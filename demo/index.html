@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Defensive Coverage — Roster Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #14181C;
+    --surface: #1B2126;
+    --surface-2: #222A31;
+    --line: #2C363E;
+    --text: #EDEFF1;
+    --text-muted: #8B95A1;
+    --accent: #E8C547;
+    --accent-2: #3E7C8C;
+    --weak: #C0392B;
+    --resist: #2E7D5B;
+    --immune: #4A5560;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap{ max-width: 960px; margin: 0 auto; padding: 28px; }
+  a.back{
+    font-family:'JetBrains Mono', monospace; font-size: 0.78rem;
+    color: var(--text-muted); text-decoration:none;
+  }
+  a.back:hover{ color: var(--text); }
+  h1{
+    font-family:'Space Grotesk', sans-serif; font-weight:700;
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    margin: 18px 0 8px;
+  }
+  p.sub{ color: var(--text-muted); max-width: 60ch; margin-bottom: 34px; }
+
+  .panel{ border: 1px solid var(--line); background: var(--surface); padding: 22px; margin-bottom: 22px; }
+  .panel-label{
+    font-family:'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent-2);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px;
+  }
+
+  .slots{ display:flex; flex-wrap: wrap; gap: 14px; }
+  .slot{
+    border: 1px dashed var(--line); padding: 12px; width: 148px;
+    display:flex; flex-direction:column; gap: 8px;
+  }
+  .slot .slot-title{
+    font-family:'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--text-muted);
+  }
+  .slot select{
+    background: var(--surface-2); color: var(--text); border: 1px solid var(--line);
+    padding: 7px 6px; font-family: 'Inter', sans-serif; font-size: 0.82rem; border-radius: 2px;
+  }
+
+  .legend{ display:flex; gap: 18px; flex-wrap: wrap; margin-top: 18px; font-family:'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); }
+  .legend span.sw{ display:inline-block; width:10px; height:10px; margin-right:6px; border-radius:1px; vertical-align:middle; }
+
+  table{ width:100%; border-collapse: collapse; margin-top: 4px; }
+  th, td{ padding: 10px 8px; text-align:left; font-size: 0.85rem; border-bottom: 1px solid var(--line); }
+  th{
+    font-family:'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500;
+  }
+  td.type-name{ font-family:'Space Grotesk', sans-serif; font-weight: 700; }
+  .pill-row{ display:flex; gap: 3px; flex-wrap: wrap; }
+  .pill{
+    width: 26px; height: 26px; border-radius: 2px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace; font-size: 0.68rem; font-weight: 700;
+  }
+  .pill.weak{ background: rgba(192,57,43,0.22); color: #E77; border: 1px solid rgba(192,57,43,0.5); }
+  .pill.resist{ background: rgba(46,125,91,0.22); color: #6FCB9F; border: 1px solid rgba(46,125,91,0.5); }
+  .pill.immune{ background: rgba(74,85,96,0.35); color: #9AA5B1; border: 1px solid rgba(74,85,96,0.6); }
+  .pill.neutral{ background: transparent; color: var(--text-muted); border: 1px dashed var(--line); }
+
+  .flag-row td{ }
+  .team-weak-badge{
+    display:inline-block; font-family:'JetBrains Mono', monospace; font-size: 0.68rem;
+    background: rgba(192,57,43,0.18); color: #E77; border: 1px solid rgba(192,57,43,0.45);
+    padding: 2px 8px; border-radius: 10px; margin-left: 8px;
+  }
+
+  footer{ margin-top: 34px; color: var(--text-muted); font-family:'JetBrains Mono', monospace; font-size: 0.72rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../index.html">← Roster Sheet</a>
+  <h1>Team defensive coverage</h1>
+  <p class="sub">Pick up to six types for your team (one or two types per slot). The table below shows, for every attacking type, how many of your slots are weak, resistant, or immune — so you can spot the holes before your opponent does.</p>
+
+  <div class="panel">
+    <div class="panel-label">Team slots</div>
+    <div class="slots" id="slots"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Coverage against each attacking type</div>
+    <table>
+      <thead>
+        <tr><th>Attacking type</th><th>Per slot</th></tr>
+      </thead>
+      <tbody id="coverage-body"></tbody>
+    </table>
+    <div class="legend">
+      <span><span class="sw" style="background:#C0392B"></span>Weak (2× or 4×)</span>
+      <span><span class="sw" style="background:#2E7D5B"></span>Resists (0.5× or 0.25×)</span>
+      <span><span class="sw" style="background:#4A5560"></span>Immune (0×)</span>
+      <span><span class="sw" style="background:transparent;border:1px dashed #2C363E"></span>Neutral / empty slot</span>
+    </div>
+  </div>
+
+  <footer>Runs entirely in your browser — no data leaves this page.</footer>
+</div>
+
+<script>
+// Attacking-type effectiveness chart. Each key is an attacking type;
+// value lists only the defending types it's NOT neutral (1x) against.
+const CHART = {
+  Normal:  { Rock:0.5, Ghost:0, Steel:0.5 },
+  Fire:    { Fire:0.5, Water:0.5, Grass:2, Ice:2, Bug:2, Rock:0.5, Dragon:0.5, Steel:2 },
+  Water:   { Fire:2, Water:0.5, Grass:0.5, Ground:2, Rock:2, Dragon:0.5 },
+  Electric:{ Water:2, Electric:0.5, Grass:0.5, Ground:0, Flying:2, Dragon:0.5 },
+  Grass:   { Fire:0.5, Water:2, Grass:0.5, Poison:0.5, Ground:2, Flying:0.5, Bug:0.5, Rock:2, Dragon:0.5, Steel:0.5 },
+  Ice:     { Fire:0.5, Water:0.5, Grass:2, Ice:0.5, Ground:2, Flying:2, Dragon:2, Steel:0.5 },
+  Fighting:{ Normal:2, Ice:2, Poison:0.5, Flying:0.5, Psychic:0.5, Bug:0.5, Rock:2, Ghost:0, Dark:2, Steel:2, Fairy:0.5 },
+  Poison:  { Grass:2, Poison:0.5, Ground:0.5, Rock:0.5, Ghost:0.5, Steel:0, Fairy:2 },
+  Ground:  { Fire:2, Electric:2, Grass:0.5, Poison:2, Flying:0, Bug:0.5, Rock:2, Steel:2 },
+  Flying:  { Electric:0.5, Grass:2, Fighting:2, Bug:2, Rock:0.5, Steel:0.5 },
+  Psychic: { Fighting:2, Poison:2, Psychic:0.5, Dark:0, Steel:0.5 },
+  Bug:     { Fire:0.5, Grass:2, Fighting:0.5, Poison:0.5, Flying:0.5, Psychic:2, Ghost:0.5, Dark:2, Steel:0.5, Fairy:0.5 },
+  Rock:    { Fire:2, Ice:2, Fighting:0.5, Ground:0.5, Flying:2, Bug:2, Steel:0.5 },
+  Ghost:   { Normal:0, Psychic:2, Ghost:2, Dark:0.5 },
+  Dragon:  { Dragon:2, Steel:0.5, Fairy:0 },
+  Dark:    { Fighting:0.5, Psychic:2, Ghost:2, Dark:0.5, Fairy:0.5 },
+  Steel:   { Fire:0.5, Water:0.5, Electric:0.5, Ice:2, Rock:2, Steel:0.5, Fairy:2 },
+  Fairy:   { Fire:0.5, Fighting:2, Poison:0.5, Dragon:2, Dark:2, Steel:0.5 }
+};
+const TYPES = Object.keys(CHART);
+const SLOT_COUNT = 6;
+
+function multiplierFor(attacking, defTypes){
+  let mult = 1;
+  defTypes.forEach(dt => {
+    if (!dt) return;
+    const row = CHART[attacking];
+    const m = (row && dt in row) ? row[dt] : 1;
+    mult *= m;
+  });
+  return mult;
+}
+
+function pillClass(mult){
+  if (mult === 0) return "immune";
+  if (mult > 1) return "weak";
+  if (mult < 1) return "resist";
+  return "neutral";
+}
+function pillLabel(mult, hasAnyType){
+  if (!hasAnyType) return "—";
+  if (mult === 0) return "0×";
+  if (mult === 0.25) return "¼×";
+  if (mult === 0.5) return "½×";
+  if (mult === 1) return "1×";
+  if (mult === 2) return "2×";
+  if (mult === 4) return "4×";
+  return mult + "×";
+}
+
+// Build slot selectors: each slot has two dropdowns (type 1, type 2 = optional)
+const slotsEl = document.getElementById("slots");
+const slotState = Array.from({length: SLOT_COUNT}, () => [null, null]);
+
+function buildSlotUI(){
+  slotsEl.innerHTML = "";
+  for (let i = 0; i < SLOT_COUNT; i++){
+    const box = document.createElement("div");
+    box.className = "slot";
+    const title = document.createElement("div");
+    title.className = "slot-title";
+    title.textContent = "SLOT " + (i + 1);
+    box.appendChild(title);
+
+    [0,1].forEach(pos => {
+      const sel = document.createElement("select");
+      const optNone = document.createElement("option");
+      optNone.value = "";
+      optNone.textContent = pos === 0 ? "Type 1" : "Type 2 (optional)";
+      sel.appendChild(optNone);
+      TYPES.forEach(t => {
+        const o = document.createElement("option");
+        o.value = t; o.textContent = t;
+        sel.appendChild(o);
+      });
+      sel.addEventListener("change", () => {
+        slotState[i][pos] = sel.value || null;
+        render();
+      });
+      box.appendChild(sel);
+    });
+    slotsEl.appendChild(box);
+  }
+}
+
+function render(){
+  const tbody = document.getElementById("coverage-body");
+  tbody.innerHTML = "";
+  TYPES.forEach(attacking => {
+    const tr = document.createElement("tr");
+    const nameTd = document.createElement("td");
+    nameTd.className = "type-name";
+    nameTd.textContent = attacking;
+
+    const rowTd = document.createElement("td");
+    const rowWrap = document.createElement("div");
+    rowWrap.className = "pill-row";
+
+    let weakCount = 0;
+    let filledSlots = 0;
+
+    slotState.forEach(defTypes => {
+      const hasAnyType = defTypes[0] || defTypes[1];
+      if (hasAnyType) filledSlots++;
+      const mult = hasAnyType ? multiplierFor(attacking, defTypes.filter(Boolean)) : 1;
+      if (hasAnyType && mult > 1) weakCount++;
+      const pill = document.createElement("div");
+      pill.className = "pill " + (hasAnyType ? pillClass(mult) : "neutral");
+      pill.textContent = pillLabel(mult, hasAnyType);
+      rowWrap.appendChild(pill);
+    });
+
+    rowTd.appendChild(rowWrap);
+    if (filledSlots > 0 && weakCount === filledSlots){
+      const badge = document.createElement("span");
+      badge.className = "team-weak-badge";
+      badge.textContent = "whole team weak";
+      nameTd.appendChild(badge);
+    }
+
+    tr.appendChild(nameTd);
+    tr.appendChild(rowTd);
+    tbody.appendChild(tr);
+  });
+}
+
+buildSlotUI();
+render();
+</script>
+</body>
+</html>
