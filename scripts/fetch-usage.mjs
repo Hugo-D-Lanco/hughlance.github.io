@@ -92,7 +92,7 @@ function topTeammates(rawTeammates = {}) {
 }
 
 async function parseChaosJson(chaos) {
-  const entries = Object.entries(chaos.pokemon || {}).filter(([name]) => name !== "empty");
+  const entries = Object.entries(chaos.data || {}).filter(([name]) => name !== "empty");
   const result = [];
   for (const [name, stats] of entries) {
     result.push({
@@ -117,7 +117,11 @@ async function run() {
       console.log(`  Rating ${rating}+…`);
       const chaos = await fetchChaosJson(slug, rating);
       byRating[rating] = await parseChaosJson(chaos);
-      console.log(`    ${byRating[rating].length} species parsed`);
+      if (byRating[rating].length === 0) {
+        console.warn(`    ⚠ 0 species parsed for ${slug}-${rating} — check the JSON shape, it may not match "chaos.data" anymore`);
+      } else {
+        console.log(`    ${byRating[rating].length} species parsed`);
+      }
     }
 
     const fileName = `usage-${slug}.json`;
