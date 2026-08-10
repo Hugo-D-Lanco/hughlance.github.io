@@ -33,8 +33,8 @@ import path from "node:path";
 const API_URL = "https://championsbattledata.com/api";
 const ASSET_BASE = "https://championsbattledata.com/"; // image_path values are relative to this
 const DOWNLOAD_SPRITES = true; // false = store remote sprite URLs instead of local files
-const SPRITE_DIR = path.join(process.cwd(), "site", "assets", "sprites");
-const OUT_FILE = path.join(process.cwd(), "site", "data", "pokedex.json");
+const SPRITE_DIR = path.join(process.cwd(), "assets", "sprites");
+const OUT_FILE = path.join(process.cwd(), "data", "pokedex.json");
 const TOP_LIST_LIMIT = 10; // championsbattledata's "values" arrays are already top-10
 // --------------------
 

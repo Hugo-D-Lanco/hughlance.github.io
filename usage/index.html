@@ -173,6 +173,15 @@ const TYPE_COLORS = {
 };
 function typeColor(t){ return TYPE_COLORS[t] || TYPE_COLORS.Unknown; }
 
+// pokedex.json stores sprite paths relative to the repo root (e.g.
+// "assets/sprites/garchomp.png"); pages live one folder down (usage/,
+// pokemon/, demo/), so relative paths need a "../" prefix. Absolute
+// fallback URLs (used when a sprite download failed) are left as-is.
+function resolveSprite(sprite){
+  if (!sprite) return null;
+  return sprite.startsWith("http") ? sprite : "../" + sprite;
+}
+
 let state = {
   source: "bo1",           // 'bo1' | 'bo3' | 'champions'
   eloRating: 1760,          // smogon only
@@ -269,7 +278,7 @@ async function renderSidebarList(){
       rows = Object.values(dex.pokemon)
         .map(p => ({
           key: p.showdownId, name: p.name, types: p.types,
-          sprite: p.sprite, metric: p[state.champFormat]?.rank ?? null,
+          sprite: resolveSprite(p.sprite), metric: p[state.champFormat]?.rank ?? null,
         }))
         .filter(r => r.metric !== null)
         .sort((a, b) => a.metric - b.metric);
@@ -286,7 +295,7 @@ async function renderSidebarList(){
         const data = await loadSmogonFormat(entry);
         setFlag(`Live: ${data.label} · ${data.month}`, true);
         const list = data.ratings[state.eloRating] || [];
-        rows = list.map(d => ({ key: d.name, name: d.name, types: [d.type], sprite: null, metric: d.usage }));
+        rows = list.map(d => ({ key: d.name, name: d.name, types: [d.type], sprite: resolveSprite(d.sprite), metric: d.usage }));
       } catch {
         setFlag("Data not available — run scripts/fetch-usage.mjs", false);
       }
@@ -296,9 +305,19 @@ async function renderSidebarList(){
   const q = state.search.trim().toLowerCase();
   if (q) rows = rows.filter(r => r.name.toLowerCase().includes(q));
 
+  // Default behavior: always show a Pokémon's data rather than an empty
+  // panel — select the top row if nothing is selected yet, or if the
+  // previous selection isn't in this list (e.g. after switching source).
+  let selectionChanged = false;
+  if (rows.length && (!state.selectedKey || !rows.find(r => r.key === state.selectedKey))){
+    state.selectedKey = rows[0].key;
+    selectionChanged = true;
+  }
+
   listEl.innerHTML = "";
   if (!rows.length){
     listEl.innerHTML = '<div style="padding:16px; color:var(--text-muted); font-family:\'JetBrains Mono\',monospace; font-size:0.78rem;">No Pokémon to show yet.</div>';
+    if (selectionChanged) renderMain();
     return;
   }
 
@@ -342,6 +361,8 @@ async function renderSidebarList(){
     row.appendChild(metric);
     listEl.appendChild(row);
   });
+
+  if (selectionChanged) renderMain();
 }
 
 // ---------- Main detail panel ----------
@@ -356,7 +377,7 @@ function barList(entries, emptyText, options = {}){
   }
   const usePct = options.usePct !== false;
   const max = usePct ? Math.max(...entries.map(e => e.pct ?? e.topPercentage ?? 1), 1) : 1;
-  entries.forEach(e => {
+  entries.forEach((e, i) => {
     const row = document.createElement("div");
     row.className = "bar-row";
     const label = document.createElement("div");
@@ -367,11 +388,19 @@ function barList(entries, emptyText, options = {}){
     const fill = document.createElement("div");
     fill.className = "fill";
     const val = e.pct ?? e.topPercentage ?? null;
-    fill.style.width = val !== null ? (val / max * 100) + "%" : "8%";
+    if (val !== null){
+      fill.style.width = (val / max * 100) + "%";
+    } else {
+      // championsbattledata only exposes a percentage for the #1 ranked
+      // entry per category — ranks below that are order-only. Show a
+      // rank number instead of faking a percentage or bar.
+      fill.style.width = "0%";
+      track.style.opacity = "0.35";
+    }
     track.appendChild(fill);
     const pct = document.createElement("div");
     pct.className = "pct";
-    pct.textContent = val !== null ? val.toFixed(1) + "%" : "—";
+    pct.textContent = val !== null ? val.toFixed(1) + "%" : "#" + (i + 1);
     row.appendChild(label); row.appendChild(track); row.appendChild(pct);
     wrap.appendChild(row);
   });
@@ -407,7 +436,8 @@ async function renderChampionsDetail(main){
   const avatarTag = mon.sprite ? "img" : "div";
   const avatar = document.createElement(avatarTag);
   avatar.className = "detail-avatar";
-  if (mon.sprite){ avatar.src = mon.sprite; } else { avatar.textContent = mon.name.slice(0,2).toUpperCase(); avatar.style.color = color; }
+  const heroSprite = resolveSprite(mon.sprite);
+  if (heroSprite){ avatar.src = heroSprite; } else { avatar.textContent = mon.name.slice(0,2).toUpperCase(); avatar.style.color = color; }
   const titleWrap = document.createElement("div");
   titleWrap.className = "detail-title";
   titleWrap.innerHTML = `<h2>${mon.name}</h2>`;
@@ -535,10 +565,10 @@ async function renderSmogonDetail(main){
 
   const hero = document.createElement("div");
   hero.className = "detail-hero";
-  const avatar = document.createElement("div");
+  const monSprite = resolveSprite(mon.sprite);
+  const avatar = document.createElement(monSprite ? "img" : "div");
   avatar.className = "detail-avatar";
-  avatar.textContent = mon.name.slice(0,2).toUpperCase();
-  avatar.style.color = color;
+  if (monSprite){ avatar.src = monSprite; } else { avatar.textContent = mon.name.slice(0,2).toUpperCase(); avatar.style.color = color; }
   const titleWrap = document.createElement("div");
   titleWrap.className = "detail-title";
   titleWrap.innerHTML = `<h2>${mon.name}</h2>`;
