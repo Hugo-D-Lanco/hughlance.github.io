@@ -27,6 +27,10 @@ import path from "node:path";
 const MONTH_OVERRIDE = null;        // set to "YYYY-MM" to pin a month, or leave null to auto-use last month
 const RATINGS = [0, 1500, 1630, 1760]; // all four cutoffs, low ladder to top cut
 const TEAMMATE_LIMIT = 5;           // top N synergy partners kept per Pokémon
+const MOVE_LIMIT = 8;               // top N moves kept per Pokémon (if present)
+const ITEM_LIMIT = 6;               // top N items
+const ABILITY_LIMIT = 6;            // top N abilities
+const SPREAD_LIMIT = 6;             // top N spreads / natures
 
 const FORMATS = {
   "Regulation M-B — Bo1 (Ladder, Closed Teamsheet)": "gen9championsvgc2026regmb", // ⚠ verify — see note below
@@ -83,24 +87,49 @@ async function lookupType(name) {
   }
 }
 
-function topTeammates(rawTeammates = {}) {
-  return Object.entries(rawTeammates)
-    .filter(([name]) => name !== "empty")
-    .map(([name, weight]) => ({ name, pct: Math.round(weight * 1000) / 10 }))
-    .sort((a, b) => b.pct - a.pct)
-    .slice(0, TEAMMATE_LIMIT);
+function topEntries(raw = {}, limit = 5) {
+  const entries = Object.entries(raw || {}).filter(([name]) => name !== "empty");
+  if (!entries.length) return [];
+
+  // Determine whether values look like fractions (0..1) or counts (>1)
+  const vals = entries.map(([, v]) => Number(v) || 0);
+  const max = Math.max(...vals);
+  let pctEntries;
+  if (max <= 1) {
+    // fractions 0..1 -> percentage
+    pctEntries = entries.map(([name, weight]) => ({ name, pct: Math.round((Number(weight) || 0) * 1000) / 10 }));
+  } else {
+    // counts -> normalize to percent of total
+    const total = vals.reduce((a, b) => a + b, 0) || 1;
+    pctEntries = entries.map(([name, weight]) => ({ name, pct: Math.round(((Number(weight) || 0) / total) * 1000) / 10 }));
+  }
+
+  return pctEntries.sort((a, b) => b.pct - a.pct).slice(0, limit);
 }
 
 async function parseChaosJson(chaos) {
   const entries = Object.entries(chaos.data || {}).filter(([name]) => name !== "empty");
   const result = [];
   for (const [name, stats] of entries) {
-    result.push({
+    const entry = {
       name,
       type: await lookupType(name),
       usage: Math.round((stats.usage ?? 0) * 1000) / 10,
-      teammates: topTeammates(stats.Teammates),
-    });
+      teammates: topEntries(stats.Teammates, TEAMMATE_LIMIT),
+    };
+
+    // If the chaos JSON includes other per-species breakdowns (Moves, Items,
+    // Abilities, Spreads/Natures) capture the top entries so the front-end can
+    // display them without additional scraping. Not all chaos JSON shapes
+    // include these keys, so guard defensively.
+    if (stats.Moves) entry.moves = topEntries(stats.Moves, MOVE_LIMIT);
+    if (stats.Items) entry.items = topEntries(stats.Items, ITEM_LIMIT);
+    if (stats.Abilities) entry.abilities = topEntries(stats.Abilities, ABILITY_LIMIT);
+    // Smogon sometimes emits "Spreads" or "Natures" — capture both if present.
+    if (stats.Spreads) entry.spreads = topEntries(stats.Spreads, SPREAD_LIMIT);
+    if (stats.Natures) entry.natures = topEntries(stats.Natures, SPREAD_LIMIT);
+
+    result.push(entry);
   }
   return result.sort((a, b) => b.usage - a.usage);
 }

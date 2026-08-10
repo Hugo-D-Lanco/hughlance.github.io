@@ -180,6 +180,38 @@ let currentRating = 1760;
 let sortKey = "usage";
 let sortDir = -1;
 let expandedName = null;
+const MON_CACHE = new Map();
+
+async function getMonDetails(entry) {
+  // Use cache
+  if (MON_CACHE.has(entry.name)) return MON_CACHE.get(entry.name);
+
+  const result = { smogon: {}, poke: null };
+  // copy any enriched data from the stored entry (moves/items/etc.)
+  ['moves','items','abilities','spreads','natures','teammates'].forEach(k => {
+    if (entry[k]) result.smogon[k] = entry[k];
+  });
+
+  // Try PokeAPI for base stats and abilities
+  const key = entry.name.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+  try {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${key}`);
+    if (res.ok) {
+      const data = await res.json();
+      result.poke = {
+        stats: data.stats.map(s => ({ name: s.stat.name, base: s.base_stat })),
+        abilities: data.abilities.map(a => ({ name: a.ability.name, hidden: a.is_hidden })),
+        moves: data.moves.map(m => m.move.name),
+        sprite: data.sprites?.front_default || null,
+      };
+    }
+  } catch (_) {
+    // ignore PokeAPI failures — degrade gracefully
+  }
+
+  MON_CACHE.set(entry.name, result);
+  return result;
+}
 
 function setFlag(text, live){
   const flag = document.getElementById("dataFlag");
@@ -196,7 +228,9 @@ async function loadManifest(){
     MANIFEST = await res.json();
     if (!MANIFEST.length) throw new Error("empty manifest");
     populateFormatFilter();
-    await loadFormat(MANIFEST[0]);
+    // Default to a Bo3/open-teamsheet format when available (common for VGC).
+    const preferred = MANIFEST.find(e => e.slug && e.slug.includes('bo3')) || MANIFEST[0];
+    await loadFormat(preferred);
   } catch {
     setFlag("Sample dataset — run scripts/fetch-usage.mjs to pull real Champions VGC data", false);
     FORMAT_DATA = SAMPLE_FORMAT;
@@ -387,28 +421,119 @@ function render(){
       const exTd = document.createElement("td");
       exTd.colSpan = 5;
 
-      const { rating: synergyRating, teammates } = teammatesFor(d.name);
-
-      const label = document.createElement("div");
-      label.className = "expand-label";
-      label.textContent = `Top teammates for ${d.name} — synergy always shown at ${synergyRating === 0 ? "0+" : synergyRating + "+"}`;
-      exTd.appendChild(label);
-
-      const pillWrap = document.createElement("div");
-      pillWrap.className = "teammates";
-      if (teammates && teammates.length){
-        teammates.forEach(t => {
-          const pill = document.createElement("span");
-          pill.className = "teammate-pill";
-          pill.innerHTML = t.name + " <b>" + t.pct.toFixed(1) + "%</b>";
-          pillWrap.appendChild(pill);
-        });
-      } else {
-        pillWrap.textContent = "No teammate data at this cutoff.";
-      }
-      exTd.appendChild(pillWrap);
+      const loading = document.createElement('div');
+      loading.textContent = 'Loading details…';
+      exTd.appendChild(loading);
       exTr.appendChild(exTd);
       tbody.appendChild(exTr);
+
+      (async () => {
+        const { rating: synergyRating, teammates } = teammatesFor(d.name);
+        const details = await getMonDetails(d);
+
+        exTd.innerHTML = '';
+
+        const label = document.createElement("div");
+        label.className = "expand-label";
+        label.textContent = `${d.name} — details (synergy shown at ${synergyRating === 0 ? '0+' : synergyRating + '+'})`;
+        exTd.appendChild(label);
+
+        // Top teammates (from Smogon data)
+        const teamSection = document.createElement('div');
+        teamSection.className = 'teammates';
+        if ((details.smogon.teammates && details.smogon.teammates.length) || (teammates && teammates.length)){
+          const list = details.smogon.teammates && details.smogon.teammates.length ? details.smogon.teammates : teammates;
+          list.forEach(t => {
+            const pill = document.createElement('span');
+            pill.className = 'teammate-pill';
+            pill.innerHTML = t.name + ' <b>' + (t.pct ? (t.pct.toFixed ? t.pct.toFixed(1) : t.pct) : '?') + '%</b>';
+            teamSection.appendChild(pill);
+          });
+        } else {
+          teamSection.textContent = 'No teammate data available.';
+        }
+        exTd.appendChild(teamSection);
+
+        // PokeAPI: base stats
+        if (details.poke && details.poke.stats) {
+          const statsWrap = document.createElement('div');
+          statsWrap.style.marginTop = '12px';
+          const statsTitle = document.createElement('div');
+          statsTitle.className = 'expand-label';
+          statsTitle.textContent = 'Base stats';
+          statsWrap.appendChild(statsTitle);
+          const statTable = document.createElement('table');
+          statTable.style.width = '100%';
+          const tbodyStats = document.createElement('tbody');
+          details.poke.stats.forEach(s => {
+            const r = document.createElement('tr');
+            const k = document.createElement('td'); k.style.width = '140px'; k.textContent = s.name.toUpperCase();
+            const v = document.createElement('td'); v.textContent = s.base;
+            r.appendChild(k); r.appendChild(v); tbodyStats.appendChild(r);
+          });
+          statTable.appendChild(tbodyStats);
+          statsWrap.appendChild(statTable);
+          exTd.appendChild(statsWrap);
+        }
+
+        // Abilities (Smogon usage if available, otherwise PokeAPI)
+        const abilWrap = document.createElement('div');
+        abilWrap.style.marginTop = '12px';
+        const abilTitle = document.createElement('div');
+        abilTitle.className = 'expand-label';
+        abilTitle.textContent = 'Abilities';
+        abilWrap.appendChild(abilTitle);
+        const abilList = document.createElement('div');
+        abilList.className = 'teammates';
+        if (details.smogon.abilities && details.smogon.abilities.length){
+          details.smogon.abilities.forEach(a => {
+            const pill = document.createElement('span'); pill.className='teammate-pill';
+            pill.innerHTML = a.name + ' <b>' + (a.pct ? a.pct.toFixed(1) : '') + '%</b>'; abilList.appendChild(pill);
+          });
+        } else if (details.poke && details.poke.abilities){
+          details.poke.abilities.forEach(a => { const pill = document.createElement('span'); pill.className='teammate-pill'; pill.textContent = a.name + (a.hidden ? ' (hidden)' : ''); abilList.appendChild(pill); });
+        } else {
+          abilList.textContent = 'No ability data available.';
+        }
+        abilWrap.appendChild(abilList);
+        exTd.appendChild(abilWrap);
+
+        // Top moves
+        const movesWrap = document.createElement('div');
+        movesWrap.style.marginTop = '12px';
+        const movesTitle = document.createElement('div');
+        movesTitle.className = 'expand-label';
+        movesTitle.textContent = 'Popular moves';
+        movesWrap.appendChild(movesTitle);
+        const movesList = document.createElement('div');
+        movesList.className = 'teammates';
+        if (details.smogon.moves && details.smogon.moves.length){
+          details.smogon.moves.forEach(m => { const pill = document.createElement('span'); pill.className='teammate-pill'; pill.innerHTML = m.name + ' <b>' + (m.pct ? m.pct.toFixed(1) : '') + '%</b>'; movesList.appendChild(pill); });
+        } else if (details.poke && details.poke.moves){
+          details.poke.moves.slice(0,8).forEach(n => { const pill = document.createElement('span'); pill.className='teammate-pill'; pill.textContent = n; movesList.appendChild(pill); });
+        } else {
+          movesList.textContent = 'No move data available.';
+        }
+        movesWrap.appendChild(movesList);
+        exTd.appendChild(movesWrap);
+
+        // Items / Natures / Spreads
+        const miscWrap = document.createElement('div');
+        miscWrap.style.marginTop = '12px';
+        const miscTitle = document.createElement('div'); miscTitle.className='expand-label'; miscTitle.textContent='Other popular choices'; miscWrap.appendChild(miscTitle);
+        const miscList = document.createElement('div'); miscList.className='teammates';
+        let anyMisc = false;
+        ['items','natures','spreads'].forEach(k => {
+          const vals = details.smogon[k];
+          if (vals && vals.length){
+            anyMisc = true;
+            vals.forEach(v => { const pill = document.createElement('span'); pill.className='teammate-pill'; pill.innerHTML = v.name + ' <b>' + (v.pct ? v.pct.toFixed(1) : '') + '%</b>'; miscList.appendChild(pill); });
+          }
+        });
+        if (!anyMisc) miscList.textContent = 'No items/natures/spread data available in the dataset.';
+        miscWrap.appendChild(miscList);
+        exTd.appendChild(miscWrap);
+      })();
     }
   });
 }
