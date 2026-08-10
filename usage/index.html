@@ -3,560 +3,639 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Team Usage & Synergy — Roster Sheet</title>
+<title>Usage & Synergy — Roster Sheet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #14181C;
-    --surface: #1B2126;
-    --surface-2: #222A31;
-    --line: #2C363E;
-    --text: #EDEFF1;
-    --text-muted: #8B95A1;
-    --accent: #E8C547;
-    --accent-2: #3E7C8C;
+    --bg: #14181C; --surface: #1B2126; --surface-2: #222A31; --line: #2C363E;
+    --text: #EDEFF1; --text-muted: #8B95A1; --accent: #E8C547; --accent-2: #3E7C8C;
     --up: #6FCB9F;
-    --down: #E77;
   }
   *{ box-sizing:border-box; margin:0; padding:0; }
+  html, body{ height:100%; }
   body{
-    background: var(--bg); color: var(--text);
-    font-family: 'Inter', sans-serif;
-    -webkit-font-smoothing: antialiased;
+    background: var(--bg); color: var(--text); font-family:'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased; overflow: hidden;
   }
-  .wrap{ max-width: 1000px; margin: 0 auto; padding: 28px; }
-  a.back{
-    font-family:'JetBrains Mono', monospace; font-size: 0.78rem;
-    color: var(--text-muted); text-decoration:none;
+  a{ color:inherit; }
+
+  .layout{ display:flex; height:100vh; }
+
+  /* ---------------- Sidebar ---------------- */
+  .sidebar{
+    width: 360px; flex-shrink:0; height:100vh; display:flex; flex-direction:column;
+    background: var(--surface); border-right: 1px solid var(--line);
   }
+  .sidebar-top{ padding: 18px 18px 14px; border-bottom: 1px solid var(--line); }
+  a.back{ font-family:'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-muted); text-decoration:none; }
   a.back:hover{ color: var(--text); }
-  h1{
-    font-family:'Space Grotesk', sans-serif; font-weight:700;
-    font-size: clamp(1.6rem, 4vw, 2.2rem);
-    margin: 18px 0 8px;
+  h1{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 1.3rem; margin: 8px 0 12px; }
+
+  .source-tabs{ display:flex; gap: 4px; margin-bottom: 10px; }
+  .source-tab{
+    flex:1; font-family:'JetBrains Mono', monospace; font-size: 0.66rem; text-align:center;
+    padding: 8px 4px; border: 1px solid var(--line); background: var(--surface-2);
+    color: var(--text-muted); cursor:pointer; border-radius: 2px; line-height:1.3;
   }
-  p.sub{ color: var(--text-muted); max-width: 66ch; margin-bottom: 10px; }
+  .source-tab.active{ background: var(--accent); color: #14181C; border-color: var(--accent); font-weight:700; }
+  .source-tab:hover:not(.active){ color: var(--text); }
+
+  .sub-controls{ display:flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .elo-tab, .fmt-tab{
+    font-family:'JetBrains Mono', monospace; font-size: 0.68rem;
+    padding: 6px 10px; border: 1px solid var(--line); background: var(--surface-2);
+    color: var(--text-muted); cursor:pointer; border-radius: 2px;
+  }
+  .elo-tab.active, .fmt-tab.active{ background: var(--accent-2); color: #fff; border-color: var(--accent-2); font-weight:700; }
+  .elo-tab:disabled{ opacity: 0.3; cursor: not-allowed; }
+  .elo-tab:hover:not(.active):not(:disabled){ color: var(--text); }
+  .fmt-tab:hover:not(.active){ color: var(--text); }
+
+  .no-elo-note{ font-family:'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--text-muted); margin-bottom: 10px; }
+
+  input[type="text"]{
+    width:100%; background: var(--surface-2); color: var(--text); border: 1px solid var(--line);
+    padding: 8px 10px; font-family:'Inter', sans-serif; font-size: 0.85rem; border-radius: 2px;
+  }
 
   .flag{
-    display:inline-flex; align-items:center; gap:8px;
-    font-family:'JetBrains Mono', monospace; font-size: 0.7rem;
-    color: var(--accent); border: 1px solid rgba(232,197,71,0.4);
-    background: rgba(232,197,71,0.08);
-    padding: 6px 10px; border-radius: 3px; margin: 12px 0 28px;
+    display:flex; align-items:center; gap:6px; font-family:'JetBrains Mono', monospace; font-size: 0.64rem;
+    color: var(--accent); padding: 6px 0 0; letter-spacing: 0.02em;
   }
-  .flag .dot{ width:6px; height:6px; background: currentColor; border-radius:50%; }
+  .flag.live{ color: var(--up); }
+  .flag .dot{ width:5px; height:5px; background: currentColor; border-radius:50%; flex-shrink:0; }
 
-  .panel{ border: 1px solid var(--line); background: var(--surface); padding: 22px; margin-bottom: 22px; }
-  .panel-label{
-    font-family:'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent-2);
-    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px;
+  .sidebar-list{ flex:1; overflow-y:auto; }
+  .mon-row{
+    display:flex; align-items:center; gap: 10px; padding: 9px 16px;
+    cursor:pointer; border-bottom: 1px solid rgba(44,54,62,0.5);
   }
-
-  .controls{ display:flex; gap: 12px; flex-wrap: wrap; align-items:center; margin-bottom: 18px; }
-  input[type="text"]{
-    background: var(--surface-2); color: var(--text); border: 1px solid var(--line);
-    padding: 9px 12px; font-family:'Inter', sans-serif; font-size: 0.88rem; border-radius: 2px;
-    flex: 1; min-width: 180px;
+  .mon-row:hover{ background: var(--surface-2); }
+  .mon-row.selected{ background: rgba(232,197,71,0.08); border-left: 2px solid var(--accent); padding-left: 14px; }
+  .mon-rank{ font-family:'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); width: 26px; flex-shrink:0; }
+  .mon-avatar{
+    width: 30px; height: 30px; border-radius: 4px; flex-shrink:0; object-fit: contain;
+    background: var(--surface-2); display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace; font-size: 0.62rem; font-weight:700;
   }
-  select{
-    background: var(--surface-2); color: var(--text); border: 1px solid var(--line);
-    padding: 9px 10px; font-family:'JetBrains Mono', monospace; font-size: 0.78rem; border-radius: 2px;
+  .mon-name-wrap{ flex:1; min-width:0; }
+  .mon-name{ font-family:'Space Grotesk', sans-serif; font-size: 0.85rem; font-weight: 600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mon-type{ font-family:'JetBrains Mono', monospace; font-size: 0.62rem; color: var(--text-muted); }
+  .mon-metric{ font-family:'JetBrains Mono', monospace; font-size: 0.76rem; flex-shrink:0; text-align:right; min-width: 44px; }
+
+  /* ---------------- Main panel ---------------- */
+  .main{ flex:1; height:100vh; overflow-y:auto; padding: 32px 40px 60px; }
+  .main-empty{ color: var(--text-muted); font-family:'JetBrains Mono', monospace; font-size: 0.85rem; margin-top: 80px; text-align:center; }
+
+  .detail-hero{ display:flex; align-items:center; gap: 22px; margin-bottom: 24px; flex-wrap: wrap; }
+  .detail-avatar{
+    width: 84px; height: 84px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; object-fit: contain; font-family:'Space Grotesk', sans-serif;
+    font-size: 1.6rem; font-weight:700; flex-shrink:0;
   }
-
-  .elo-tabs{ display:flex; gap: 6px; }
-  .elo-tab{
-    font-family:'JetBrains Mono', monospace; font-size: 0.76rem;
-    padding: 8px 14px; border: 1px solid var(--line); background: var(--surface-2);
-    color: var(--text-muted); cursor: pointer; border-radius: 2px;
+  .detail-title h2{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: clamp(1.6rem, 3.4vw, 2.2rem); }
+  .type-badges{ display:flex; gap: 6px; margin-top: 8px; }
+  .type-badge{
+    font-family:'JetBrains Mono', monospace; font-size: 0.72rem; font-weight:700;
+    padding: 4px 11px; border-radius: 12px;
   }
-  .elo-tab:hover{ color: var(--text); }
-  .elo-tab.active{ background: var(--accent); color: #14181C; border-color: var(--accent); font-weight: 700; }
+  .detail-metrics{ display:flex; gap: 26px; margin-left: auto; flex-wrap: wrap; }
+  .metric .num{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 1.7rem; }
+  .metric .lbl{ font-family:'JetBrains Mono', monospace; font-size: 0.64rem; color: var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; }
 
-  table{ width:100%; border-collapse: collapse; margin-top: 4px; }
-  th, td{ padding: 10px 8px; text-align:left; font-size: 0.86rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
-  th{
-    font-family:'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500; cursor: pointer;
-    user-select: none;
-  }
-  th:hover{ color: var(--text); }
-  th.active{ color: var(--accent); }
-  td.name{ font-family:'Space Grotesk', sans-serif; font-weight: 700; cursor: pointer; }
-  td.name:hover{ color: var(--accent); }
-  td.rank{ font-family:'JetBrains Mono', monospace; color: var(--text-muted); width: 30px; }
+  .trend-panel, .card{ border: 1px solid var(--line); background: var(--surface); padding: 20px; margin-bottom: 18px; }
+  .panel-label{ font-family:'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--accent-2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom: 14px; }
+  .elo-trend{ display:flex; align-items:flex-end; gap: 18px; height: 80px; }
+  .elo-bar-col{ display:flex; flex-direction:column; align-items:center; gap: 6px; flex:1; }
+  .elo-bar{ width: 30px; background: var(--accent-2); border-radius: 3px 3px 0 0; }
+  .elo-bar.peak{ background: var(--accent); }
+  .elo-bar-label, .elo-bar-pct{ font-family:'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--text-muted); }
 
-  .bar-cell{ display:flex; align-items:center; gap: 10px; min-width: 180px; }
-  .bar-track{ flex:1; height: 8px; background: var(--surface-2); border-radius: 4px; overflow:hidden; }
-  .bar-fill{ height: 100%; background: var(--accent-2); border-radius: 4px; }
-  .pct{ font-family:'JetBrains Mono', monospace; font-size: 0.8rem; width: 50px; text-align:right; }
+  .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grid3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+  .card h3{ font-family:'Space Grotesk', sans-serif; font-size: 0.95rem; margin-bottom: 12px; }
+  .bar-row{ display:flex; align-items:center; gap: 10px; margin-bottom: 9px; font-size: 0.82rem; }
+  .bar-row .label{ width: 42%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bar-row .track{ flex:1; height: 6px; background: var(--surface-2); border-radius: 4px; overflow:hidden; }
+  .bar-row .fill{ height:100%; background: var(--accent-2); border-radius:4px; }
+  .bar-row .pct{ font-family:'JetBrains Mono', monospace; font-size: 0.72rem; width: 40px; text-align:right; color: var(--text-muted); }
+  .empty-note{ color: var(--text-muted); font-size: 0.82rem; }
 
-  .trend{ display:flex; align-items:flex-end; gap: 3px; height: 22px; }
-  .trend i{ width: 6px; background: var(--accent-2); border-radius: 1px; display:block; opacity: 0.55; }
-  .trend i:last-child{ opacity: 1; background: var(--accent); }
+  .tag-cloud{ display:flex; flex-wrap:wrap; gap: 6px; }
+  .tag{ font-family:'JetBrains Mono', monospace; font-size: 0.7rem; background: var(--surface-2); border: 1px solid var(--line); padding: 4px 9px; border-radius: 10px; color: var(--text-muted); }
 
-  tr.expand-row td{ background: var(--surface-2); padding: 16px 8px; border-bottom: 1px solid var(--line); }
-  .teammates{ display:flex; flex-wrap:wrap; gap: 8px; }
-  .teammate-pill{
-    font-family:'JetBrains Mono', monospace; font-size: 0.72rem;
-    background: var(--surface); border: 1px solid var(--line);
-    padding: 5px 10px; border-radius: 12px; color: var(--text);
-  }
-  .teammate-pill b{ color: var(--accent-2); font-weight: 700; }
-  .expand-label{
-    font-family:'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;
-  }
+  .teammate-pill{ font-family:'JetBrains Mono', monospace; font-size: 0.74rem; background: var(--surface-2); border: 1px solid var(--line); padding: 6px 12px; border-radius: 12px; color: var(--text); cursor:pointer; display:inline-block; }
+  .teammate-pill:hover{ border-color: var(--accent-2); }
+  .teammate-pill b{ color: var(--accent-2); }
 
-  footer{ margin-top: 34px; color: var(--text-muted); font-family:'JetBrains Mono', monospace; font-size: 0.72rem; }
-
-  @media (max-width: 640px){
-    .controls{ flex-direction: column; align-items: stretch; }
+  @media (max-width: 860px){
+    .sidebar{ width: 280px; }
+    .grid2, .grid3{ grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <a class="back" href="../index.html">← Roster Sheet</a>
-  <h1>Usage & synergy across ELO</h1>
-  <p class="sub">Usage rates and teammate synergy for Champions VGC, across all four Smogon rating cutoffs — 0, 1500+, 1630+, 1760+ — so you can see how a Pokémon's popularity shifts from the open ladder to top cut. Click a row to see its most common teammates.</p>
-  <div class="flag" id="dataFlag"><span class="dot"></span>Loading data…</div>
+<div class="layout">
 
-  <div class="panel">
-    <div class="panel-label">Filter</div>
-    <div class="controls">
-      <select id="formatFilter"></select>
-      <div class="elo-tabs" id="eloTabs"></div>
-      <input type="text" id="search" placeholder="Search by name…">
-      <select id="typeFilter"><option value="">All types</option></select>
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <a class="back" href="../index.html">← Roster Sheet</a>
+      <h1>Usage & Synergy</h1>
+
+      <div class="source-tabs" id="sourceTabs">
+        <div class="source-tab" data-source="bo1">Bo1<br>Ladder</div>
+        <div class="source-tab" data-source="bo3">Bo3<br>Open Sheet</div>
+        <div class="source-tab" data-source="champions">Champions<br>In-Game</div>
+      </div>
+
+      <div class="sub-controls" id="eloTabs"></div>
+      <div class="no-elo-note" id="noEloNote" style="display:none;">Champions has no ELO ladder — ranked by in-game usage instead.</div>
+
+      <input type="text" id="search" placeholder="Search Pokémon…">
+      <div class="flag" id="dataFlag"><span class="dot"></span>Loading…</div>
     </div>
+    <div class="sidebar-list" id="sidebarList"></div>
+  </aside>
 
-    <table>
-      <thead>
-        <tr>
-          <th data-key="rank">#</th>
-          <th data-key="name">Pokémon</th>
-          <th data-key="type">Type</th>
-          <th data-key="usage" class="active">Usage %</th>
-          <th>Across ELO</th>
-        </tr>
-      </thead>
-      <tbody id="rows"></tbody>
-    </table>
-  </div>
+  <main class="main" id="main">
+    <div class="main-empty">Pick a data source and select a Pokémon to see its full profile.</div>
+  </main>
 
-  <footer>Data: Smogon's monthly Champions VGC chaos JSON, pulled by scripts/fetch-usage.mjs for the four rating cutoffs. Click a Pokémon's name to expand its top teammates.</footer>
 </div>
 
 <script>
-// Fallback sample dataset — used only if data/manifest.json (produced by
-// scripts/fetch-usage.mjs) isn't available yet, e.g. before the first run
-// or when this page is opened directly from disk. Shaped like one format's
-// real data file: usage + teammates per rating cutoff.
-const SAMPLE_RATINGS = {
-  0:    sampleFor(0.7),
-  1500: sampleFor(0.85),
-  1630: sampleFor(0.95),
-  1760: sampleFor(1.0),
+const TYPE_COLORS = {
+  Normal:"#A8A878", Fire:"#F08030", Water:"#6890F0", Electric:"#F8D030", Grass:"#78C850",
+  Ice:"#98D8D8", Fighting:"#C03028", Poison:"#A040A0", Ground:"#E0C068", Flying:"#A890F0",
+  Psychic:"#F85888", Bug:"#A8B820", Rock:"#B8A038", Ghost:"#705898", Dragon:"#7038F8",
+  Dark:"#705848", Steel:"#B8B8D0", Fairy:"#EE99AC", Unknown:"#8B95A1"
 };
-function sampleFor(mult){
-  const base = [
-    ["Garchomp","Dragon",34.8],["Incineroar","Fire",31.2],["Kingambit","Dark",28.6],
-    ["Sinistcha","Grass",24.9],["Basculegion","Water",22.4],["Charizard","Fire",21.1],
-    ["Whimsicott","Grass",19.7],["Gholdengo","Steel",18.3],["Archaludon","Steel",16.5],
-    ["Farigiraf","Normal",15.2],["Sylveon","Fairy",14.6],["Staraptor","Flying",13.4],
-  ];
-  return base.map(([name, type, usage]) => ({
-    name, type, usage: Math.round(usage * mult * 10) / 10,
-    teammates: base.filter(b => b[0] !== name).slice(0, 4)
-      .map(([n], i) => ({ name: n, pct: Math.round((40 - i * 7) * mult * 10) / 10 })),
-  }));
-}
-const SAMPLE_FORMAT = { label: "Sample data", slug: "sample", month: "—", ratings: SAMPLE_RATINGS };
+function typeColor(t){ return TYPE_COLORS[t] || TYPE_COLORS.Unknown; }
 
-let FORMAT_DATA = SAMPLE_FORMAT;
-let MANIFEST = [];
-let currentRating = 1760;
-let sortKey = "usage";
-let sortDir = -1;
-let expandedName = null;
-const MON_CACHE = new Map();
+let state = {
+  source: "bo1",           // 'bo1' | 'bo3' | 'champions'
+  eloRating: 1760,          // smogon only
+  champFormat: "doubles",   // 'doubles' | 'singles', champions only
+  search: "",
+  selectedKey: null,        // smogon: pokemon name; champions: showdownId
+};
 
-async function getMonDetails(entry) {
-  // Use cache
-  if (MON_CACHE.has(entry.name)) return MON_CACHE.get(entry.name);
-
-  const result = { smogon: {}, poke: null };
-  // copy any enriched data from the stored entry (moves/items/etc.)
-  ['moves','items','abilities','spreads','natures','teammates'].forEach(k => {
-    if (entry[k]) result.smogon[k] = entry[k];
-  });
-
-  // Try PokeAPI for base stats and abilities
-  const key = entry.name.toLowerCase().replace(/[^a-z0-9-]/g, '-');
-  try {
-    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${key}`);
-    if (res.ok) {
-      const data = await res.json();
-      result.poke = {
-        stats: data.stats.map(s => ({ name: s.stat.name, base: s.base_stat })),
-        abilities: data.abilities.map(a => ({ name: a.ability.name, hidden: a.is_hidden })),
-        moves: data.moves.map(m => m.move.name),
-        sprite: data.sprites?.front_default || null,
-      };
-    }
-  } catch (_) {
-    // ignore PokeAPI failures — degrade gracefully
-  }
-
-  MON_CACHE.set(entry.name, result);
-  return result;
-}
+let SMOGON_MANIFEST = [];
+let SMOGON_CACHE = {};      // slug -> format data
+let POKEDEX = null;         // champions data, loaded once
 
 function setFlag(text, live){
   const flag = document.getElementById("dataFlag");
+  flag.className = "flag" + (live ? " live" : "");
   flag.innerHTML = '<span class="dot"></span>' + text;
-  flag.style.color = live ? "var(--up)" : "";
-  flag.style.borderColor = live ? "rgba(111,203,159,0.4)" : "";
-  flag.style.background = live ? "rgba(111,203,159,0.08)" : "";
 }
 
-async function loadManifest(){
+// ---------- Data loading ----------
+async function loadSmogonManifest(){
   try {
     const res = await fetch("../data/manifest.json");
-    if (!res.ok) throw new Error("no manifest");
-    MANIFEST = await res.json();
-    if (!MANIFEST.length) throw new Error("empty manifest");
-    populateFormatFilter();
-    // Default to a Bo3/open-teamsheet format when available (common for VGC).
-    const preferred = MANIFEST.find(e => e.slug && e.slug.includes('bo3')) || MANIFEST[0];
-    await loadFormat(preferred);
-  } catch {
-    setFlag("Sample dataset — run scripts/fetch-usage.mjs to pull real Champions VGC data", false);
-    FORMAT_DATA = SAMPLE_FORMAT;
-    populateFormatFilter();
-    buildEloTabs();
-    populateTypeFilter();
-    render();
+    if (!res.ok) throw new Error();
+    SMOGON_MANIFEST = await res.json();
+  } catch { SMOGON_MANIFEST = []; }
+}
+
+function findSmogonEntry(sourceId){
+  // bo1 = slug without "bo3", bo3 = slug containing "bo3"
+  return SMOGON_MANIFEST.find(e => sourceId === "bo3" ? e.slug.includes("bo3") : !e.slug.includes("bo3"));
+}
+
+async function loadSmogonFormat(entry){
+  if (SMOGON_CACHE[entry.slug]) return SMOGON_CACHE[entry.slug];
+  const res = await fetch("../data/" + entry.file);
+  if (!res.ok) throw new Error("missing data file");
+  const data = await res.json();
+  SMOGON_CACHE[entry.slug] = data;
+  return data;
+}
+
+async function loadPokedex(){
+  if (POKEDEX) return POKEDEX;
+  const res = await fetch("../data/pokedex.json");
+  if (!res.ok) throw new Error("missing pokedex.json");
+  POKEDEX = await res.json();
+  return POKEDEX;
+}
+
+// ---------- Sidebar controls ----------
+function renderSourceTabs(){
+  document.querySelectorAll(".source-tab").forEach(el => {
+    el.classList.toggle("active", el.dataset.source === state.source);
+    el.onclick = () => { state.source = el.dataset.source; state.selectedKey = null; refresh(); };
+  });
+}
+
+function renderSubControls(){
+  const wrap = document.getElementById("eloTabs");
+  const note = document.getElementById("noEloNote");
+  wrap.innerHTML = "";
+
+  if (state.source === "champions"){
+    note.style.display = "block";
+    ["doubles","singles"].forEach(fmt => {
+      const btn = document.createElement("div");
+      btn.className = "fmt-tab" + (state.champFormat === fmt ? " active" : "");
+      btn.textContent = fmt === "doubles" ? "Doubles" : "Singles";
+      btn.onclick = () => { state.champFormat = fmt; renderSubControls(); renderSidebarList(); renderMain(); };
+      wrap.appendChild(btn);
+    });
+  } else {
+    note.style.display = "none";
+    [0, 1500, 1630, 1760].forEach(r => {
+      const btn = document.createElement("div");
+      btn.className = "elo-tab" + (state.eloRating === r ? " active" : "");
+      btn.textContent = r === 0 ? "0+" : r + "+";
+      btn.onclick = () => { state.eloRating = r; renderSubControls(); renderSidebarList(); renderMain(); };
+      wrap.appendChild(btn);
+    });
   }
 }
 
-async function loadFormat(entry){
-  try {
-    const res = await fetch("../data/" + entry.file);
-    if (!res.ok) throw new Error("missing data file");
-    FORMAT_DATA = await res.json();
-    setFlag(`Live: ${FORMAT_DATA.label} · ${FORMAT_DATA.month}`, true);
-  } catch {
-    FORMAT_DATA = SAMPLE_FORMAT;
-    setFlag("Sample dataset — data file missing, run scripts/fetch-usage.mjs", false);
-  }
-  buildEloTabs();
-  populateTypeFilter();
-  render();
-}
+// ---------- Sidebar list ----------
+async function renderSidebarList(){
+  const listEl = document.getElementById("sidebarList");
+  listEl.innerHTML = '<div style="padding:16px; color:var(--text-muted); font-family:\'JetBrains Mono\',monospace; font-size:0.78rem;">Loading…</div>';
 
-function populateFormatFilter(){
-  const sel = document.getElementById("formatFilter");
-  sel.innerHTML = "";
-  if (!MANIFEST.length){
-    const o = document.createElement("option");
-    o.textContent = "Sample data";
-    sel.appendChild(o);
-    sel.disabled = true;
+  let rows = [];
+  if (state.source === "champions"){
+    try {
+      const dex = await loadPokedex();
+      setFlag(`Live: Champions Battle Data · ${dex.count} Pokémon`, true);
+      rows = Object.values(dex.pokemon)
+        .map(p => ({
+          key: p.showdownId, name: p.name, types: p.types,
+          sprite: p.sprite, metric: p[state.champFormat]?.rank ?? null,
+        }))
+        .filter(r => r.metric !== null)
+        .sort((a, b) => a.metric - b.metric);
+    } catch {
+      setFlag("Champions data not available — run scripts/fetch-pokedex.mjs", false);
+      rows = [];
+    }
+  } else {
+    const entry = findSmogonEntry(state.source);
+    if (!entry){
+      setFlag("Data not available — run scripts/fetch-usage.mjs", false);
+    } else {
+      try {
+        const data = await loadSmogonFormat(entry);
+        setFlag(`Live: ${data.label} · ${data.month}`, true);
+        const list = data.ratings[state.eloRating] || [];
+        rows = list.map(d => ({ key: d.name, name: d.name, types: [d.type], sprite: null, metric: d.usage }));
+      } catch {
+        setFlag("Data not available — run scripts/fetch-usage.mjs", false);
+      }
+    }
+  }
+
+  const q = state.search.trim().toLowerCase();
+  if (q) rows = rows.filter(r => r.name.toLowerCase().includes(q));
+
+  listEl.innerHTML = "";
+  if (!rows.length){
+    listEl.innerHTML = '<div style="padding:16px; color:var(--text-muted); font-family:\'JetBrains Mono\',monospace; font-size:0.78rem;">No Pokémon to show yet.</div>';
     return;
   }
-  sel.disabled = false;
-  MANIFEST.forEach(entry => {
-    const o = document.createElement("option");
-    o.value = entry.slug;
-    o.textContent = entry.label;
-    sel.appendChild(o);
-  });
-  sel.onchange = () => {
-    const entry = MANIFEST.find(e => e.slug === sel.value);
-    if (entry) loadFormat(entry);
-  };
-}
 
-function ratingKeys(){
-  return Object.keys(FORMAT_DATA.ratings).map(Number).sort((a,b) => a - b);
-}
+  rows.forEach((r, i) => {
+    const row = document.createElement("div");
+    row.className = "mon-row" + (state.selectedKey === r.key ? " selected" : "");
+    row.onclick = () => { state.selectedKey = r.key; renderSidebarList(); renderMain(); };
 
-function buildEloTabs(){
-  const wrap = document.getElementById("eloTabs");
-  wrap.innerHTML = "";
-  const keys = ratingKeys();
-  if (!keys.includes(currentRating)) currentRating = keys[keys.length - 1];
-  keys.forEach(r => {
-    const btn = document.createElement("button");
-    btn.className = "elo-tab" + (r === currentRating ? " active" : "");
-    btn.textContent = r === 0 ? "0+" : r + "+";
-    btn.onclick = () => {
-      currentRating = r;
-      expandedName = null;
-      document.querySelectorAll(".elo-tab").forEach(t => t.classList.remove("active"));
-      btn.classList.add("active");
-      render();
-    };
-    wrap.appendChild(btn);
-  });
-}
+    const rank = document.createElement("div");
+    rank.className = "mon-rank";
+    rank.textContent = i + 1;
 
-function currentData(){
-  return FORMAT_DATA.ratings[currentRating] || [];
-}
-
-function uniqueTypes(){
-  const all = ratingKeys().flatMap(r => FORMAT_DATA.ratings[r].map(d => d.type));
-  return [...new Set(all)].sort();
-}
-function populateTypeFilter(){
-  const sel = document.getElementById("typeFilter");
-  sel.innerHTML = '<option value="">All types</option>';
-  uniqueTypes().forEach(t => {
-    const o = document.createElement("option");
-    o.value = t; o.textContent = t;
-    sel.appendChild(o);
-  });
-}
-
-function usageAcrossElo(name){
-  return ratingKeys().map(r => {
-    const found = (FORMAT_DATA.ratings[r] || []).find(d => d.name === name);
-    return found ? found.usage : 0;
-  });
-}
-
-function teammatesFor(name){
-  // Synergy is always shown at the top-cut rating (1760+), regardless of
-  // which ELO tab is active for usage — partnerships below ~1500 tend to
-  // reflect less experienced play and aren't a reliable signal.
-  const keys = ratingKeys();
-  const synergyRating = keys.includes(1760) ? 1760 : keys[keys.length - 1];
-  const pool = FORMAT_DATA.ratings[synergyRating] || [];
-  const found = pool.find(d => d.name === name);
-  return { rating: synergyRating, teammates: found ? found.teammates : [] };
-}
-
-function currentRows(){
-  const q = document.getElementById("search").value.trim().toLowerCase();
-  const typeF = document.getElementById("typeFilter").value;
-  let rows = currentData().filter(d =>
-    (!q || d.name.toLowerCase().includes(q)) &&
-    (!typeF || d.type === typeF)
-  );
-  rows.sort((a, b) => {
-    if (sortKey === "name" || sortKey === "type") {
-      return a[sortKey].localeCompare(b[sortKey]) * sortDir;
+    const avatar = document.createElement(r.sprite ? "img" : "div");
+    avatar.className = "mon-avatar";
+    if (r.sprite){ avatar.src = r.sprite; avatar.onerror = () => { avatar.style.display = "none"; }; }
+    else {
+      const c = typeColor(r.types[0]);
+      avatar.style.color = c;
+      avatar.textContent = r.name.slice(0, 2).toUpperCase();
     }
-    return (a[sortKey] - b[sortKey]) * sortDir;
+
+    const nameWrap = document.createElement("div");
+    nameWrap.className = "mon-name-wrap";
+    const nameEl = document.createElement("div");
+    nameEl.className = "mon-name";
+    nameEl.textContent = r.name;
+    const typeEl = document.createElement("div");
+    typeEl.className = "mon-type";
+    typeEl.textContent = r.types.join(" / ");
+    nameWrap.appendChild(nameEl);
+    nameWrap.appendChild(typeEl);
+
+    const metric = document.createElement("div");
+    metric.className = "mon-metric";
+    metric.style.color = "var(--text-muted)";
+    metric.textContent = state.source === "champions" ? "#" + r.metric : r.metric.toFixed(1) + "%";
+
+    row.appendChild(rank);
+    row.appendChild(avatar);
+    row.appendChild(nameWrap);
+    row.appendChild(metric);
+    listEl.appendChild(row);
   });
-  return rows;
 }
 
-function render(){
-  const tbody = document.getElementById("rows");
-  tbody.innerHTML = "";
-  const rows = currentRows();
-  const maxUsage = Math.max(...currentData().map(d => d.usage), 1);
-
-  rows.forEach((d, i) => {
-    const tr = document.createElement("tr");
-
-    const rankTd = document.createElement("td");
-    rankTd.className = "rank";
-    rankTd.textContent = i + 1;
-
-    const nameTd = document.createElement("td");
-    nameTd.className = "name";
-    nameTd.textContent = d.name;
-    nameTd.onclick = () => {
-      expandedName = expandedName === d.name ? null : d.name;
-      render();
-    };
-
-    const typeTd = document.createElement("td");
-    typeTd.textContent = d.type;
-    typeTd.style.color = "var(--text-muted)";
-
-    const usageTd = document.createElement("td");
-    const wrap = document.createElement("div");
-    wrap.className = "bar-cell";
+// ---------- Main detail panel ----------
+function barList(entries, emptyText, options = {}){
+  const wrap = document.createElement("div");
+  if (!entries || !entries.length){
+    const p = document.createElement("div");
+    p.className = "empty-note";
+    p.textContent = emptyText;
+    wrap.appendChild(p);
+    return wrap;
+  }
+  const usePct = options.usePct !== false;
+  const max = usePct ? Math.max(...entries.map(e => e.pct ?? e.topPercentage ?? 1), 1) : 1;
+  entries.forEach(e => {
+    const row = document.createElement("div");
+    row.className = "bar-row";
+    const label = document.createElement("div");
+    label.className = "label";
+    label.textContent = e.name;
     const track = document.createElement("div");
-    track.className = "bar-track";
+    track.className = "track";
     const fill = document.createElement("div");
-    fill.className = "bar-fill";
-    fill.style.width = (d.usage / maxUsage * 100) + "%";
+    fill.className = "fill";
+    const val = e.pct ?? e.topPercentage ?? null;
+    fill.style.width = val !== null ? (val / max * 100) + "%" : "8%";
     track.appendChild(fill);
     const pct = document.createElement("div");
     pct.className = "pct";
-    pct.textContent = d.usage.toFixed(1) + "%";
-    wrap.appendChild(track);
-    wrap.appendChild(pct);
-    usageTd.appendChild(wrap);
-
-    const trendTd = document.createElement("td");
-    const series = usageAcrossElo(d.name);
-    const maxSeries = Math.max(...series, 1);
-    const trend = document.createElement("div");
-    trend.className = "trend";
-    series.forEach(v => {
-      const bar = document.createElement("i");
-      bar.style.height = Math.max(3, (v / maxSeries) * 20) + "px";
-      trend.appendChild(bar);
-    });
-    trendTd.appendChild(trend);
-
-    tr.appendChild(rankTd);
-    tr.appendChild(nameTd);
-    tr.appendChild(typeTd);
-    tr.appendChild(usageTd);
-    tr.appendChild(trendTd);
-    tbody.appendChild(tr);
-
-    if (expandedName === d.name){
-      const exTr = document.createElement("tr");
-      exTr.className = "expand-row";
-      const exTd = document.createElement("td");
-      exTd.colSpan = 5;
-
-      const loading = document.createElement('div');
-      loading.textContent = 'Loading details…';
-      exTd.appendChild(loading);
-      exTr.appendChild(exTd);
-      tbody.appendChild(exTr);
-
-      (async () => {
-        const { rating: synergyRating, teammates } = teammatesFor(d.name);
-        const details = await getMonDetails(d);
-
-        exTd.innerHTML = '';
-
-        const label = document.createElement("div");
-        label.className = "expand-label";
-        label.textContent = `${d.name} — details (synergy shown at ${synergyRating === 0 ? '0+' : synergyRating + '+'})`;
-        exTd.appendChild(label);
-
-        // Top teammates (from Smogon data)
-        const teamSection = document.createElement('div');
-        teamSection.className = 'teammates';
-        if ((details.smogon.teammates && details.smogon.teammates.length) || (teammates && teammates.length)){
-          const list = details.smogon.teammates && details.smogon.teammates.length ? details.smogon.teammates : teammates;
-          list.forEach(t => {
-            const pill = document.createElement('span');
-            pill.className = 'teammate-pill';
-            pill.innerHTML = t.name + ' <b>' + (t.pct ? (t.pct.toFixed ? t.pct.toFixed(1) : t.pct) : '?') + '%</b>';
-            teamSection.appendChild(pill);
-          });
-        } else {
-          teamSection.textContent = 'No teammate data available.';
-        }
-        exTd.appendChild(teamSection);
-
-        // PokeAPI: base stats
-        if (details.poke && details.poke.stats) {
-          const statsWrap = document.createElement('div');
-          statsWrap.style.marginTop = '12px';
-          const statsTitle = document.createElement('div');
-          statsTitle.className = 'expand-label';
-          statsTitle.textContent = 'Base stats';
-          statsWrap.appendChild(statsTitle);
-          const statTable = document.createElement('table');
-          statTable.style.width = '100%';
-          const tbodyStats = document.createElement('tbody');
-          details.poke.stats.forEach(s => {
-            const r = document.createElement('tr');
-            const k = document.createElement('td'); k.style.width = '140px'; k.textContent = s.name.toUpperCase();
-            const v = document.createElement('td'); v.textContent = s.base;
-            r.appendChild(k); r.appendChild(v); tbodyStats.appendChild(r);
-          });
-          statTable.appendChild(tbodyStats);
-          statsWrap.appendChild(statTable);
-          exTd.appendChild(statsWrap);
-        }
-
-        // Abilities (Smogon usage if available, otherwise PokeAPI)
-        const abilWrap = document.createElement('div');
-        abilWrap.style.marginTop = '12px';
-        const abilTitle = document.createElement('div');
-        abilTitle.className = 'expand-label';
-        abilTitle.textContent = 'Abilities';
-        abilWrap.appendChild(abilTitle);
-        const abilList = document.createElement('div');
-        abilList.className = 'teammates';
-        if (details.smogon.abilities && details.smogon.abilities.length){
-          details.smogon.abilities.forEach(a => {
-            const pill = document.createElement('span'); pill.className='teammate-pill';
-            pill.innerHTML = a.name + ' <b>' + (a.pct ? a.pct.toFixed(1) : '') + '%</b>'; abilList.appendChild(pill);
-          });
-        } else if (details.poke && details.poke.abilities){
-          details.poke.abilities.forEach(a => { const pill = document.createElement('span'); pill.className='teammate-pill'; pill.textContent = a.name + (a.hidden ? ' (hidden)' : ''); abilList.appendChild(pill); });
-        } else {
-          abilList.textContent = 'No ability data available.';
-        }
-        abilWrap.appendChild(abilList);
-        exTd.appendChild(abilWrap);
-
-        // Top moves
-        const movesWrap = document.createElement('div');
-        movesWrap.style.marginTop = '12px';
-        const movesTitle = document.createElement('div');
-        movesTitle.className = 'expand-label';
-        movesTitle.textContent = 'Popular moves';
-        movesWrap.appendChild(movesTitle);
-        const movesList = document.createElement('div');
-        movesList.className = 'teammates';
-        if (details.smogon.moves && details.smogon.moves.length){
-          details.smogon.moves.forEach(m => { const pill = document.createElement('span'); pill.className='teammate-pill'; pill.innerHTML = m.name + ' <b>' + (m.pct ? m.pct.toFixed(1) : '') + '%</b>'; movesList.appendChild(pill); });
-        } else if (details.poke && details.poke.moves){
-          details.poke.moves.slice(0,8).forEach(n => { const pill = document.createElement('span'); pill.className='teammate-pill'; pill.textContent = n; movesList.appendChild(pill); });
-        } else {
-          movesList.textContent = 'No move data available.';
-        }
-        movesWrap.appendChild(movesList);
-        exTd.appendChild(movesWrap);
-
-        // Items / Natures / Spreads
-        const miscWrap = document.createElement('div');
-        miscWrap.style.marginTop = '12px';
-        const miscTitle = document.createElement('div'); miscTitle.className='expand-label'; miscTitle.textContent='Other popular choices'; miscWrap.appendChild(miscTitle);
-        const miscList = document.createElement('div'); miscList.className='teammates';
-        let anyMisc = false;
-        ['items','natures','spreads'].forEach(k => {
-          const vals = details.smogon[k];
-          if (vals && vals.length){
-            anyMisc = true;
-            vals.forEach(v => { const pill = document.createElement('span'); pill.className='teammate-pill'; pill.innerHTML = v.name + ' <b>' + (v.pct ? v.pct.toFixed(1) : '') + '%</b>'; miscList.appendChild(pill); });
-          }
-        });
-        if (!anyMisc) miscList.textContent = 'No items/natures/spread data available in the dataset.';
-        miscWrap.appendChild(miscList);
-        exTd.appendChild(miscWrap);
-      })();
-    }
+    pct.textContent = val !== null ? val.toFixed(1) + "%" : "—";
+    row.appendChild(label); row.appendChild(track); row.appendChild(pct);
+    wrap.appendChild(row);
   });
+  return wrap;
 }
 
-document.querySelectorAll("th[data-key]").forEach(th => {
-  th.addEventListener("click", () => {
-    const key = th.dataset.key;
-    if (key === sortKey) {
-      sortDir *= -1;
-    } else {
-      sortKey = key;
-      sortDir = key === "name" || key === "type" ? 1 : -1;
-    }
-    document.querySelectorAll("th[data-key]").forEach(h => h.classList.remove("active"));
-    th.classList.add("active");
-    render();
+async function renderMain(){
+  const main = document.getElementById("main");
+  if (!state.selectedKey){
+    main.innerHTML = '<div class="main-empty">Pick a data source and select a Pokémon to see its full profile.</div>';
+    return;
+  }
+
+  if (state.source === "champions"){
+    await renderChampionsDetail(main);
+  } else {
+    await renderSmogonDetail(main);
+  }
+}
+
+async function renderChampionsDetail(main){
+  const dex = await loadPokedex().catch(() => null);
+  const mon = dex?.pokemon?.[state.selectedKey];
+  if (!mon){ main.innerHTML = '<div class="main-empty">Pokémon not found.</div>'; return; }
+
+  const fmtData = mon[state.champFormat];
+  const color = typeColor(mon.types[0]);
+
+  main.innerHTML = "";
+
+  const hero = document.createElement("div");
+  hero.className = "detail-hero";
+  const avatarTag = mon.sprite ? "img" : "div";
+  const avatar = document.createElement(avatarTag);
+  avatar.className = "detail-avatar";
+  if (mon.sprite){ avatar.src = mon.sprite; } else { avatar.textContent = mon.name.slice(0,2).toUpperCase(); avatar.style.color = color; }
+  const titleWrap = document.createElement("div");
+  titleWrap.className = "detail-title";
+  titleWrap.innerHTML = `<h2>${mon.name}</h2>`;
+  const badges = document.createElement("div");
+  badges.className = "type-badges";
+  mon.types.forEach(t => {
+    const c = typeColor(t);
+    const b = document.createElement("span");
+    b.className = "type-badge";
+    b.textContent = t;
+    b.style.background = c + "26"; b.style.border = "1px solid " + c + "66"; b.style.color = c;
+    badges.appendChild(b);
   });
+  titleWrap.appendChild(badges);
+
+  const metrics = document.createElement("div");
+  metrics.className = "detail-metrics";
+  metrics.innerHTML = `
+    <div class="metric"><div class="num">#${fmtData?.rank ?? "—"}</div><div class="lbl">${state.champFormat} rank</div></div>
+    <div class="metric"><div class="num">${mon.baseStatTotal ?? "—"}</div><div class="lbl">Base stat total</div></div>
+  `;
+
+  hero.appendChild(avatar); hero.appendChild(titleWrap); hero.appendChild(metrics);
+  main.appendChild(hero);
+
+  // Base stats
+  const statsCard = document.createElement("div");
+  statsCard.className = "card";
+  statsCard.innerHTML = '<h3>Base stats</h3>';
+  if (mon.baseStats){
+    const statEntries = [
+      ["HP", mon.baseStats.hp], ["Attack", mon.baseStats.attack], ["Defense", mon.baseStats.defense],
+      ["Sp. Atk", mon.baseStats.sp_attack], ["Sp. Def", mon.baseStats.sp_defense], ["Speed", mon.baseStats.speed],
+    ].map(([name, val]) => ({ name, pct: val }));
+    statsCard.appendChild(barList(statEntries, "No stat data.", { usePct: true }));
+  }
+  main.appendChild(statsCard);
+
+  // Battle breakdown grid
+  const grid = document.createElement("div");
+  grid.className = "grid3";
+  const sections = [
+    ["Moves", fmtData?.moves, "No move data."],
+    ["Held items", fmtData?.items, "No item data."],
+    ["Abilities", fmtData?.abilities, "No ability data."],
+    ["Natures", fmtData?.natures, "No nature data."],
+    ["Top teammates", fmtData?.teammates, "No teammate data."],
+  ];
+  sections.forEach(([title, entries, empty]) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    const h = document.createElement("h3");
+    h.textContent = title;
+    card.appendChild(h);
+    if (title === "Top teammates"){
+      const wrap = document.createElement("div");
+      wrap.className = "tag-cloud";
+      if (entries && entries.length){
+        entries.forEach(e => {
+          const pill = document.createElement("span");
+          pill.className = "teammate-pill";
+          pill.textContent = e.name;
+          pill.onclick = () => {
+            const found = Object.values(dex.pokemon).find(p => p.name === e.name);
+            if (found){ state.selectedKey = found.showdownId; renderSidebarList(); renderMain(); }
+          };
+          wrap.appendChild(pill);
+        });
+      } else {
+        wrap.innerHTML = '<div class="empty-note">' + empty + '</div>';
+      }
+      card.appendChild(wrap);
+    } else {
+      card.appendChild(barList(entries, empty, { usePct: title !== "Natures" && title !== "Held items" ? true : true }));
+    }
+    grid.appendChild(card);
+  });
+  main.appendChild(grid);
+
+  // EV spreads (raw strings, not percentages)
+  if (fmtData?.evSpreads?.length){
+    const spreadCard = document.createElement("div");
+    spreadCard.className = "card";
+    spreadCard.innerHTML = '<h3>Common EV spreads</h3>';
+    const list = document.createElement("div");
+    list.className = "tag-cloud";
+    fmtData.evSpreads.forEach(s => {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = s;
+      list.appendChild(tag);
+    });
+    spreadCard.appendChild(list);
+    main.appendChild(spreadCard);
+  }
+
+  // Learnable movepool
+  const movepoolCard = document.createElement("div");
+  movepoolCard.className = "card";
+  movepoolCard.innerHTML = `<h3>Learnable moves <span style="color:var(--text-muted); font-weight:400; font-size:0.78rem;">(${mon.learnableMoves.length})</span></h3>`;
+  const cloud = document.createElement("div");
+  cloud.className = "tag-cloud";
+  mon.learnableMoves.forEach(m => {
+    const tag = document.createElement("span");
+    tag.className = "tag";
+    tag.textContent = m;
+    cloud.appendChild(tag);
+  });
+  movepoolCard.appendChild(cloud);
+  main.appendChild(movepoolCard);
+}
+
+async function renderSmogonDetail(main){
+  const entry = findSmogonEntry(state.source);
+  if (!entry){ main.innerHTML = '<div class="main-empty">No data source loaded.</div>'; return; }
+  const data = await loadSmogonFormat(entry).catch(() => null);
+  if (!data){ main.innerHTML = '<div class="main-empty">Data not available.</div>'; return; }
+
+  const ratingKeys = Object.keys(data.ratings).map(Number).sort((a,b) => a - b);
+  const mon = (data.ratings[state.eloRating] || []).find(d => d.name === state.selectedKey);
+  if (!mon){ main.innerHTML = '<div class="main-empty">Not found at this rating cutoff.</div>'; return; }
+
+  const color = typeColor(mon.type);
+  main.innerHTML = "";
+
+  const hero = document.createElement("div");
+  hero.className = "detail-hero";
+  const avatar = document.createElement("div");
+  avatar.className = "detail-avatar";
+  avatar.textContent = mon.name.slice(0,2).toUpperCase();
+  avatar.style.color = color;
+  const titleWrap = document.createElement("div");
+  titleWrap.className = "detail-title";
+  titleWrap.innerHTML = `<h2>${mon.name}</h2>`;
+  const badges = document.createElement("div");
+  badges.className = "type-badges";
+  const b = document.createElement("span");
+  b.className = "type-badge"; b.textContent = mon.type;
+  b.style.background = color + "26"; b.style.border = "1px solid " + color + "66"; b.style.color = color;
+  badges.appendChild(b);
+  titleWrap.appendChild(badges);
+
+  const metrics = document.createElement("div");
+  metrics.className = "detail-metrics";
+  metrics.innerHTML = `<div class="metric"><div class="num">${mon.usage.toFixed(1)}%</div><div class="lbl">Usage @ ${state.eloRating === 0 ? "0+" : state.eloRating + "+"}</div></div>`;
+
+  hero.appendChild(avatar); hero.appendChild(titleWrap); hero.appendChild(metrics);
+  main.appendChild(hero);
+
+  const trendPanel = document.createElement("div");
+  trendPanel.className = "trend-panel";
+  trendPanel.innerHTML = '<div class="panel-label">Usage across ELO</div>';
+  const trend = document.createElement("div");
+  trend.className = "elo-trend";
+  const series = ratingKeys.map(r => {
+    const found = (data.ratings[r] || []).find(d => d.name === state.selectedKey);
+    return { rating: r, usage: found ? found.usage : 0 };
+  });
+  const maxU = Math.max(...series.map(s => s.usage), 1);
+  series.forEach(s => {
+    const col = document.createElement("div");
+    col.className = "elo-bar-col";
+    const pctLbl = document.createElement("div");
+    pctLbl.className = "elo-bar-pct"; pctLbl.textContent = s.usage.toFixed(1) + "%";
+    const bar = document.createElement("div");
+    bar.className = "elo-bar" + (s.usage === maxU ? " peak" : "");
+    bar.style.height = Math.max(4, (s.usage / maxU) * 56) + "px";
+    const lbl = document.createElement("div");
+    lbl.className = "elo-bar-label"; lbl.textContent = s.rating === 0 ? "0+" : s.rating + "+";
+    col.appendChild(pctLbl); col.appendChild(bar); col.appendChild(lbl);
+    trend.appendChild(col);
+  });
+  trendPanel.appendChild(trend);
+  main.appendChild(trendPanel);
+
+  const grid = document.createElement("div");
+  grid.className = "grid2";
+  [["Abilities", mon.abilities], ["Items", mon.items], ["Moves", mon.moves], ["EV spreads", mon.spreads]].forEach(([title, entries]) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    const h = document.createElement("h3"); h.textContent = title;
+    card.appendChild(h);
+    card.appendChild(barList(entries, `No ${title.toLowerCase()} data at this cutoff.`));
+    grid.appendChild(card);
+  });
+  main.appendChild(grid);
+
+  // Synergy pinned to 1760+
+  const synergyRating = ratingKeys.includes(1760) ? 1760 : ratingKeys[ratingKeys.length - 1];
+  const synergyMon = (data.ratings[synergyRating] || []).find(d => d.name === state.selectedKey);
+  const teamCard = document.createElement("div");
+  teamCard.className = "card";
+  teamCard.innerHTML = `<h3>Top teammates <span style="color:var(--text-muted); font-weight:400; font-size:0.78rem;">(${synergyRating === 0 ? "0+" : synergyRating + "+"} — synergy always shown here)</span></h3>`;
+  const cloud = document.createElement("div");
+  cloud.className = "tag-cloud";
+  if (synergyMon?.teammates?.length){
+    synergyMon.teammates.forEach(t => {
+      const pill = document.createElement("span");
+      pill.className = "teammate-pill";
+      pill.innerHTML = t.name + " <b>" + t.pct.toFixed(1) + "%</b>";
+      pill.onclick = () => { state.selectedKey = t.name; renderSidebarList(); renderMain(); };
+      cloud.appendChild(pill);
+    });
+  } else {
+    cloud.innerHTML = '<div class="empty-note">No teammate data at this cutoff.</div>';
+  }
+  teamCard.appendChild(cloud);
+  main.appendChild(teamCard);
+}
+
+// ---------- Wire up ----------
+document.getElementById("search").addEventListener("input", (e) => {
+  state.search = e.target.value;
+  renderSidebarList();
 });
 
-document.getElementById("search").addEventListener("input", render);
-document.getElementById("typeFilter").addEventListener("change", render);
+async function refresh(){
+  renderSourceTabs();
+  renderSubControls();
+  await renderSidebarList();
+  await renderMain();
+}
 
-loadManifest();
+(async function init(){
+  renderSourceTabs();
+  await loadSmogonManifest();
+  await refresh();
+})();
 </script>
 </body>
 </html>
