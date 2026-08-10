@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Team Usage Rates — Roster Sheet</title>
+<title>Team Usage & Synergy — Roster Sheet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -16,6 +16,8 @@
     --text-muted: #8B95A1;
     --accent: #E8C547;
     --accent-2: #3E7C8C;
+    --up: #6FCB9F;
+    --down: #E77;
   }
   *{ box-sizing:border-box; margin:0; padding:0; }
   body{
@@ -23,7 +25,7 @@
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap{ max-width: 960px; margin: 0 auto; padding: 28px; }
+  .wrap{ max-width: 1000px; margin: 0 auto; padding: 28px; }
   a.back{
     font-family:'JetBrains Mono', monospace; font-size: 0.78rem;
     color: var(--text-muted); text-decoration:none;
@@ -34,16 +36,16 @@
     font-size: clamp(1.6rem, 4vw, 2.2rem);
     margin: 18px 0 8px;
   }
-  p.sub{ color: var(--text-muted); max-width: 62ch; margin-bottom: 10px; }
+  p.sub{ color: var(--text-muted); max-width: 66ch; margin-bottom: 10px; }
 
-  .sample-flag{
+  .flag{
     display:inline-flex; align-items:center; gap:8px;
     font-family:'JetBrains Mono', monospace; font-size: 0.7rem;
     color: var(--accent); border: 1px solid rgba(232,197,71,0.4);
     background: rgba(232,197,71,0.08);
     padding: 6px 10px; border-radius: 3px; margin: 12px 0 28px;
   }
-  .sample-flag .dot{ width:6px; height:6px; background: var(--accent); border-radius:50%; }
+  .flag .dot{ width:6px; height:6px; background: currentColor; border-radius:50%; }
 
   .panel{ border: 1px solid var(--line); background: var(--surface); padding: 22px; margin-bottom: 22px; }
   .panel-label{
@@ -51,7 +53,7 @@
     text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px;
   }
 
-  .controls{ display:flex; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  .controls{ display:flex; gap: 12px; flex-wrap: wrap; align-items:center; margin-bottom: 18px; }
   input[type="text"]{
     background: var(--surface-2); color: var(--text); border: 1px solid var(--line);
     padding: 9px 12px; font-family:'Inter', sans-serif; font-size: 0.88rem; border-radius: 2px;
@@ -62,8 +64,17 @@
     padding: 9px 10px; font-family:'JetBrains Mono', monospace; font-size: 0.78rem; border-radius: 2px;
   }
 
-  table{ width:100%; border-collapse: collapse; margin-top: 18px; }
-  th, td{ padding: 10px 8px; text-align:left; font-size: 0.86rem; border-bottom: 1px solid var(--line); }
+  .elo-tabs{ display:flex; gap: 6px; }
+  .elo-tab{
+    font-family:'JetBrains Mono', monospace; font-size: 0.76rem;
+    padding: 8px 14px; border: 1px solid var(--line); background: var(--surface-2);
+    color: var(--text-muted); cursor: pointer; border-radius: 2px;
+  }
+  .elo-tab:hover{ color: var(--text); }
+  .elo-tab.active{ background: var(--accent); color: #14181C; border-color: var(--accent); font-weight: 700; }
+
+  table{ width:100%; border-collapse: collapse; margin-top: 4px; }
+  th, td{ padding: 10px 8px; text-align:left; font-size: 0.86rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
   th{
     font-family:'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--text-muted);
     text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500; cursor: pointer;
@@ -71,27 +82,51 @@
   }
   th:hover{ color: var(--text); }
   th.active{ color: var(--accent); }
-  td.name{ font-family:'Space Grotesk', sans-serif; font-weight: 700; }
-  td.rank{ font-family:'JetBrains Mono', monospace; color: var(--text-muted); width: 34px; }
+  td.name{ font-family:'Space Grotesk', sans-serif; font-weight: 700; cursor: pointer; }
+  td.name:hover{ color: var(--accent); }
+  td.rank{ font-family:'JetBrains Mono', monospace; color: var(--text-muted); width: 30px; }
 
-  .bar-cell{ display:flex; align-items:center; gap: 10px; min-width: 220px; }
+  .bar-cell{ display:flex; align-items:center; gap: 10px; min-width: 180px; }
   .bar-track{ flex:1; height: 8px; background: var(--surface-2); border-radius: 4px; overflow:hidden; }
   .bar-fill{ height: 100%; background: var(--accent-2); border-radius: 4px; }
-  .pct{ font-family:'JetBrains Mono', monospace; font-size: 0.8rem; width: 54px; text-align:right; }
+  .pct{ font-family:'JetBrains Mono', monospace; font-size: 0.8rem; width: 50px; text-align:right; }
+
+  .trend{ display:flex; align-items:flex-end; gap: 3px; height: 22px; }
+  .trend i{ width: 6px; background: var(--accent-2); border-radius: 1px; display:block; opacity: 0.55; }
+  .trend i:last-child{ opacity: 1; background: var(--accent); }
+
+  tr.expand-row td{ background: var(--surface-2); padding: 16px 8px; border-bottom: 1px solid var(--line); }
+  .teammates{ display:flex; flex-wrap:wrap; gap: 8px; }
+  .teammate-pill{
+    font-family:'JetBrains Mono', monospace; font-size: 0.72rem;
+    background: var(--surface); border: 1px solid var(--line);
+    padding: 5px 10px; border-radius: 12px; color: var(--text);
+  }
+  .teammate-pill b{ color: var(--accent-2); font-weight: 700; }
+  .expand-label{
+    font-family:'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;
+  }
 
   footer{ margin-top: 34px; color: var(--text-muted); font-family:'JetBrains Mono', monospace; font-size: 0.72rem; }
+
+  @media (max-width: 640px){
+    .controls{ flex-direction: column; align-items: stretch; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
   <a class="back" href="../index.html">← Roster Sheet</a>
-  <h1>Team usage rates</h1>
-  <p class="sub">Search and sort a usage-rate table before you build around a Pokémon. Runs entirely on bundled data — swap in a real monthly export and it updates automatically.</p>
-  <div class="sample-flag"><span class="dot"></span>Sample dataset for demo purposes — not live Smogon numbers</div>
+  <h1>Usage & synergy across ELO</h1>
+  <p class="sub">Usage rates and teammate synergy for Champions VGC, across all four Smogon rating cutoffs — 0, 1500+, 1630+, 1760+ — so you can see how a Pokémon's popularity shifts from the open ladder to top cut. Click a row to see its most common teammates.</p>
+  <div class="flag" id="dataFlag"><span class="dot"></span>Loading data…</div>
 
   <div class="panel">
     <div class="panel-label">Filter</div>
     <div class="controls">
+      <select id="formatFilter"></select>
+      <div class="elo-tabs" id="eloTabs"></div>
       <input type="text" id="search" placeholder="Search by name…">
       <select id="typeFilter"><option value="">All types</option></select>
     </div>
@@ -103,44 +138,148 @@
           <th data-key="name">Pokémon</th>
           <th data-key="type">Type</th>
           <th data-key="usage" class="active">Usage %</th>
+          <th>Across ELO</th>
         </tr>
       </thead>
       <tbody id="rows"></tbody>
     </table>
   </div>
 
-  <footer>To use real numbers: replace the DATA array in this page with a parsed Smogon/Showdown monthly usage export (name, type, usage%). No other code needs to change.</footer>
+  <footer>Data: Smogon's monthly Champions VGC chaos JSON, pulled by scripts/fetch-usage.mjs for the four rating cutoffs. Click a Pokémon's name to expand its top teammates.</footer>
 </div>
 
 <script>
-// Sample usage-rate dataset — illustrative only, for demoing the tool's layout and interactions.
-// Replace with a real parsed export (Pokémon name, primary type, usage %) to make this live.
-const DATA = [
-  { name: "Garchomp",     type: "Dragon",  usage: 34.8 },
-  { name: "Incineroar",   type: "Fire",    usage: 31.2 },
-  { name: "Kingambit",    type: "Dark",    usage: 28.6 },
-  { name: "Sinistcha",    type: "Grass",   usage: 24.9 },
-  { name: "Basculegion",  type: "Water",   usage: 22.4 },
-  { name: "Charizard",    type: "Fire",    usage: 21.1 },
-  { name: "Whimsicott",   type: "Grass",   usage: 19.7 },
-  { name: "Gholdengo",    type: "Steel",   usage: 18.3 },
-  { name: "Archaludon",   type: "Steel",   usage: 16.5 },
-  { name: "Farigiraf",    type: "Normal",  usage: 15.2 },
-  { name: "Sylveon",      type: "Fairy",   usage: 14.6 },
-  { name: "Staraptor",    type: "Flying",  usage: 13.4 },
-  { name: "Grimmsnarl",   type: "Dark",    usage: 12.9 },
-  { name: "Aerodactyl",   type: "Rock",    usage: 11.8 },
-  { name: "Raichu",       type: "Electric",usage: 10.5 },
-];
+// Fallback sample dataset — used only if data/manifest.json (produced by
+// scripts/fetch-usage.mjs) isn't available yet, e.g. before the first run
+// or when this page is opened directly from disk. Shaped like one format's
+// real data file: usage + teammates per rating cutoff.
+const SAMPLE_RATINGS = {
+  0:    sampleFor(0.7),
+  1500: sampleFor(0.85),
+  1630: sampleFor(0.95),
+  1760: sampleFor(1.0),
+};
+function sampleFor(mult){
+  const base = [
+    ["Garchomp","Dragon",34.8],["Incineroar","Fire",31.2],["Kingambit","Dark",28.6],
+    ["Sinistcha","Grass",24.9],["Basculegion","Water",22.4],["Charizard","Fire",21.1],
+    ["Whimsicott","Grass",19.7],["Gholdengo","Steel",18.3],["Archaludon","Steel",16.5],
+    ["Farigiraf","Normal",15.2],["Sylveon","Fairy",14.6],["Staraptor","Flying",13.4],
+  ];
+  return base.map(([name, type, usage]) => ({
+    name, type, usage: Math.round(usage * mult * 10) / 10,
+    teammates: base.filter(b => b[0] !== name).slice(0, 4)
+      .map(([n], i) => ({ name: n, pct: Math.round((40 - i * 7) * mult * 10) / 10 })),
+  }));
+}
+const SAMPLE_FORMAT = { label: "Sample data", slug: "sample", month: "—", ratings: SAMPLE_RATINGS };
 
+let FORMAT_DATA = SAMPLE_FORMAT;
+let MANIFEST = [];
+let currentRating = 1760;
 let sortKey = "usage";
-let sortDir = -1; // -1 desc, 1 asc
+let sortDir = -1;
+let expandedName = null;
+
+function setFlag(text, live){
+  const flag = document.getElementById("dataFlag");
+  flag.innerHTML = '<span class="dot"></span>' + text;
+  flag.style.color = live ? "var(--up)" : "";
+  flag.style.borderColor = live ? "rgba(111,203,159,0.4)" : "";
+  flag.style.background = live ? "rgba(111,203,159,0.08)" : "";
+}
+
+async function loadManifest(){
+  try {
+    const res = await fetch("../data/manifest.json");
+    if (!res.ok) throw new Error("no manifest");
+    MANIFEST = await res.json();
+    if (!MANIFEST.length) throw new Error("empty manifest");
+    populateFormatFilter();
+    await loadFormat(MANIFEST[0]);
+  } catch {
+    setFlag("Sample dataset — run scripts/fetch-usage.mjs to pull real Champions VGC data", false);
+    FORMAT_DATA = SAMPLE_FORMAT;
+    populateFormatFilter();
+    buildEloTabs();
+    populateTypeFilter();
+    render();
+  }
+}
+
+async function loadFormat(entry){
+  try {
+    const res = await fetch("../data/" + entry.file);
+    if (!res.ok) throw new Error("missing data file");
+    FORMAT_DATA = await res.json();
+    setFlag(`Live: ${FORMAT_DATA.label} · ${FORMAT_DATA.month}`, true);
+  } catch {
+    FORMAT_DATA = SAMPLE_FORMAT;
+    setFlag("Sample dataset — data file missing, run scripts/fetch-usage.mjs", false);
+  }
+  buildEloTabs();
+  populateTypeFilter();
+  render();
+}
+
+function populateFormatFilter(){
+  const sel = document.getElementById("formatFilter");
+  sel.innerHTML = "";
+  if (!MANIFEST.length){
+    const o = document.createElement("option");
+    o.textContent = "Sample data";
+    sel.appendChild(o);
+    sel.disabled = true;
+    return;
+  }
+  sel.disabled = false;
+  MANIFEST.forEach(entry => {
+    const o = document.createElement("option");
+    o.value = entry.slug;
+    o.textContent = entry.label;
+    sel.appendChild(o);
+  });
+  sel.onchange = () => {
+    const entry = MANIFEST.find(e => e.slug === sel.value);
+    if (entry) loadFormat(entry);
+  };
+}
+
+function ratingKeys(){
+  return Object.keys(FORMAT_DATA.ratings).map(Number).sort((a,b) => a - b);
+}
+
+function buildEloTabs(){
+  const wrap = document.getElementById("eloTabs");
+  wrap.innerHTML = "";
+  const keys = ratingKeys();
+  if (!keys.includes(currentRating)) currentRating = keys[keys.length - 1];
+  keys.forEach(r => {
+    const btn = document.createElement("button");
+    btn.className = "elo-tab" + (r === currentRating ? " active" : "");
+    btn.textContent = r === 0 ? "0+" : r + "+";
+    btn.onclick = () => {
+      currentRating = r;
+      expandedName = null;
+      document.querySelectorAll(".elo-tab").forEach(t => t.classList.remove("active"));
+      btn.classList.add("active");
+      render();
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+function currentData(){
+  return FORMAT_DATA.ratings[currentRating] || [];
+}
 
 function uniqueTypes(){
-  return [...new Set(DATA.map(d => d.type))].sort();
+  const all = ratingKeys().flatMap(r => FORMAT_DATA.ratings[r].map(d => d.type));
+  return [...new Set(all)].sort();
 }
 function populateTypeFilter(){
   const sel = document.getElementById("typeFilter");
+  sel.innerHTML = '<option value="">All types</option>';
   uniqueTypes().forEach(t => {
     const o = document.createElement("option");
     o.value = t; o.textContent = t;
@@ -148,10 +287,28 @@ function populateTypeFilter(){
   });
 }
 
+function usageAcrossElo(name){
+  return ratingKeys().map(r => {
+    const found = (FORMAT_DATA.ratings[r] || []).find(d => d.name === name);
+    return found ? found.usage : 0;
+  });
+}
+
+function teammatesFor(name){
+  // Synergy is always shown at the top-cut rating (1760+), regardless of
+  // which ELO tab is active for usage — partnerships below ~1500 tend to
+  // reflect less experienced play and aren't a reliable signal.
+  const keys = ratingKeys();
+  const synergyRating = keys.includes(1760) ? 1760 : keys[keys.length - 1];
+  const pool = FORMAT_DATA.ratings[synergyRating] || [];
+  const found = pool.find(d => d.name === name);
+  return { rating: synergyRating, teammates: found ? found.teammates : [] };
+}
+
 function currentRows(){
   const q = document.getElementById("search").value.trim().toLowerCase();
   const typeF = document.getElementById("typeFilter").value;
-  let rows = DATA.filter(d =>
+  let rows = currentData().filter(d =>
     (!q || d.name.toLowerCase().includes(q)) &&
     (!typeF || d.type === typeF)
   );
@@ -168,7 +325,7 @@ function render(){
   const tbody = document.getElementById("rows");
   tbody.innerHTML = "";
   const rows = currentRows();
-  const maxUsage = Math.max(...DATA.map(d => d.usage));
+  const maxUsage = Math.max(...currentData().map(d => d.usage), 1);
 
   rows.forEach((d, i) => {
     const tr = document.createElement("tr");
@@ -180,6 +337,10 @@ function render(){
     const nameTd = document.createElement("td");
     nameTd.className = "name";
     nameTd.textContent = d.name;
+    nameTd.onclick = () => {
+      expandedName = expandedName === d.name ? null : d.name;
+      render();
+    };
 
     const typeTd = document.createElement("td");
     typeTd.textContent = d.type;
@@ -201,11 +362,54 @@ function render(){
     wrap.appendChild(pct);
     usageTd.appendChild(wrap);
 
+    const trendTd = document.createElement("td");
+    const series = usageAcrossElo(d.name);
+    const maxSeries = Math.max(...series, 1);
+    const trend = document.createElement("div");
+    trend.className = "trend";
+    series.forEach(v => {
+      const bar = document.createElement("i");
+      bar.style.height = Math.max(3, (v / maxSeries) * 20) + "px";
+      trend.appendChild(bar);
+    });
+    trendTd.appendChild(trend);
+
     tr.appendChild(rankTd);
     tr.appendChild(nameTd);
     tr.appendChild(typeTd);
     tr.appendChild(usageTd);
+    tr.appendChild(trendTd);
     tbody.appendChild(tr);
+
+    if (expandedName === d.name){
+      const exTr = document.createElement("tr");
+      exTr.className = "expand-row";
+      const exTd = document.createElement("td");
+      exTd.colSpan = 5;
+
+      const { rating: synergyRating, teammates } = teammatesFor(d.name);
+
+      const label = document.createElement("div");
+      label.className = "expand-label";
+      label.textContent = `Top teammates for ${d.name} — synergy always shown at ${synergyRating === 0 ? "0+" : synergyRating + "+"}`;
+      exTd.appendChild(label);
+
+      const pillWrap = document.createElement("div");
+      pillWrap.className = "teammates";
+      if (teammates && teammates.length){
+        teammates.forEach(t => {
+          const pill = document.createElement("span");
+          pill.className = "teammate-pill";
+          pill.innerHTML = t.name + " <b>" + t.pct.toFixed(1) + "%</b>";
+          pillWrap.appendChild(pill);
+        });
+      } else {
+        pillWrap.textContent = "No teammate data at this cutoff.";
+      }
+      exTd.appendChild(pillWrap);
+      exTr.appendChild(exTd);
+      tbody.appendChild(exTr);
+    }
   });
 }
 
@@ -227,8 +431,7 @@ document.querySelectorAll("th[data-key]").forEach(th => {
 document.getElementById("search").addEventListener("input", render);
 document.getElementById("typeFilter").addEventListener("change", render);
 
-populateTypeFilter();
-render();
+loadManifest();
 </script>
 </body>
 </html>
