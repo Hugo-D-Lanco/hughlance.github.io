@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Usage Rates — Roster Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #14181C;
+    --surface: #1B2126;
+    --surface-2: #222A31;
+    --line: #2C363E;
+    --text: #EDEFF1;
+    --text-muted: #8B95A1;
+    --accent: #E8C547;
+    --accent-2: #3E7C8C;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap{ max-width: 960px; margin: 0 auto; padding: 28px; }
+  a.back{
+    font-family:'JetBrains Mono', monospace; font-size: 0.78rem;
+    color: var(--text-muted); text-decoration:none;
+  }
+  a.back:hover{ color: var(--text); }
+  h1{
+    font-family:'Space Grotesk', sans-serif; font-weight:700;
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    margin: 18px 0 8px;
+  }
+  p.sub{ color: var(--text-muted); max-width: 62ch; margin-bottom: 10px; }
+
+  .sample-flag{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'JetBrains Mono', monospace; font-size: 0.7rem;
+    color: var(--accent); border: 1px solid rgba(232,197,71,0.4);
+    background: rgba(232,197,71,0.08);
+    padding: 6px 10px; border-radius: 3px; margin: 12px 0 28px;
+  }
+  .sample-flag .dot{ width:6px; height:6px; background: var(--accent); border-radius:50%; }
+
+  .panel{ border: 1px solid var(--line); background: var(--surface); padding: 22px; margin-bottom: 22px; }
+  .panel-label{
+    font-family:'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent-2);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px;
+  }
+
+  .controls{ display:flex; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  input[type="text"]{
+    background: var(--surface-2); color: var(--text); border: 1px solid var(--line);
+    padding: 9px 12px; font-family:'Inter', sans-serif; font-size: 0.88rem; border-radius: 2px;
+    flex: 1; min-width: 180px;
+  }
+  select{
+    background: var(--surface-2); color: var(--text); border: 1px solid var(--line);
+    padding: 9px 10px; font-family:'JetBrains Mono', monospace; font-size: 0.78rem; border-radius: 2px;
+  }
+
+  table{ width:100%; border-collapse: collapse; margin-top: 18px; }
+  th, td{ padding: 10px 8px; text-align:left; font-size: 0.86rem; border-bottom: 1px solid var(--line); }
+  th{
+    font-family:'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500; cursor: pointer;
+    user-select: none;
+  }
+  th:hover{ color: var(--text); }
+  th.active{ color: var(--accent); }
+  td.name{ font-family:'Space Grotesk', sans-serif; font-weight: 700; }
+  td.rank{ font-family:'JetBrains Mono', monospace; color: var(--text-muted); width: 34px; }
+
+  .bar-cell{ display:flex; align-items:center; gap: 10px; min-width: 220px; }
+  .bar-track{ flex:1; height: 8px; background: var(--surface-2); border-radius: 4px; overflow:hidden; }
+  .bar-fill{ height: 100%; background: var(--accent-2); border-radius: 4px; }
+  .pct{ font-family:'JetBrains Mono', monospace; font-size: 0.8rem; width: 54px; text-align:right; }
+
+  footer{ margin-top: 34px; color: var(--text-muted); font-family:'JetBrains Mono', monospace; font-size: 0.72rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../index.html">← Roster Sheet</a>
+  <h1>Team usage rates</h1>
+  <p class="sub">Search and sort a usage-rate table before you build around a Pokémon. Runs entirely on bundled data — swap in a real monthly export and it updates automatically.</p>
+  <div class="sample-flag"><span class="dot"></span>Sample dataset for demo purposes — not live Smogon numbers</div>
+
+  <div class="panel">
+    <div class="panel-label">Filter</div>
+    <div class="controls">
+      <input type="text" id="search" placeholder="Search by name…">
+      <select id="typeFilter"><option value="">All types</option></select>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th data-key="rank">#</th>
+          <th data-key="name">Pokémon</th>
+          <th data-key="type">Type</th>
+          <th data-key="usage" class="active">Usage %</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <footer>To use real numbers: replace the DATA array in this page with a parsed Smogon/Showdown monthly usage export (name, type, usage%). No other code needs to change.</footer>
+</div>
+
+<script>
+// Sample usage-rate dataset — illustrative only, for demoing the tool's layout and interactions.
+// Replace with a real parsed export (Pokémon name, primary type, usage %) to make this live.
+const DATA = [
+  { name: "Garchomp",     type: "Dragon",  usage: 34.8 },
+  { name: "Incineroar",   type: "Fire",    usage: 31.2 },
+  { name: "Kingambit",    type: "Dark",    usage: 28.6 },
+  { name: "Sinistcha",    type: "Grass",   usage: 24.9 },
+  { name: "Basculegion",  type: "Water",   usage: 22.4 },
+  { name: "Charizard",    type: "Fire",    usage: 21.1 },
+  { name: "Whimsicott",   type: "Grass",   usage: 19.7 },
+  { name: "Gholdengo",    type: "Steel",   usage: 18.3 },
+  { name: "Archaludon",   type: "Steel",   usage: 16.5 },
+  { name: "Farigiraf",    type: "Normal",  usage: 15.2 },
+  { name: "Sylveon",      type: "Fairy",   usage: 14.6 },
+  { name: "Staraptor",    type: "Flying",  usage: 13.4 },
+  { name: "Grimmsnarl",   type: "Dark",    usage: 12.9 },
+  { name: "Aerodactyl",   type: "Rock",    usage: 11.8 },
+  { name: "Raichu",       type: "Electric",usage: 10.5 },
+];
+
+let sortKey = "usage";
+let sortDir = -1; // -1 desc, 1 asc
+
+function uniqueTypes(){
+  return [...new Set(DATA.map(d => d.type))].sort();
+}
+function populateTypeFilter(){
+  const sel = document.getElementById("typeFilter");
+  uniqueTypes().forEach(t => {
+    const o = document.createElement("option");
+    o.value = t; o.textContent = t;
+    sel.appendChild(o);
+  });
+}
+
+function currentRows(){
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  const typeF = document.getElementById("typeFilter").value;
+  let rows = DATA.filter(d =>
+    (!q || d.name.toLowerCase().includes(q)) &&
+    (!typeF || d.type === typeF)
+  );
+  rows.sort((a, b) => {
+    if (sortKey === "name" || sortKey === "type") {
+      return a[sortKey].localeCompare(b[sortKey]) * sortDir;
+    }
+    return (a[sortKey] - b[sortKey]) * sortDir;
+  });
+  return rows;
+}
+
+function render(){
+  const tbody = document.getElementById("rows");
+  tbody.innerHTML = "";
+  const rows = currentRows();
+  const maxUsage = Math.max(...DATA.map(d => d.usage));
+
+  rows.forEach((d, i) => {
+    const tr = document.createElement("tr");
+
+    const rankTd = document.createElement("td");
+    rankTd.className = "rank";
+    rankTd.textContent = i + 1;
+
+    const nameTd = document.createElement("td");
+    nameTd.className = "name";
+    nameTd.textContent = d.name;
+
+    const typeTd = document.createElement("td");
+    typeTd.textContent = d.type;
+    typeTd.style.color = "var(--text-muted)";
+
+    const usageTd = document.createElement("td");
+    const wrap = document.createElement("div");
+    wrap.className = "bar-cell";
+    const track = document.createElement("div");
+    track.className = "bar-track";
+    const fill = document.createElement("div");
+    fill.className = "bar-fill";
+    fill.style.width = (d.usage / maxUsage * 100) + "%";
+    track.appendChild(fill);
+    const pct = document.createElement("div");
+    pct.className = "pct";
+    pct.textContent = d.usage.toFixed(1) + "%";
+    wrap.appendChild(track);
+    wrap.appendChild(pct);
+    usageTd.appendChild(wrap);
+
+    tr.appendChild(rankTd);
+    tr.appendChild(nameTd);
+    tr.appendChild(typeTd);
+    tr.appendChild(usageTd);
+    tbody.appendChild(tr);
+  });
+}
+
+document.querySelectorAll("th[data-key]").forEach(th => {
+  th.addEventListener("click", () => {
+    const key = th.dataset.key;
+    if (key === sortKey) {
+      sortDir *= -1;
+    } else {
+      sortKey = key;
+      sortDir = key === "name" || key === "type" ? 1 : -1;
+    }
+    document.querySelectorAll("th[data-key]").forEach(h => h.classList.remove("active"));
+    th.classList.add("active");
+    render();
+  });
+});
+
+document.getElementById("search").addEventListener("input", render);
+document.getElementById("typeFilter").addEventListener("change", render);
+
+populateTypeFilter();
+render();
+</script>
+</body>
+</html>
