@@ -104,7 +104,13 @@
   .metric .num{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 1.7rem; }
   .metric .lbl{ font-family:'JetBrains Mono', monospace; font-size: 0.64rem; color: var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; }
 
-  .trend-panel, .card{ border: 1px solid var(--line); background: var(--surface); padding: 20px; margin-bottom: 18px; }
+  .trend-panel{ border: 1px solid var(--line); background: var(--surface); padding: 20px; margin-bottom: 18px; }
+  .grid2 .card, .grid3 .card{
+    border: 1px solid var(--line); background: var(--surface); padding: 16px 18px;
+    display:flex; flex-direction:column; height: 300px;
+  }
+  .grid2 .card h3, .grid3 .card h3{ flex-shrink:0; }
+  .grid2 .card-body, .grid3 .card-body{ flex:1; min-height:0; overflow-y:auto; }
   .panel-label{ font-family:'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--accent-2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom: 14px; }
   .elo-trend{ display:flex; align-items:flex-end; gap: 18px; height: 80px; }
   .elo-bar-col{ display:flex; flex-direction:column; align-items:center; gap: 6px; flex:1; }
@@ -128,6 +134,47 @@
   .teammate-pill{ font-family:'JetBrains Mono', monospace; font-size: 0.74rem; background: var(--surface-2); border: 1px solid var(--line); padding: 6px 12px; border-radius: 12px; color: var(--text); cursor:pointer; display:inline-block; }
   .teammate-pill:hover{ border-color: var(--accent-2); }
   .teammate-pill b{ color: var(--accent-2); }
+
+  .bar-row.clickable{ cursor: pointer; border-radius: 3px; padding: 3px 4px; margin: 0 -4px 6px; }
+  .bar-row.clickable:hover{ background: var(--surface-2); }
+
+  /* Selectable button-lists (moves/items/abilities/natures/spreads) */
+  .select-list{ display:flex; flex-direction:column; gap: 6px; }
+  .select-btn{
+    display:flex; align-items:center; justify-content:space-between; gap: 10px;
+    width: 100%; text-align:left; font-family:'Inter', sans-serif; font-size: 0.82rem;
+    background: var(--surface-2); border: 1px solid var(--line); color: var(--text);
+    padding: 8px 11px; border-radius: 4px; cursor: pointer;
+  }
+  .select-btn:hover{ border-color: var(--accent-2); }
+  .select-btn.active{ background: rgba(232,197,71,0.1); border-color: var(--accent); }
+  .select-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .select-pct{ font-family:'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--accent-2); flex-shrink:0; }
+  .select-pct.muted{ color: var(--text-muted); }
+  .select-btn.active .select-pct{ color: var(--accent); }
+
+  /* Stat bars inside the grid — same width as any other card now,
+     and a bit thicker since the Base stats card otherwise has empty
+     space below its 6 short rows compared to scrollable list cards. */
+  .stat-row{ display:flex; align-items:center; gap: 10px; font-size: 0.82rem; }
+  .stat-row .label{ width: 30%; }
+  .stat-row .track{ flex:1; height: 13px; background: var(--surface-2); border-radius: 6px; overflow:hidden; }
+  .stat-row .fill{ height:100%; border-radius:6px; }
+  .stat-row .num{ font-family:'JetBrains Mono', monospace; font-size: 0.76rem; width: 34px; text-align:right; }
+
+  /* Export Pokémon — a normal grid card like everything else, not a
+     special oversized one. */
+  .export-text{
+    font-family:'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.65;
+    white-space: pre-wrap; color: var(--text); background: var(--surface-2);
+    border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px;
+  }
+  .export-copy{
+    margin-top: 10px; width: 100%; font-family:'JetBrains Mono', monospace; font-size: 0.74rem;
+    background: var(--surface-2); border: 1px solid var(--line); color: var(--text-muted);
+    padding: 7px 12px; border-radius: 3px; cursor: pointer;
+  }
+  .export-copy:hover{ color: var(--text); border-color: var(--accent-2); }
 
   @media (max-width: 860px){
     .sidebar{ width: 280px; }
@@ -365,47 +412,114 @@ async function renderSidebarList(){
   if (selectionChanged) renderMain();
 }
 
-// ---------- Main detail panel ----------
-function barList(entries, emptyText, options = {}){
+// ---------- Export Pokémon build state ----------
+// Tracks the currently-picked item/ability/moves/nature/EVs for whichever
+// Pokémon is selected, defaulting to the #1 ranked pick per category.
+// Persists across re-renders of the SAME Pokémon (so clicking a button
+// doesn't lose your other picks); resets when you switch Pokémon,
+// source, format, or ELO tab.
+let currentBuild = null;
+let buildKey = null;
+
+const STAT_LABELS = ["HP", "Atk", "Def", "SpA", "SpD", "Spe"];
+function formatEvString(raw){
+  if (!raw) return null;
+  const nums = raw.split("/").map(n => parseInt(n.trim(), 10) || 0);
+  const parts = nums.map((n, i) => n > 0 ? `${n} ${STAT_LABELS[i]}` : null).filter(Boolean);
+  return parts.length ? parts.join(" / ") : "0 HP";
+}
+
+function buildExportText(name, item, ability, natureName, evsRaw, moves){
+  const lines = [];
+  lines.push(item ? `${name} @ ${item}` : name);
+  if (ability) lines.push(`Ability: ${ability}`);
+  lines.push(`Level: 50`);
+  const evText = formatEvString(evsRaw);
+  if (evText) lines.push(`EVs: ${evText}`);
+  if (natureName) lines.push(`${natureName} Nature`);
+  (moves || []).forEach(m => lines.push(`- ${m}`));
+  return lines.join("\n");
+}
+
+function renderExportCard(name, exportText){
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = '<h3>Export Pokémon</h3>';
+  const body = document.createElement("div");
+  body.className = "card-body";
+  const pre = document.createElement("div");
+  pre.className = "export-text";
+  pre.textContent = exportText;
+  body.appendChild(pre);
+  const copyBtn = document.createElement("button");
+  copyBtn.type = "button";
+  copyBtn.className = "export-copy";
+  copyBtn.textContent = "Copy to clipboard";
+  copyBtn.onclick = () => {
+    navigator.clipboard?.writeText(exportText);
+    copyBtn.textContent = "Copied!";
+    setTimeout(() => { copyBtn.textContent = "Copy to clipboard"; }, 1200);
+  };
+  body.appendChild(copyBtn);
+  card.appendChild(body);
+  return card;
+}
+
+// entries: [{name, pct?}]. multi: true allows several active picks
+// (moves, up to 4); false is single-select (item/ability/nature/spread).
+// isActive(name) / onPick(name) let the caller own the actual state.
+function selectableList(entries, emptyText, { isActive, onPick, multi = false, maxPicks = 4 } = {}){
   const wrap = document.createElement("div");
+  wrap.className = "select-list";
   if (!entries || !entries.length){
-    const p = document.createElement("div");
-    p.className = "empty-note";
-    p.textContent = emptyText;
-    wrap.appendChild(p);
+    wrap.innerHTML = `<div class="empty-note">${emptyText}</div>`;
     return wrap;
   }
-  const usePct = options.usePct !== false;
-  const max = usePct ? Math.max(...entries.map(e => e.pct ?? e.topPercentage ?? 1), 1) : 1;
   entries.forEach((e, i) => {
-    const row = document.createElement("div");
-    row.className = "bar-row";
-    const label = document.createElement("div");
-    label.className = "label";
-    label.textContent = e.name;
-    const track = document.createElement("div");
-    track.className = "track";
-    const fill = document.createElement("div");
-    fill.className = "fill";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    const active = isActive(e.name);
+    btn.className = "select-btn" + (active ? " active" : "");
     const val = e.pct ?? e.topPercentage ?? null;
-    if (val !== null){
-      fill.style.width = (val / max * 100) + "%";
-    } else {
-      // championsbattledata only exposes a percentage for the #1 ranked
-      // entry per category — ranks below that are order-only. Show a
-      // rank number instead of faking a percentage or bar.
-      fill.style.width = "0%";
-      track.style.opacity = "0.35";
-    }
-    track.appendChild(fill);
-    const pct = document.createElement("div");
-    pct.className = "pct";
-    pct.textContent = val !== null ? val.toFixed(1) + "%" : "#" + (i + 1);
-    row.appendChild(label); row.appendChild(track); row.appendChild(pct);
-    wrap.appendChild(row);
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "select-name";
+    nameSpan.textContent = e.name;
+    const pctSpan = document.createElement("span");
+    pctSpan.className = "select-pct" + (val === null ? " muted" : "");
+    pctSpan.textContent = val !== null ? val.toFixed(1) + "%" : "#" + (i + 1);
+    btn.appendChild(nameSpan);
+    btn.appendChild(pctSpan);
+    btn.onclick = () => onPick(e.name, active);
+    wrap.appendChild(btn);
   });
   return wrap;
 }
+
+function statBarList(baseStats){
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "display:flex; flex-direction:column; justify-content:space-between; height:100%;";
+  if (!baseStats){
+    wrap.innerHTML = '<div class="empty-note">No stat data.</div>';
+    return wrap;
+  }
+  [["HP", baseStats.hp], ["Attack", baseStats.attack], ["Defense", baseStats.defense],
+   ["Sp. Atk", baseStats.sp_attack], ["Sp. Def", baseStats.sp_defense], ["Speed", baseStats.speed]]
+    .forEach(([name, val]) => {
+      const row = document.createElement("div");
+      row.className = "stat-row";
+      const label = document.createElement("div"); label.className = "label"; label.textContent = name;
+      const track = document.createElement("div"); track.className = "track";
+      const fill = document.createElement("div"); fill.className = "fill";
+      fill.style.width = Math.min(100, (val / 255) * 100) + "%";
+      fill.style.background = STAT_COLORS[name];
+      track.appendChild(fill);
+      const num = document.createElement("div"); num.className = "num"; num.textContent = val;
+      row.appendChild(label); row.appendChild(track); row.appendChild(num);
+      wrap.appendChild(row);
+    });
+  return wrap;
+}
+const STAT_COLORS = { "HP": "#E85D5D", "Attack": "#F0A030", "Defense": "#F0D030", "Sp. Atk": "#5088F0", "Sp. Def": "#4CAF6D", "Speed": "#F06FA8" };
 
 async function renderMain(){
   const main = document.getElementById("main");
@@ -428,6 +542,21 @@ async function renderChampionsDetail(main){
 
   const fmtData = mon[state.champFormat];
   const color = typeColor(mon.types[0]);
+
+  // Reset the build only when the Pokémon/format actually changes —
+  // clicking a button in the lists below re-renders this same function,
+  // and should keep whatever's already been picked.
+  const key = `champions:${state.champFormat}:${mon.showdownId}`;
+  if (buildKey !== key){
+    buildKey = key;
+    currentBuild = {
+      item: fmtData?.items?.[0]?.name || null,
+      ability: fmtData?.abilities?.[0]?.name || null,
+      nature: fmtData?.natures?.[0]?.name || null,
+      evs: fmtData?.evSpreads?.[0]?.name || null,
+      moves: (fmtData?.moves || []).slice(0, 4).map(m => m.name),
+    };
+  }
 
   main.innerHTML = "";
 
@@ -463,91 +592,91 @@ async function renderChampionsDetail(main){
   hero.appendChild(avatar); hero.appendChild(titleWrap); hero.appendChild(metrics);
   main.appendChild(hero);
 
-  // Base stats
+  // Everything below — base stats and Export Pokémon included — is one
+  // 3-column grid, so every card is the same size and nothing sits
+  // alone in its own row.
+  const grid = document.createElement("div");
+  grid.className = "grid3";
+
   const statsCard = document.createElement("div");
   statsCard.className = "card";
   statsCard.innerHTML = '<h3>Base stats</h3>';
-  if (mon.baseStats){
-    const statEntries = [
-      ["HP", mon.baseStats.hp], ["Attack", mon.baseStats.attack], ["Defense", mon.baseStats.defense],
-      ["Sp. Atk", mon.baseStats.sp_attack], ["Sp. Def", mon.baseStats.sp_defense], ["Speed", mon.baseStats.speed],
-    ].map(([name, val]) => ({ name, pct: val }));
-    statsCard.appendChild(barList(statEntries, "No stat data.", { usePct: true }));
-  }
-  main.appendChild(statsCard);
+  const statsBody = document.createElement("div"); statsBody.className = "card-body";
+  statsBody.appendChild(statBarList(mon.baseStats));
+  statsCard.appendChild(statsBody);
+  grid.appendChild(statsCard);
 
-  // Battle breakdown grid
-  const grid = document.createElement("div");
-  grid.className = "grid3";
+  const rerender = () => renderMain();
+
   const sections = [
-    ["Moves", fmtData?.moves, "No move data."],
-    ["Held items", fmtData?.items, "No item data."],
-    ["Abilities", fmtData?.abilities, "No ability data."],
-    ["Natures", fmtData?.natures, "No nature data."],
-    ["Top teammates", fmtData?.teammates, "No teammate data."],
+    ["Moves", fmtData?.moves, "No move data.", {
+      multi: true,
+      isActive: (n) => currentBuild.moves.includes(n),
+      onPick: (n, active) => {
+        if (active) currentBuild.moves = currentBuild.moves.filter(m => m !== n);
+        else if (currentBuild.moves.length < 4) currentBuild.moves.push(n);
+        else currentBuild.moves = [...currentBuild.moves.slice(1), n];
+        rerender();
+      },
+    }],
+    ["Items", fmtData?.items, "No item data.", {
+      isActive: (n) => currentBuild.item === n,
+      onPick: (n) => { currentBuild.item = n; rerender(); },
+    }],
+    ["Abilities", fmtData?.abilities, "No ability data.", {
+      isActive: (n) => currentBuild.ability === n,
+      onPick: (n) => { currentBuild.ability = n; rerender(); },
+    }],
+    ["Natures", fmtData?.natures, "No nature data.", {
+      isActive: (n) => currentBuild.nature === n,
+      onPick: (n) => { currentBuild.nature = n; rerender(); },
+    }],
+    ["EV spreads", fmtData?.evSpreads, "No EV spread data.", {
+      isActive: (n) => currentBuild.evs === n,
+      onPick: (n) => { currentBuild.evs = n; rerender(); },
+    }],
   ];
-  sections.forEach(([title, entries, empty]) => {
+  sections.forEach(([title, entries, empty, opts]) => {
     const card = document.createElement("div");
     card.className = "card";
-    const h = document.createElement("h3");
-    h.textContent = title;
+    const h = document.createElement("h3"); h.textContent = title;
     card.appendChild(h);
-    if (title === "Top teammates"){
-      const wrap = document.createElement("div");
-      wrap.className = "tag-cloud";
-      if (entries && entries.length){
-        entries.forEach(e => {
-          const pill = document.createElement("span");
-          pill.className = "teammate-pill";
-          pill.textContent = e.name;
-          pill.onclick = () => {
-            const found = Object.values(dex.pokemon).find(p => p.name === e.name);
-            if (found){ state.selectedKey = found.showdownId; renderSidebarList(); renderMain(); }
-          };
-          wrap.appendChild(pill);
-        });
-      } else {
-        wrap.innerHTML = '<div class="empty-note">' + empty + '</div>';
-      }
-      card.appendChild(wrap);
-    } else {
-      card.appendChild(barList(entries, empty, { usePct: title !== "Natures" && title !== "Held items" ? true : true }));
-    }
+    const body = document.createElement("div"); body.className = "card-body";
+    body.appendChild(selectableList(entries, empty, opts));
+    card.appendChild(body);
     grid.appendChild(card);
   });
-  main.appendChild(grid);
 
-  // EV spreads (raw strings, not percentages)
-  if (fmtData?.evSpreads?.length){
-    const spreadCard = document.createElement("div");
-    spreadCard.className = "card";
-    spreadCard.innerHTML = '<h3>Common EV spreads</h3>';
-    const list = document.createElement("div");
-    list.className = "tag-cloud";
-    fmtData.evSpreads.forEach(s => {
-      const tag = document.createElement("span");
-      tag.className = "tag";
-      tag.textContent = s;
-      list.appendChild(tag);
-    });
-    spreadCard.appendChild(list);
-    main.appendChild(spreadCard);
-  }
-
-  // Learnable movepool
-  const movepoolCard = document.createElement("div");
-  movepoolCard.className = "card";
-  movepoolCard.innerHTML = `<h3>Learnable moves <span style="color:var(--text-muted); font-weight:400; font-size:0.78rem;">(${mon.learnableMoves.length})</span></h3>`;
+  const teamCard = document.createElement("div");
+  teamCard.className = "card";
+  teamCard.innerHTML = '<h3>Top teammates</h3>';
   const cloud = document.createElement("div");
   cloud.className = "tag-cloud";
-  mon.learnableMoves.forEach(m => {
-    const tag = document.createElement("span");
-    tag.className = "tag";
-    tag.textContent = m;
-    cloud.appendChild(tag);
-  });
-  movepoolCard.appendChild(cloud);
-  main.appendChild(movepoolCard);
+  if (fmtData?.teammates?.length){
+    fmtData.teammates.forEach(e => {
+      const pill = document.createElement("span");
+      pill.className = "teammate-pill";
+      pill.innerHTML = e.name + (typeof e.pct === "number" ? " <b>" + e.pct.toFixed(1) + "%</b>" : "");
+      pill.onclick = () => {
+        const found = Object.values(dex.pokemon).find(p => p.name === e.name);
+        if (found){ state.selectedKey = found.showdownId; renderSidebarList(); renderMain(); }
+      };
+      cloud.appendChild(pill);
+    });
+  } else {
+    cloud.innerHTML = '<div class="empty-note">No teammate data.</div>';
+  }
+  const teamBody = document.createElement("div"); teamBody.className = "card-body";
+  teamBody.appendChild(cloud);
+  teamCard.appendChild(teamBody);
+  grid.appendChild(teamCard);
+
+  grid.appendChild(renderExportCard(
+    mon.name,
+    buildExportText(mon.name, currentBuild.item, currentBuild.ability, currentBuild.nature, currentBuild.evs, currentBuild.moves)
+  ));
+
+  main.appendChild(grid);
 }
 
 async function renderSmogonDetail(main){
@@ -561,6 +690,30 @@ async function renderSmogonDetail(main){
   if (!mon){ main.innerHTML = '<div class="main-empty">Not found at this rating cutoff.</div>'; return; }
 
   const color = typeColor(mon.type);
+
+  // Smogon spreads are "Nature:HP/Atk/Def/SpA/SpD/Spe" in one string —
+  // split so the export card can show "Nature" and "EVs" as separate
+  // lines like a real Showdown set.
+  const splitSpread = (name) => {
+    if (!name) return { nature: null, evs: null };
+    const [nature, evs] = name.split(":");
+    return { nature: nature || null, evs: evs || null };
+  };
+
+  const key = `${state.source}:${state.eloRating}:${mon.name}`;
+  if (buildKey !== key){
+    buildKey = key;
+    const topSpread = splitSpread(mon.spreads?.[0]?.name);
+    currentBuild = {
+      item: mon.items?.[0]?.name || null,
+      ability: mon.abilities?.[0]?.name || null,
+      nature: topSpread.nature,
+      evs: topSpread.evs,
+      spreadName: mon.spreads?.[0]?.name || null, // full "Nature:EVs" string, used to match the active button
+      moves: (mon.moves || []).slice(0, 4).map(m => m.name),
+    };
+  }
+
   main.innerHTML = "";
 
   const hero = document.createElement("div");
@@ -587,6 +740,93 @@ async function renderSmogonDetail(main){
   hero.appendChild(avatar); hero.appendChild(titleWrap); hero.appendChild(metrics);
   main.appendChild(hero);
 
+  const rerender = () => renderMain();
+
+  // Same 3-column grid as the Champions page — base stats and Export
+  // Pokémon included, so every card is the same size.
+  const grid = document.createElement("div");
+  grid.className = "grid3";
+
+  const statsCard = document.createElement("div");
+  statsCard.className = "card";
+  statsCard.innerHTML = '<h3>Base stats</h3>';
+  const statsBody = document.createElement("div"); statsBody.className = "card-body";
+  statsBody.appendChild(statBarList(mon.baseStats));
+  statsCard.appendChild(statsBody);
+  grid.appendChild(statsCard);
+
+  const sections = [
+    ["Abilities", mon.abilities, {
+      isActive: (n) => currentBuild.ability === n,
+      onPick: (n) => { currentBuild.ability = n; rerender(); },
+    }],
+    ["Items", mon.items, {
+      isActive: (n) => currentBuild.item === n,
+      onPick: (n) => { currentBuild.item = n; rerender(); },
+    }],
+    ["Moves", mon.moves, {
+      multi: true,
+      isActive: (n) => currentBuild.moves.includes(n),
+      onPick: (n, active) => {
+        if (active) currentBuild.moves = currentBuild.moves.filter(m => m !== n);
+        else if (currentBuild.moves.length < 4) currentBuild.moves.push(n);
+        else currentBuild.moves = [...currentBuild.moves.slice(1), n];
+        rerender();
+      },
+    }],
+    ["EV spreads", mon.spreads, {
+      // Spreads bundle nature+EVs together — selecting one sets both.
+      isActive: (n) => currentBuild.spreadName === n,
+      onPick: (n) => {
+        const { nature, evs } = splitSpread(n);
+        currentBuild.nature = nature; currentBuild.evs = evs; currentBuild.spreadName = n;
+        rerender();
+      },
+    }],
+  ];
+  sections.forEach(([title, entries, opts]) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    const h = document.createElement("h3"); h.textContent = title;
+    card.appendChild(h);
+    const body = document.createElement("div"); body.className = "card-body";
+    body.appendChild(selectableList(entries, `No ${title.toLowerCase()} data at this cutoff.`, opts));
+    card.appendChild(body);
+    grid.appendChild(card);
+  });
+
+  // Synergy pinned to 1760+, regardless of the active ELO tab
+  const synergyRating = ratingKeys.includes(1760) ? 1760 : ratingKeys[ratingKeys.length - 1];
+  const synergyMon = (data.ratings[synergyRating] || []).find(d => d.name === state.selectedKey);
+  const teamCard = document.createElement("div");
+  teamCard.className = "card";
+  teamCard.innerHTML = `<h3>Top teammates <span style="color:var(--text-muted); font-weight:400; font-size:0.72rem;">(${synergyRating === 0 ? "0+" : synergyRating + "+"})</span></h3>`;
+  const cloud = document.createElement("div");
+  cloud.className = "tag-cloud";
+  if (synergyMon?.teammates?.length){
+    synergyMon.teammates.forEach(t => {
+      const pill = document.createElement("span");
+      pill.className = "teammate-pill";
+      pill.innerHTML = t.name + " <b>" + t.pct.toFixed(1) + "%</b>";
+      pill.onclick = () => { state.selectedKey = t.name; renderSidebarList(); renderMain(); };
+      cloud.appendChild(pill);
+    });
+  } else {
+    cloud.innerHTML = '<div class="empty-note">No teammate data at this cutoff.</div>';
+  }
+  const teamBody = document.createElement("div"); teamBody.className = "card-body";
+  teamBody.appendChild(cloud);
+  teamCard.appendChild(teamBody);
+  grid.appendChild(teamCard);
+
+  grid.appendChild(renderExportCard(
+    mon.name,
+    buildExportText(mon.name, currentBuild.item, currentBuild.ability, currentBuild.nature, currentBuild.evs, currentBuild.moves)
+  ));
+
+  main.appendChild(grid);
+
+  // "Usage across ELO" stays at the bottom — unique to Smogon sources.
   const trendPanel = document.createElement("div");
   trendPanel.className = "trend-panel";
   trendPanel.innerHTML = '<div class="panel-label">Usage across ELO</div>';
@@ -612,40 +852,6 @@ async function renderSmogonDetail(main){
   });
   trendPanel.appendChild(trend);
   main.appendChild(trendPanel);
-
-  const grid = document.createElement("div");
-  grid.className = "grid2";
-  [["Abilities", mon.abilities], ["Items", mon.items], ["Moves", mon.moves], ["EV spreads", mon.spreads]].forEach(([title, entries]) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    const h = document.createElement("h3"); h.textContent = title;
-    card.appendChild(h);
-    card.appendChild(barList(entries, `No ${title.toLowerCase()} data at this cutoff.`));
-    grid.appendChild(card);
-  });
-  main.appendChild(grid);
-
-  // Synergy pinned to 1760+
-  const synergyRating = ratingKeys.includes(1760) ? 1760 : ratingKeys[ratingKeys.length - 1];
-  const synergyMon = (data.ratings[synergyRating] || []).find(d => d.name === state.selectedKey);
-  const teamCard = document.createElement("div");
-  teamCard.className = "card";
-  teamCard.innerHTML = `<h3>Top teammates <span style="color:var(--text-muted); font-weight:400; font-size:0.78rem;">(${synergyRating === 0 ? "0+" : synergyRating + "+"} — synergy always shown here)</span></h3>`;
-  const cloud = document.createElement("div");
-  cloud.className = "tag-cloud";
-  if (synergyMon?.teammates?.length){
-    synergyMon.teammates.forEach(t => {
-      const pill = document.createElement("span");
-      pill.className = "teammate-pill";
-      pill.innerHTML = t.name + " <b>" + t.pct.toFixed(1) + "%</b>";
-      pill.onclick = () => { state.selectedKey = t.name; renderSidebarList(); renderMain(); };
-      cloud.appendChild(pill);
-    });
-  } else {
-    cloud.innerHTML = '<div class="empty-note">No teammate data at this cutoff.</div>';
-  }
-  teamCard.appendChild(cloud);
-  main.appendChild(teamCard);
 }
 
 // ---------- Wire up ----------

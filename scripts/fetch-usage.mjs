@@ -31,11 +31,18 @@
  *
  * IMPORTANT — names: chaos JSON keys (moves/items/abilities/species) are
  * Pokémon Showdown internal IDs — lowercase, no spaces or punctuation
- * ("suckerpunch", "focussash"). We build id→display-name dictionaries
- * from PokeAPI once per run and use them to show real names.
+ * ("suckerpunch", "focussash"). Move/item/ability names are prettified
+ * via a PokeAPI id→name dictionary built once per run.
+ *
+ * IMPORTANT — sprites/types/base stats: these come from your LOCAL
+ * data/pokedex.json (built by scripts/fetch-pokedex.mjs), not PokeAPI —
+ * both Smogon-sourced and Champions-sourced Pokémon then share the same
+ * sprite assets and stat numbers site-wide. Run fetch-pokedex.mjs BEFORE
+ * this script; if data/pokedex.json is missing, this script stops with
+ * an error telling you to do that.
  */
 
-import { writeFile, mkdir } from "node:fs/promises";
+import { writeFile, mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
 // ---- Configure: only the Champions VGC formats this app supports ----
@@ -55,6 +62,7 @@ const FORMATS = {
 // https://www.smogon.com/stats/{YYYY-MM}/chaos/ before relying on it;
 // adjust the string above if the real slug differs.
 const DETAIL_LIMITS = { teammates: 6, abilities: 4, items: 6, moves: 8, spreads: 4 };
+const POKEDEX_PATH = path.join(process.cwd(), "data", "pokedex.json");
 // -----------------------------------------------------------------------
 
 function previousMonth() {
@@ -79,15 +87,95 @@ async function fetchChaosJson(slug, rating) {
 }
 
 // ---------------------------------------------------------------------
-// Name dictionaries: showdown-id -> display name, built once from PokeAPI
+// Local pokedex lookup (sprites, types, base stats) — built by
+// scripts/fetch-pokedex.mjs. Both championsbattledata's showdownId and
+// Smogon's chaos.json keys are Pokémon Showdown internal IDs, so a plain
+// toId() normalization is enough to match one to the other.
 // ---------------------------------------------------------------------
 const toId = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 const titleCase = (s) => s.split(/[- ]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 
+let POKEDEX = null;
+async function loadPokedex() {
+  try {
+    const raw = await readFile(POKEDEX_PATH, "utf-8");
+    POKEDEX = JSON.parse(raw).pokemon || {};
+  } catch {
+    throw new Error(
+      `Couldn't read ${POKEDEX_PATH}. Run "node scripts/fetch-pokedex.mjs" first — ` +
+      `Bo1/Bo3 sprites, types, and base stats are sourced from that local file now.`
+    );
+  }
+}
+
+// Best-effort slug guess for Pokémon not in the local Champions pokedex —
+// mainly Mega forms, which Smogon IDs as "garchompmega" (no separator).
+// PokeAPI wants "garchomp-mega" / "-mega-x" / "-mega-y".
+function guessPokeApiSlug(chaosKey){
+  const id = chaosKey.toLowerCase();
+  if (id.endsWith("megax")) return id.slice(0, -5) + "-mega-x";
+  if (id.endsWith("megay")) return id.slice(0, -5) + "-mega-y";
+  if (id.endsWith("mega")) return id.slice(0, -4) + "-mega";
+  return id;
+}
+
+// Fallback for anything not found in the local pokedex.json — fetches
+// type/sprite/base stats from PokeAPI instead, so Mega evolutions (or
+// any other form Champions doesn't index) still show something rather
+// than blank. Cached so each missing species is only fetched once.
+const POKEAPI_FALLBACK_CACHE = new Map();
+async function fetchPokeApiFallback(chaosKey){
+  const slug = guessPokeApiSlug(chaosKey);
+  if (POKEAPI_FALLBACK_CACHE.has(slug)) return POKEAPI_FALLBACK_CACHE.get(slug);
+  try {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${slug}`);
+    if (!res.ok) throw new Error("not found");
+    const data = await res.json();
+    const find = (n) => data.stats?.find(s => s.stat.name === n)?.base_stat ?? 0;
+    const baseStats = {
+      hp: find("hp"), attack: find("attack"), defense: find("defense"),
+      sp_attack: find("special-attack"), sp_defense: find("special-defense"), speed: find("speed"),
+    };
+    const result = {
+      name: titleCase(data.name),
+      type: data.types?.[0]?.type?.name ? titleCase(data.types[0].type.name) : "Unknown",
+      sprite: data.sprites?.other?.["official-artwork"]?.front_default || data.sprites?.front_default || null,
+      baseStats,
+      baseStatTotal: Object.values(baseStats).reduce((a, b) => a + b, 0),
+    };
+    POKEAPI_FALLBACK_CACHE.set(slug, result);
+    return result;
+  } catch {
+    const result = { name: titleCase(chaosKey), type: "Unknown", sprite: null, baseStats: null, baseStatTotal: null };
+    POKEAPI_FALLBACK_CACHE.set(slug, result);
+    return result;
+  }
+}
+
+async function localSpecies(chaosKey) {
+  const entry = POKEDEX[toId(chaosKey)];
+  if (entry) {
+    return {
+      name: entry.name,
+      type: entry.types?.[0] || "Unknown",
+      sprite: entry.sprite || null, // already a repo-relative path, e.g. "assets/sprites/x.png"
+      baseStats: entry.baseStats || null,
+      baseStatTotal: entry.baseStatTotal || null,
+    };
+  }
+  // Not in the local Champions pokedex (e.g. a Mega form Champions
+  // doesn't have) — fall back to PokeAPI for sprite/type/stats rather
+  // than leaving the entry blank.
+  return fetchPokeApiFallback(chaosKey);
+}
+
+// ---------------------------------------------------------------------
+// Move/item/ability name dictionaries: showdown-id -> display name,
+// built once from PokeAPI (pokedex.json doesn't cover these).
+// ---------------------------------------------------------------------
 let MOVE_NAMES = new Map();
 let ITEM_NAMES = new Map();
 let ABILITY_NAMES = new Map();
-let SPECIES_NAMES = new Map(); // id -> {display, sprite}
 
 async function fetchList(endpoint, limit) {
   const res = await fetch(`https://pokeapi.co/api/v2/${endpoint}?limit=${limit}`);
@@ -109,52 +197,9 @@ async function buildNameDictionaries() {
   console.log(`  ${MOVE_NAMES.size} moves, ${ITEM_NAMES.size} items, ${ABILITY_NAMES.size} abilities`);
 }
 
-// Species need their own map since slugs keep hyphens for forms
-// ("landorus-therian") while chaos JSON strips them entirely
-// ("landorustherian") — same id() as everything else, but the display
-// name preserves the hyphen (matches real Pokémon naming conventions).
-async function buildSpeciesDictionary() {
-  console.log("Building species name/sprite dictionary from PokeAPI…");
-  const list = await fetchList("pokemon", 2000);
-  let done = 0;
-  for (const p of list) {
-    const id = toId(p.name);
-    const display = p.name.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join("-");
-    SPECIES_NAMES.set(id, { display, slug: p.name });
-    done++;
-  }
-  console.log(`  ${SPECIES_NAMES.size} species/forms indexed`);
-}
-
 function prettifyMove(id) { return MOVE_NAMES.get(toId(id)) || titleCase(id); }
 function prettifyItem(id) { return ITEM_NAMES.get(toId(id)) || titleCase(id); }
 function prettifyAbility(id) { return ABILITY_NAMES.get(toId(id)) || titleCase(id); }
-function speciesInfo(id) {
-  return SPECIES_NAMES.get(toId(id)) || { display: titleCase(id), slug: toId(id) };
-}
-
-// Sprite + type come from a per-species PokeAPI call (cached), reusing
-// the same slug the name dictionary resolved above.
-const SPECIES_DETAIL_CACHE = new Map();
-async function lookupSpeciesDetail(showdownName) {
-  const { slug } = speciesInfo(showdownName);
-  if (SPECIES_DETAIL_CACHE.has(slug)) return SPECIES_DETAIL_CACHE.get(slug);
-  try {
-    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${slug}`);
-    if (!res.ok) throw new Error("not found");
-    const data = await res.json();
-    const type = data.types?.[0]?.type?.name ?? "unknown";
-    const sprite = data.sprites?.other?.["official-artwork"]?.front_default
-      || data.sprites?.front_default || null;
-    const result = { type: type.charAt(0).toUpperCase() + type.slice(1), sprite };
-    SPECIES_DETAIL_CACHE.set(slug, result);
-    return result;
-  } catch {
-    const result = { type: "Unknown", sprite: null };
-    SPECIES_DETAIL_CACHE.set(slug, result);
-    return result;
-  }
-}
 
 // ---------------------------------------------------------------------
 // Chaos JSON parsing
@@ -181,9 +226,22 @@ function topEntries(rawObj = {}, limit, total, prettify) {
 
 async function parseChaosJson(chaos) {
   const entries = Object.entries(chaos.data || {}).filter(([name]) => name !== "empty");
+
+  // Pre-resolve every teammate species name that shows up anywhere in
+  // this file, so the synchronous topEntries() callback below can just
+  // look names up instead of needing to be async itself.
+  const teammateKeys = new Set();
+  entries.forEach(([, stats]) => {
+    Object.keys(stats.Teammates || {}).forEach(k => { if (k !== "empty") teammateKeys.add(k); });
+  });
+  const teammateNames = new Map();
+  for (const key of teammateKeys) {
+    teammateNames.set(key, (await localSpecies(key)).name);
+  }
+
   const result = [];
   for (const [name, stats] of entries) {
-    const { type, sprite } = await lookupSpeciesDetail(name);
+    const species = await localSpecies(name);
     // Abilities/Items are 1-per-battle, so their weight sum is this
     // Pokémon's true total weighted appearances. Fall back to Moves/4
     // (roughly 4 moves per set) only if both are missing.
@@ -191,11 +249,13 @@ async function parseChaosJson(chaos) {
       || sumWeights(stats.Moves) / 4 || 0;
 
     result.push({
-      name: speciesInfo(name).display,
-      type,
-      sprite,
+      name: species.name,
+      type: species.type,
+      sprite: species.sprite,
+      baseStats: species.baseStats,
+      baseStatTotal: species.baseStatTotal,
       usage: Math.round((stats.usage ?? 0) * 1000) / 10,
-      teammates: topEntries(stats.Teammates, DETAIL_LIMITS.teammates, total, (n) => speciesInfo(n).display),
+      teammates: topEntries(stats.Teammates, DETAIL_LIMITS.teammates, total, (n) => teammateNames.get(n) || titleCase(n)),
       abilities: topEntries(stats.Abilities, DETAIL_LIMITS.abilities, total, prettifyAbility),
       items: topEntries(stats.Items, DETAIL_LIMITS.items, total, prettifyItem),
       moves: topEntries(stats.Moves, DETAIL_LIMITS.moves, total, prettifyMove),
@@ -207,8 +267,8 @@ async function parseChaosJson(chaos) {
 
 async function run() {
   await mkdir(OUT_DIR, { recursive: true });
+  await loadPokedex();
   await buildNameDictionaries();
-  await buildSpeciesDictionary();
 
   const manifest = [];
 

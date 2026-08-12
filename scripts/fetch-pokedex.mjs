@@ -3,24 +3,31 @@
  * fetch-pokedex.mjs
  *
  * Pulls Pokémon Champions battle data from championsbattledata.com's public
- * API and stores it locally as site/data/pokedex.json, so the site can show
- * sprites, types, base stats, full learnable movepools, and current
- * Doubles/Singles battle breakdowns (top moves, items, abilities,
- * teammates, EV spreads, and each Pokémon's in-game usage RANK) without
- * hitting championsbattledata.com on every page load.
+ * API and stores it locally as data/pokedex.json, so the site can show
+ * sprites, types, base stats, and current Doubles/Singles battle
+ * breakdowns (moves, items, abilities, natures, EV spreads, teammates,
+ * and each Pokémon's in-game usage RANK) without hitting
+ * championsbattledata.com on every page load.
  *
- * One request gets everything: GET https://championsbattledata.com/api
- * returns every indexed Pokémon in a single JSON payload (confirmed live —
- * see the "summary" object per entry). We trim it down before writing,
- * dropping the daily dated CSV path lists (dozens of entries per Pokémon
- * we don't use yet) to keep the local file a manageable size.
+ * BASE STATS come from PokeAPI, not championsbattledata. The bulk index's
+ * per-Pokémon "summary.primary" stat numbers turned out NOT to be plain
+ * base stats (Garchomp showed Attack 150, not its real base 130 — 150 is
+ * what Attack 130 becomes at Lv.50 with a neutral nature/31 IV/0 EV,
+ * i.e. a calculated in-battle stat, not the base stat itself). PokeAPI's
+ * numbers are the standard, unambiguous base stats players expect here.
  *
- * Champions has no ELO/rating system. Instead, each Pokémon's battle
- * summary carries a "position" value (the same number repeats across all
- * of that Pokémon's category rows for a format) — this is its usage RANK
- * for that format. Lower position = more used. We surface this as
- * `rank` so the site can sort/display Champions Pokémon the same way it
- * sorts Smogon usage %, just without a percentage.
+ * MOVE/ITEM/ABILITY/NATURE/SPREAD PERCENTAGES: the bulk index's condensed
+ * "summary.battleSummary" only carries a percentage for the #1 ranked
+ * entry per category — ranks 2–10 are name-only. The per-Pokémon battle
+ * endpoint (GET /api/battle/{format}/{showdownId}) returns parsed CSV
+ * rows shaped like { pokemon, category, rank, name, percentage } — one
+ * row per ranked entry, with a real percentage on every rank, not just
+ * #1 (confirmed against a real exported CSV). Categories seen: move,
+ * held_item, ability, teammate, stat_align (nature), stat_point (EV
+ * spread). This script groups those rows by category and uses them in
+ * place of the condensed rank-only data whenever they're available,
+ * falling back to the condensed version only if this endpoint's shape
+ * doesn't match for a given Pokémon (so nothing shows up broken/blank).
  *
  * This is a fan-made public API, unaffiliated with Nintendo/Game Freak/
  * The Pokémon Company, per its own site footer.
@@ -31,11 +38,14 @@ import path from "node:path";
 
 // ---- Configure ----
 const API_URL = "https://championsbattledata.com/api";
+const BATTLE_URL = (format, id) => `https://championsbattledata.com/api/battle/${format}/${id}`;
 const ASSET_BASE = "https://championsbattledata.com/"; // image_path values are relative to this
 const DOWNLOAD_SPRITES = true; // false = store remote sprite URLs instead of local files
 const SPRITE_DIR = path.join(process.cwd(), "assets", "sprites");
 const OUT_FILE = path.join(process.cwd(), "data", "pokedex.json");
-const TOP_LIST_LIMIT = 10; // championsbattledata's "values" arrays are already top-10
+const TOP_LIST_LIMIT = 10;
+const FORMATS = ["Doubles", "Singles"];
+let loggedSampleRow = false; // print one raw row once, for sanity-checking column detection
 // --------------------
 
 async function fetchIndex() {
@@ -60,10 +70,38 @@ async function downloadSprite(imagePath, showdownId) {
   }
 }
 
-// A category's "top" entry + "values" list together become a ranked
-// {name, note?} list, capped at TOP_LIST_LIMIT. Percentages are only
-// present for some categories (move/item/ability/stat_alignment) — not
-// teammate, which championsbattledata only ranks, not scores.
+// ---------------------------------------------------------------------
+// Base stats — from PokeAPI, cached by species slug.
+// ---------------------------------------------------------------------
+const BASE_STAT_CACHE = new Map();
+async function fetchBaseStats(slug) {
+  if (BASE_STAT_CACHE.has(slug)) return BASE_STAT_CACHE.get(slug);
+  try {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${slug}`);
+    if (!res.ok) throw new Error("not found");
+    const data = await res.json();
+    const find = (n) => data.stats?.find(s => s.stat.name === n)?.base_stat ?? 0;
+    const baseStats = {
+      hp: find("hp"), attack: find("attack"), defense: find("defense"),
+      sp_attack: find("special-attack"), sp_defense: find("special-defense"), speed: find("speed"),
+    };
+    const baseStatTotal = Object.values(baseStats).reduce((a, b) => a + b, 0);
+    const result = { baseStats, baseStatTotal };
+    BASE_STAT_CACHE.set(slug, result);
+    return result;
+  } catch {
+    const result = { baseStats: null, baseStatTotal: null };
+    BASE_STAT_CACHE.set(slug, result);
+    return result;
+  }
+}
+
+// ---------------------------------------------------------------------
+// Condensed category lists from the bulk index (rank-only beyond #1) —
+// used as-is for Teammates (no richer source for that), and as a
+// fallback for Moves/Items/Abilities/Natures/EV spreads if the richer
+// per-Pokémon row aggregation below doesn't pan out for an entry.
+// ---------------------------------------------------------------------
 function buildCategoryList(topEntry, valuesArr = []) {
   return (valuesArr || []).slice(0, TOP_LIST_LIMIT).map((name, i) => {
     const entry = { name };
@@ -74,29 +112,119 @@ function buildCategoryList(topEntry, valuesArr = []) {
   });
 }
 
-function buildFormatBlock(formatSummary) {
+function buildCondensedBlock(formatSummary) {
   if (!formatSummary) return null;
   const { top = {}, values = {}, position = null } = formatSummary;
   return {
-    rank: position, // lower = more used; Champions has no ELO, this is the sort key
-    topMove: top.move?.name ?? null,
-    topItem: top.held_item?.name ?? null,
-    topAbility: top.ability?.name ?? null,
-    topTeammate: top.teammate?.name ?? null,
-    topNature: top.stat_alignment?.name ?? null,
+    rank: position,
     moves: buildCategoryList(top.move, values.move),
     items: buildCategoryList(top.held_item, values.held_item),
     abilities: buildCategoryList(top.ability, values.ability),
     teammates: buildCategoryList(top.teammate, values.teammate),
     natures: buildCategoryList(top.stat_alignment, values.stat_alignment),
-    evSpreads: (values.stat_points || []).slice(0, TOP_LIST_LIMIT),
+    evSpreads: (values.stat_points || []).slice(0, TOP_LIST_LIMIT).map(name => ({ name })),
   };
+}
+
+// ---------------------------------------------------------------------
+// Rich per-Pokémon rows — GET /api/battle/{format}/{showdownId}.
+// Confirmed shape (from a real exported CSV): one row per
+// (category, rank, name, percentage) — e.g.
+//   { pokemon, category: "move", rank: 1, name: "Dragon Claw", percentage: "85.00%" }
+// categories seen: move, held_item, ability, teammate, stat_align
+// (nature), stat_point (EV spread). Percentage may arrive as a string
+// with a "%" sign, a 0–100 number, or a 0–1 fraction — handled below.
+// ---------------------------------------------------------------------
+const CATEGORY_MAP = {
+  move: "moves",
+  held_item: "items",
+  item: "items",
+  ability: "abilities",
+  teammate: "teammates",
+  stat_align: "natures",
+  stat_alignment: "natures",
+  nature: "natures",
+  stat_point: "evSpreads",
+  stat_points: "evSpreads",
+};
+
+function parsePercentage(raw){
+  if (raw === null || raw === undefined || raw === "") return 0;
+  if (typeof raw === "string"){
+    const n = parseFloat(raw.replace("%", "").trim());
+    return isNaN(n) ? 0 : n;
+  }
+  const n = Number(raw);
+  if (isNaN(n)) return 0;
+  return n <= 1 ? n * 100 : n; // 0–1 fraction vs already-a-percentage
+}
+
+function groupRows(rows){
+  const buckets = { moves: [], items: [], abilities: [], teammates: [], natures: [], evSpreads: [] };
+  for (const row of rows){
+    const keys = Object.keys(row);
+    const get = (candidates) => {
+      const k = keys.find(k => candidates.includes(k.toLowerCase()));
+      return k ? row[k] : undefined;
+    };
+    const category = get(["category"]);
+    const name = get(["name"]);
+    const percentage = get(["percentage", "percent", "pct"]);
+    const bucketName = CATEGORY_MAP[String(category).toLowerCase()];
+    if (!bucketName || !name) continue;
+    buckets[bucketName].push({ name, pct: parsePercentage(percentage) });
+  }
+  Object.keys(buckets).forEach(k => {
+    buckets[k].sort((a, b) => b.pct - a.pct);
+    buckets[k] = buckets[k].slice(0, TOP_LIST_LIMIT);
+  });
+  return buckets;
+}
+
+async function fetchRichBlock(format, showdownId) {
+  try {
+    const res = await fetch(BATTLE_URL(format, showdownId));
+    if (!res.ok) return null;
+    const data = await res.json();
+    const rows = Array.isArray(data) ? data : (data.rows || data.data || null);
+    if (!rows || !rows.length) return null;
+
+    if (!loggedSampleRow) {
+      console.log("  Sample battle-row keys:", Object.keys(rows[0]).join(", "));
+      loggedSampleRow = true;
+    }
+
+    return groupRows(rows);
+  } catch {
+    return null;
+  }
+}
+
+async function buildFormatBlock(entrySummaryBlock, format, showdownId) {
+  const condensed = buildCondensedBlock(entrySummaryBlock);
+  if (!condensed) return null;
+
+  const rich = await fetchRichBlock(format, showdownId);
+  if (rich) {
+    return {
+      rank: condensed.rank,
+      moves: rich.moves.length ? rich.moves : condensed.moves,
+      items: rich.items.length ? rich.items : condensed.items,
+      abilities: rich.abilities.length ? rich.abilities : condensed.abilities,
+      natures: rich.natures.length ? rich.natures : condensed.natures,
+      evSpreads: rich.evSpreads.length ? rich.evSpreads : condensed.evSpreads,
+      teammates: rich.teammates.length ? rich.teammates : condensed.teammates,
+    };
+  }
+  return condensed; // fallback: rank-only beyond #1, but never broken/blank
 }
 
 async function buildRecord(entry) {
   const summary = entry.summary || {};
   const primary = summary.primary || {};
   const battleCurrent = summary.battleSummary?.Current || {};
+
+  const { baseStats, baseStatTotal } = await fetchBaseStats(entry.slug || entry.showdownId);
 
   const record = {
     name: entry.name,
@@ -108,23 +236,10 @@ async function buildRecord(entry) {
     types: summary.types || [],
     abilities: (primary.abilities || "").split("|").filter(Boolean),
     hiddenAbility: primary.hidden_ability || null,
-    baseStats: summary.baseStats || null,
-    baseStatTotal: summary.baseStatTotal || null,
-    learnableMoves: entry.learnableMoveNames || [],
-    forms: (summary.forms || []).map(f => ({
-      name: f.form_name,
-      savedName: f.saved_name,
-      types: f.types,
-      abilities: (f.abilities || "").split("|").filter(Boolean),
-      baseStats: {
-        hp: f.hp, attack: f.attack, defense: f.defense,
-        sp_attack: f.sp_attack, sp_defense: f.sp_defense, speed: f.speed,
-      },
-      baseStatTotal: f.base_stat_total,
-      imagePath: f.image_path,
-    })),
-    doubles: buildFormatBlock(battleCurrent.Doubles),
-    singles: buildFormatBlock(battleCurrent.Singles),
+    baseStats,
+    baseStatTotal,
+    doubles: await buildFormatBlock(battleCurrent.Doubles, "Doubles", entry.showdownId),
+    singles: await buildFormatBlock(battleCurrent.Singles, "Singles", entry.showdownId),
     sprite: null, // filled in below
   };
 
@@ -143,13 +258,14 @@ async function run() {
   const index = await fetchIndex();
   const entries = index.pokemon || [];
   console.log(`Index has ${entries.length} Pokémon/forms. Building pokedex…`);
+  console.log("(This run also hits the per-Pokémon battle endpoint for richer move/item/ability%, so it'll take longer than before.)");
 
   const pokedex = {};
   let done = 0;
   for (const entry of entries) {
     pokedex[entry.showdownId] = await buildRecord(entry);
     done++;
-    if (done % 50 === 0) console.log(`  ${done}/${entries.length}…`);
+    if (done % 25 === 0) console.log(`  ${done}/${entries.length}…`);
   }
 
   await writeFile(
