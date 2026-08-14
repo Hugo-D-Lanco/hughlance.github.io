@@ -36,6 +36,15 @@
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 
+process.on("unhandledRejection", (err) => {
+  console.error("UNHANDLED REJECTION:", err?.stack || err);
+  process.exit(1);
+});
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT EXCEPTION:", err?.stack || err);
+  process.exit(1);
+});
+
 // ---- Configure ----
 const API_URL = "https://championsbattledata.com/api";
 const BATTLE_URL = (format, id) => `https://championsbattledata.com/api/battle/${format}/${id}`;
@@ -54,6 +63,12 @@ async function fetchIndex() {
   return res.json();
 }
 
+// PNG magic bytes — confirms we actually got an image, not a 404 error
+// page or empty body that happened to arrive with a 200 status.
+function isValidPng(buf) {
+  return buf.length > 200 && buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47;
+}
+
 async function downloadSprite(imagePath, showdownId) {
   if (!imagePath) return null;
   const url = ASSET_BASE + imagePath;
@@ -62,11 +77,15 @@ async function downloadSprite(imagePath, showdownId) {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`sprite ${res.status}`);
     const buf = Buffer.from(await res.arrayBuffer());
+    if (!isValidPng(buf)) throw new Error(`not a valid PNG (${buf.length} bytes)`);
     await writeFile(path.join(SPRITE_DIR, localName), buf);
     return `assets/sprites/${localName}`; // relative path used by the site
   } catch (err) {
     console.warn(`  ⚠ sprite failed for ${showdownId}: ${err.message}`);
-    return url; // fall back to the remote URL rather than losing the reference
+    // Return null (not the broken URL) — a falsy sprite is what lets
+    // fetch-usage.mjs's fallback logic correctly retry this species
+    // later instead of treating a broken link as "already handled".
+    return null;
   }
 }
 
@@ -159,6 +178,7 @@ function parsePercentage(raw){
   return n <= 1 ? n * 100 : n; // 0–1 fraction vs already-a-percentage
 }
 
+const warnedBlankName = new Set(); // module-level: warn once total, not once per Pokémon (hundreds of calls)
 function groupRows(rows){
   const buckets = { moves: [], items: [], abilities: [], teammates: [], natures: [], evSpreads: [] };
   for (const row of rows){
@@ -171,7 +191,14 @@ function groupRows(rows){
     const name = get(["name"]);
     const percentage = get(["percentage", "percent", "pct"]);
     const bucketName = CATEGORY_MAP[String(category).toLowerCase()];
-    if (!bucketName || !name) continue;
+    if (!bucketName) continue;
+    if (!name) {
+      if (!warnedBlankName.has(bucketName)) {
+        console.warn(`    ⚠ "${category}" rows have a blank "name" field for every Pokémon checked so far — that category's rich per-rank data isn't available from this endpoint; falling back to the condensed (rank-1-only) data for it instead. (This warning only prints once.)`);
+        warnedBlankName.add(bucketName);
+      }
+      continue;
+    }
     buckets[bucketName].push({ name, pct: parsePercentage(percentage) });
   }
   Object.keys(buckets).forEach(k => {

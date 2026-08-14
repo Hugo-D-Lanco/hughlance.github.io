@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Explore Pokemon Champions battle data with usage stats, Singles and Doubles meta rankings, movesets, held items, abilities, teammates, stat spreads, learnable moves, and API access." />
+  <meta name="keywords" content="Pokemon Champions, Pokemon Champions battle data, battle data, stats, usage stats, ranked battle data, Pokemon Champions meta, most used Pokemon, best Pokemon, Pokemon Champions singles meta, Pokemon Champions doubles meta, Pokemon moveset, Pokemon best item, Pokemon teammates, Pokemon Champions team builder, best team, competitive team, Pokemon Champions API, Pokemon Champions database, stats list" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#050c08" />
+  <link rel="canonical" href="https://championsbattledata.com/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://championsbattledata.com/" />
+  <meta property="og:title" content="Pokemon Champions Battle Data" />
+  <meta property="og:description" content="Pokemon Champions battle data with usage stats, Singles and Doubles meta rankings, movesets, held items, abilities, teammates, stat spreads, learnable moves, and API access." />
+  <meta property="og:site_name" content="Pokemon Champions Battle Data" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Pokemon Champions Battle Data" />
+  <meta name="twitter:description" content="Search Pokemon Champions battle data, usage stats, Singles and Doubles meta rankings, movesets, held items, abilities, teammates, stat spreads, learnable moves, and API access." />
+  <title>Pokemon Champions Battle Data</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="site.webmanifest" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://championsbattledata.com/#website",
+        "url": "https://championsbattledata.com/",
+        "name": "Pokemon Champions Battle Data",
+        "description": "Pokemon Champions battle data with usage stats, Singles and Doubles meta rankings, movesets, held items, abilities, teammates, stat spreads, learnable moves, and API access.",
+        "inLanguage": "en",
+        "keywords": [
+          "Pokemon Champions",
+          "Pokemon Champions battle data",
+          "usage stats",
+          "ranked battle data",
+          "Pokemon Champions meta",
+          "most used Pokemon",
+          "best Pokemon",
+          "Pokemon Champions singles meta",
+          "Pokemon Champions doubles meta",
+          "Pokemon moveset",
+          "Pokemon best item",
+          "Pokemon teammates",
+          "Pokemon Champions team builder",
+          "best team",
+          "competitive team",
+          "Pokemon Champions API",
+          "Pokemon Champions database",
+          "stats list"
+        ]
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "https://championsbattledata.com/#app",
+        "url": "https://championsbattledata.com/",
+        "name": "Pokemon Champions Battle Data",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "description": "Search Pokemon Champions battle data online with usage stats, Singles and Doubles meta rankings, Pokemon movesets, best held items, abilities, teammates, stat spreads, learnable moves, team-building data, and API access."
+      },
+      {
+        "@type": "Dataset",
+        "@id": "https://championsbattledata.com/#dataset",
+        "url": "https://championsbattledata.com/",
+        "name": "Pokemon Champions Battle Data",
+        "description": "Pokemon Champions battle data with usage stats, Singles and Doubles meta rankings, movesets, held items, abilities, teammates, stat spreads, learnable moves, and competitive team-building data.",
+        "creator": {
+          "@type": "Organization",
+          "name": "Pokemon Champions Battle Data",
+          "url": "https://championsbattledata.com/"
+        },
+        "license": "https://championsbattledata.com/license.html",
+        "isAccessibleForFree": true,
+        "keywords": [
+          "Pokemon Champions battle data",
+          "usage stats",
+          "ranked battle data",
+          "Pokemon Champions meta",
+          "most used Pokemon",
+          "best Pokemon",
+          "Pokemon Champions singles meta",
+          "Pokemon Champions doubles meta",
+          "Pokemon moveset",
+          "Pokemon best item",
+          "Pokemon teammates",
+          "Pokemon Champions team builder",
+          "best team",
+          "competitive team",
+          "Pokemon Champions API",
+          "Pokemon Champions database"
+        ]
+      }
+    ]
+  }
+  </script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="page-explorer">
+  <a class="skip-link" href="#results">Skip to results</a>
+
+  <header class="site-header" aria-label="Site header">
+    <nav class="nav-shell">
+      <a class="brand" href="/" aria-label="championsbattledata.com home">
+        <img class="brand-logo" src="favicon.svg" alt="" aria-hidden="true" />
+        <span>
+          <strong>Pokemon Champions Battle Data</strong>
+          <small>championsbattledata.com</small>
+        </span>
+      </a>
+      <div class="nav-actions">
+        <div class="format-switch" role="group" aria-label="Battle format">
+          <button class="format-toggle active" id="formatToggleDoubles" type="button" aria-pressed="true" data-format="Doubles">Doubles</button>
+          <button class="format-toggle" id="formatToggleSingles" type="button" aria-pressed="false" data-format="Singles">Singles</button>
+        </div>
+        <a class="ghost-button" href="api_guide.html">API</a>
+        <a class="discord-button" href="https://discord.gg/k93eVQzj8c" target="_blank" rel="noopener">Discord</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero section-shell" aria-labelledby="pageTitle">
+      <div class="hero-copy">
+        <p class="eyebrow">Pokemon Champions Competitive Data Explorer</p>
+        <h1 id="pageTitle">Pokemon Champions Battle Data + API</h1>
+        <p class="hero-text">Explore Pokemon Champions battle data with usage stats, ranked meta trends, Singles and Doubles movesets, best held items, abilities, teammates, stat spreads, learnable moves, and API access for competitive team building.</p>
+      </div>
+
+      <aside class="hero-card battle-entry-panel" aria-label="Battle data entries">
+        <div class="entry-panel-header">
+          <div>
+            <span class="stat-label">Battle Data</span>
+            <strong id="datasetStatus">Loading CSV data…</strong>
+          </div>
+          <span class="entry-count" id="pokemonCount">0</span>
+        </div>
+        <div class="entry-list" id="battleEntryList" role="list" aria-label="Loaded battle data entries"></div>
+      </aside>
+    </section>
+
+    <section class="controls section-shell" aria-label="Search and filters">
+      <div class="search-panel">
+        <div class="search-label-row">
+          <label for="searchInput">Search database</label>
+          <div class="search-help">
+            <button class="search-help-button" id="searchHelpButton" type="button" aria-expanded="false" aria-controls="searchHelpPopover" aria-label="Toggle advanced search options">?</button>
+            <div class="search-help-popover" id="searchHelpPopover" role="dialog" aria-label="Advanced Search help">
+              <div class="search-help-header"><strong>Advanced Search</strong><button class="search-help-close" id="searchHelpClose" type="button" aria-label="Close Advanced Search help">×</button></div>
+              <p>Chain filters with spaces or commas. For example: <code>Fake Out, spe&gt;=100</code> shows all Pokemon that can learn Fake Out and have a Speed stat of 100 or higher.</p>
+              <dl>
+                <dt>Quick search</dt><dd>Simply type a name, type, ability, move, item, or nature.</dd>
+                <dt>Target Search</dt><dd>To search only within a certain category, type the category before the keyword. For example, <code>type=Dragon</code> searches the data for Dragon-type Pokemon; otherwise, it would also show Pokemon with moves such as Dragon Dance.</dd>
+                <dt>Categories</dt><dd><code>spe&gt;=120</code>, <code>type=Ground</code>, <code>item=Choice Scarf</code>, <code>ability=Rough Skin</code>, <code>nature=Jolly</code>, <code>teammate=Garchomp</code>, <code>move=Earth Power</code>.</dd>
+                <dt>Rank Filter</dt><dd><span class="rank-help"><span class="plain-code">move&lt;=5=Earthquake</span> shows all Pokémon that have Earthquake in their Top 5 moves. <span class="plain-code">item&lt;=3=Choice Scarf</span> finds Pokémon with Choice Scarf in their Top 3 items.</span></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="search-action-row">
+          <div class="search-box">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10.8 18.1a7.3 7.3 0 1 1 5.1-2.1l4 4a1.3 1.3 0 0 1-1.9 1.8l-3.9-4a7.1 7.1 0 0 1-3.3.3Zm0-2.5a4.8 4.8 0 1 0 0-9.6 4.8 4.8 0 0 0 0 9.6Z"/></svg>
+            <input id="searchInput" type="search" placeholder="Search database, press Enter to save search" autocomplete="off" />
+          </div>
+          <button class="mobile-filter-toggle" id="mobileFilterToggle" type="button" aria-expanded="false" aria-controls="filterGrid">Filters</button>
+        </div>
+      </div>
+      <div class="filter-grid" id="filterGrid">
+        <label>Type
+          <select id="typeFilter"><option value="all">All types</option></select>
+        </label>
+        <label>Sort by
+          <select id="sortFilter">
+            <option value="name">A–Z</option>
+            <option value="bst">Total Stats</option>
+            <option value="hp">Health</option>
+            <option value="attack">Attack</option>
+            <option value="defense">Defense</option>
+            <option value="sp_attack">Special Attack</option>
+            <option value="sp_defense">Special Defense</option>
+            <option value="speed">Speed</option>
+          </select>
+        </label>
+        <label>Order
+          <select id="orderFilter">
+            <option value="desc" selected>Descending</option>
+            <option value="asc">Ascending</option>
+          </select>
+        </label>
+        <label class="checkbox-label">
+          <input id="favoritesOnly" type="checkbox" />
+          Favorites only
+        </label>
+      </div>
+    </section>
+
+    <section class="section-shell layout" id="results">
+      <aside class="sidebar" aria-label="Pokémon roster">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Search history</p>
+            <h2>Recent searches</h2>
+          </div>
+          <span class="pill" id="resultCount">0 shown</span>
+        </div>
+        <div class="roster-list" id="rosterList" role="list"></div>
+      </aside>
+
+      <section class="content-area" aria-live="polite">
+        <div class="panel-heading desktop-heading">
+          <div>
+            <p class="eyebrow">Overview</p>
+            <h2>Search results</h2>
+          </div>
+          <button class="ghost-button compact" id="clearFiltersButton" type="button">Clear filters</button>
+        </div>
+        <div class="card-grid" id="pokemonGrid"></div>
+        <div class="empty-state" id="emptyState" hidden>
+          <strong>No Pokémon matched your filters.</strong>
+          <p>Try a Pokémon name, clear the type filter, or use an advanced query such as spe&gt;=120 or type=Ground.</p>
+          <button class="primary-button" type="button" id="emptyClearButton">Reset filters</button>
+        </div>
+      </section>
+    </section>
+
+  </main>
+
+  <footer class="site-footer section-shell" aria-label="Site notice">
+    <p>This fan-made project is not affiliated with, endorsed by, or sponsored by Pokemon, Nintendo, Game Freak, or Creatures Inc. <a href="/license.html">License</a>.</p>
+  </footer>
+
+  <dialog class="detail-dialog" id="detailDialog" aria-labelledby="detailTitle">
+    <div class="dialog-inner">
+      <div class="dialog-actions" aria-label="Profile actions">
+        <button class="profile-favorite-button close-button" type="button" id="profileFavoriteButton" aria-label="Toggle favorite" aria-pressed="false">&#9825;</button>
+        <button class="close-button" type="button" id="closeDialogButton" aria-label="Close profile">×</button>
+      </div>
+      <div class="detail-content" id="detailContent"></div>
+    </div>
+  </dialog>
+
+  <template id="pokemonCardTemplate">
+    <article class="pokemon-card">
+      <span class="result-position" aria-label="Search result position"></span>
+      <button class="favorite-button" type="button" aria-label="Toggle favorite">☆</button>
+      <div class="pokemon-art"></div>
+      <div class="pokemon-card-body">
+        <div class="card-title-row">
+          <div>
+            <h3></h3>
+          </div>
+        </div>
+        <div class="type-row"></div>
+        <div class="quick-facts"></div>
+        <button class="primary-button open-profile" type="button">Open profile</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js" defer></script>
+<!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a928e40b55444341af33d93783c57f12"}'></script><!-- Cloudflare Pages Analytics --></body>
+</html>

@@ -21,13 +21,16 @@
  *
  * IMPORTANT — percentage math: only the top-level "usage" field in chaos
  * JSON is a ready-to-use fraction of the whole metagame. The per-Pokémon
- * breakdowns (Abilities/Items/Moves/Spreads/Teammates) are raw weighted
- * counts, not fractions — they must be divided by that Pokémon's OWN
- * total weighted count to become a percentage. Abilities and held items
- * are mutually exclusive per battle (one ability, one item), so the sum
- * of all Ability weights for a Pokémon equals its total weighted
- * appearances — that sum is the denominator used for every category
- * below, matching how Smogon's own site displays these numbers.
+ * breakdowns (Abilities/Items/Moves/Spreads/Teammates/Checks and
+ * Counters) are raw weighted counts, not fractions — they must be
+ * divided by that Pokémon's OWN total weighted count to become a
+ * percentage. Abilities and held items are mutually exclusive per battle
+ * (one ability, one item), so the sum of all Ability weights for a
+ * Pokémon equals its total weighted appearances — that sum is the
+ * denominator used for every category below, matching how Smogon's own
+ * site displays these numbers. Natures and EV spreads are split out of
+ * Smogon's combined "Nature:EVs" Spreads keys into two independent
+ * ranked lists, matching how the Champions page shows them.
  *
  * IMPORTANT — names: chaos JSON keys (moves/items/abilities/species) are
  * Pokémon Showdown internal IDs — lowercase, no spaces or punctuation
@@ -45,6 +48,18 @@
 import { writeFile, mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
+// Surface ANY failure, no matter where it happens — a silent exit with
+// no error message (which is what you hit) means something threw
+// outside the normal try/catch path. These make that impossible.
+process.on("unhandledRejection", (err) => {
+  console.error("UNHANDLED REJECTION:", err?.stack || err);
+  process.exit(1);
+});
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT EXCEPTION:", err?.stack || err);
+  process.exit(1);
+});
+
 // ---- Configure: only the Champions VGC formats this app supports ----
 const MONTH_OVERRIDE = null;        // set to "YYYY-MM" to pin a month, or leave null to auto-use last month
 const RATINGS = [0, 1500, 1630, 1760]; // all four cutoffs, low ladder to top cut
@@ -61,7 +76,7 @@ const FORMATS = {
 // against a live directory listing. Confirm at
 // https://www.smogon.com/stats/{YYYY-MM}/chaos/ before relying on it;
 // adjust the string above if the real slug differs.
-const DETAIL_LIMITS = { teammates: 6, abilities: 4, items: 6, moves: 8, spreads: 4 };
+const DETAIL_LIMITS = { teammates: 6, abilities: 4, items: 6, moves: 8, spreads: 4, natures: 4, checks: 6 };
 const POKEDEX_PATH = path.join(process.cwd(), "data", "pokedex.json");
 // -----------------------------------------------------------------------
 
@@ -79,11 +94,24 @@ const OUT_DIR = path.join(process.cwd(), "data");
 
 async function fetchChaosJson(slug, rating) {
   const url = `https://www.smogon.com/stats/${MONTH}/chaos/${slug}-${rating}.json`;
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`Fetch failed for ${slug} @ ${rating}: ${res.status} ${res.statusText} (${url})`);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000); // 30s — a hang here shouldn't hang forever
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) {
+      throw new Error(`Fetch failed for ${slug} @ ${rating}: ${res.status} ${res.statusText} (${url})`);
+    }
+    const text = await res.text();
+    console.log(`    fetched ${(text.length / 1024).toFixed(0)} KB from ${url}`);
+    return JSON.parse(text);
+  } catch (err) {
+    if (err.name === "AbortError") {
+      throw new Error(`Timed out after 30s fetching ${url}`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
   }
-  return res.json();
 }
 
 // ---------------------------------------------------------------------
@@ -108,25 +136,155 @@ async function loadPokedex() {
   }
 }
 
+// Species-specific naming exceptions you've confirmed or described —
+// checked BEFORE the generic Mega/regional-suffix rules below, since
+// these don't follow that pattern cleanly.
+const SPECIAL_FORM_RULES = [
+  // Floette's "Eternal Flower" form isn't really a Mega Evolution, but
+  // this asset library files its art as "Mega Floette" anyway — the
+  // actual species identity (for stats + export) is Floette-Eternal.
+  { test: /^floette(mega|eternal)$/,
+    asset: () => "Mega Floette", display: () => "Floette-Eternal", slug: () => "floette-eternal" },
+
+  // Lycanroc: asset filenames use the literal word "Form"; Showdown/
+  // PokeAPI use a hyphen suffix, and Midday has none (it's the default).
+  { test: /^lycanroc-?(dusk|midnight)$/,
+    asset: (m) => `Lycanroc ${titleCase(m[1])} Form`, display: (m) => `Lycanroc-${titleCase(m[1])}`, slug: (m) => `lycanroc-${m[1]}` },
+  { test: /^lycanrocmidday$/,
+    asset: () => "Lycanroc Midday Form", display: () => "Lycanroc", slug: () => "lycanroc" },
+
+  // Aegislash: only Blade forme needs this — Shield is the default/base
+  // entry and already goes through the normal path.
+  { test: /^aegislash-?blade$/,
+    asset: () => "Aegislash Blade Forme", display: () => "Aegislash-Blade", slug: () => "aegislash-blade" },
+
+  // Vivillon: many cosmetic wing patterns, all sharing the same
+  // "{Pattern} Pattern" asset-name shape.
+  { test: /^vivillon-?(.+)$/,
+    asset: (m) => `Vivillon ${titleCase(m[1])} Pattern`, display: (m) => `Vivillon-${titleCase(m[1])}`, slug: (m) => `vivillon-${m[1]}` },
+
+  // Paldean Tauros: three "Breed" forms.
+  { test: /^tauros-?paldea-?(combat|aqua|blaze)$/,
+    asset: (m) => `Paldean Tauros ${titleCase(m[1])} Breed`, display: (m) => `Tauros-Paldea-${titleCase(m[1])}`, slug: (m) => `tauros-paldea-${m[1]}-breed` },
+];
+
+function matchSpecialForm(chaosKey){
+  const id = chaosKey.toLowerCase();
+  for (const rule of SPECIAL_FORM_RULES){
+    const m = id.match(rule.test);
+    if (m) return { assetName: rule.asset(m), displayName: rule.display(m), pokeApiSlug: rule.slug(m) };
+  }
+  return null;
+}
+
 // Best-effort slug guess for Pokémon not in the local Champions pokedex —
-// mainly Mega forms, which Smogon IDs as "garchompmega" (no separator).
+// mainly Mega forms, which Smogon may ID with OR without a hyphen before
+// the suffix ("garchompmega" or "garchomp-mega") — the "-?" here makes
+// both work and, critically, keeps a real hyphen from ending up INSIDE
+// the captured species name (that was the cause of a trailing "%20" in
+// the built URLs — the hyphen was leaking into the name via titleCase's
+// hyphen-splitting, leaving an empty trailing segment).
 // PokeAPI wants "garchomp-mega" / "-mega-x" / "-mega-y".
 function guessPokeApiSlug(chaosKey){
+  const special = matchSpecialForm(chaosKey);
+  if (special) return special.pokeApiSlug;
   const id = chaosKey.toLowerCase();
-  if (id.endsWith("megax")) return id.slice(0, -5) + "-mega-x";
-  if (id.endsWith("megay")) return id.slice(0, -5) + "-mega-y";
-  if (id.endsWith("mega")) return id.slice(0, -4) + "-mega";
+  let m;
+  if ((m = id.match(/^(.+?)-?megax$/))) return `${m[1]}-mega-x`;
+  if ((m = id.match(/^(.+?)-?megay$/))) return `${m[1]}-mega-y`;
+  if ((m = id.match(/^(.+?)-?megaz$/))) return `${m[1]}-mega-z`;
+  if ((m = id.match(/^(.+?)-?mega$/))) return `${m[1]}-mega`;
+  if ((m = id.match(/^(.+?)-?alola$/))) return `${m[1]}-alola`;
+  if ((m = id.match(/^(.+?)-?galar$/))) return `${m[1]}-galar`;
+  if ((m = id.match(/^(.+?)-?hisui$/))) return `${m[1]}-hisui`;
   return id;
 }
 
-// Fallback for anything not found in the local pokedex.json — fetches
-// type/sprite/base stats from PokeAPI instead, so Mega evolutions (or
-// any other form Champions doesn't index) still show something rather
-// than blank. Cached so each missing species is only fetched once.
-const POKEAPI_FALLBACK_CACHE = new Map();
-async function fetchPokeApiFallback(chaosKey){
+// Display name for species not in the local Champions pokedex — Showdown
+// convention, hyphen-separated ("Charizard-Mega-X", "Raichu-Alola",
+// "Floette-Eternal"), matching how you asked these to read and how
+// Showdown itself names formes (this is what team-export text should
+// show as the species name). Different from championsbattledata's own
+// asset-filename convention below — the two are kept separate.
+function guessDisplayName(chaosKey){
+  const special = matchSpecialForm(chaosKey);
+  if (special) return special.displayName;
+  const id = chaosKey.toLowerCase();
+  let m;
+  if ((m = id.match(/^(.+?)-?megax$/))) return `${titleCase(m[1])}-Mega-X`;
+  if ((m = id.match(/^(.+?)-?megay$/))) return `${titleCase(m[1])}-Mega-Y`;
+  if ((m = id.match(/^(.+?)-?megaz$/))) return `${titleCase(m[1])}-Mega-Z`;
+  if ((m = id.match(/^(.+?)-?mega$/))) return `${titleCase(m[1])}-Mega`;
+  if ((m = id.match(/^(.+?)-?alola$/))) return `${titleCase(m[1])}-Alola`;
+  if ((m = id.match(/^(.+?)-?galar$/))) return `${titleCase(m[1])}-Galar`;
+  if ((m = id.match(/^(.+?)-?hisui$/))) return `${titleCase(m[1])}-Hisui`;
+  return titleCase(id);
+}
+
+// championsbattledata's own asset folder uses a different, SPACE-based
+// naming convention ("Mega Charizard X", not "Charizard-Mega-X") —
+// confirmed via
+// https://championsbattledata.com/pokemon_champions_assets/pokemon/Mega%20Charizard%20X.png
+function guessChampionsAssetName(chaosKey){
+  const special = matchSpecialForm(chaosKey);
+  if (special) return special.assetName;
+  const id = chaosKey.toLowerCase();
+  let m;
+  if ((m = id.match(/^(.+?)-?megax$/))) return `Mega ${titleCase(m[1])} X`;
+  if ((m = id.match(/^(.+?)-?megay$/))) return `Mega ${titleCase(m[1])} Y`;
+  if ((m = id.match(/^(.+?)-?megaz$/))) return `Mega ${titleCase(m[1])} Z`;
+  if ((m = id.match(/^(.+?)-?mega$/))) return `Mega ${titleCase(m[1])}`;
+  if ((m = id.match(/^(.+?)-?alola$/))) return `Alolan ${titleCase(m[1])}`;
+  if ((m = id.match(/^(.+?)-?galar$/))) return `Galarian ${titleCase(m[1])}`;
+  if ((m = id.match(/^(.+?)-?hisui$/))) return `Hisuian ${titleCase(m[1])}`;
+  return titleCase(id);
+}
+
+// Try the championsbattledata asset path (confirmed format above) before
+// ever touching PokeAPI for a sprite, downloading it locally so Bo1/Bo3
+// pages load from the same local asset folder as everything else. Logs
+// each failure once (not per Pokémon-format-rating call) so a systematic
+// naming mismatch is visible without spamming the console.
+const CHAMPIONS_ASSET_BASE = "https://championsbattledata.com/pokemon_champions_assets/pokemon/";
+const SPRITE_DIR = path.join(process.cwd(), "assets", "sprites");
+const CHAMPIONS_SPRITE_CACHE = new Map();
+const loggedSpriteFailures = new Set();
+// PNG magic bytes — confirms we actually got an image, not a 404 error
+// page or empty body that happened to arrive with a 200 status.
+function isValidPng(buf) {
+  return buf.length > 200 && buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47;
+}
+
+async function fetchChampionsSpriteByName(assetName, chaosKey){
+  if (CHAMPIONS_SPRITE_CACHE.has(chaosKey)) return CHAMPIONS_SPRITE_CACHE.get(chaosKey);
+  const url = CHAMPIONS_ASSET_BASE + encodeURIComponent(assetName) + ".png";
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`${res.status}`);
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (!isValidPng(buf)) throw new Error(`not a valid PNG (${buf.length} bytes)`);
+    const localName = `${toId(chaosKey)}.png`;
+    await writeFile(path.join(SPRITE_DIR, localName), buf);
+    const result = `assets/sprites/${localName}`;
+    CHAMPIONS_SPRITE_CACHE.set(chaosKey, result);
+    return result;
+  } catch (err) {
+    if (!loggedSpriteFailures.has(chaosKey)) {
+      console.warn(`    ⚠ sprite not found at ${url} (${err.message}) — trying PokeAPI art instead`);
+      loggedSpriteFailures.add(chaosKey);
+    }
+    CHAMPIONS_SPRITE_CACHE.set(chaosKey, null);
+    return null;
+  }
+}
+
+// Base stats/type for anything not in the local pokedex — PokeAPI is
+// the source here (sprite comes from championsbattledata above, tried
+// first; this only fills in the numbers).
+const POKEAPI_STATS_CACHE = new Map();
+async function fetchPokeApiStats(chaosKey){
   const slug = guessPokeApiSlug(chaosKey);
-  if (POKEAPI_FALLBACK_CACHE.has(slug)) return POKEAPI_FALLBACK_CACHE.get(slug);
+  if (POKEAPI_STATS_CACHE.has(slug)) return POKEAPI_STATS_CACHE.get(slug);
   try {
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${slug}`);
     if (!res.ok) throw new Error("not found");
@@ -137,36 +295,89 @@ async function fetchPokeApiFallback(chaosKey){
       sp_attack: find("special-attack"), sp_defense: find("special-defense"), speed: find("speed"),
     };
     const result = {
-      name: titleCase(data.name),
       type: data.types?.[0]?.type?.name ? titleCase(data.types[0].type.name) : "Unknown",
-      sprite: data.sprites?.other?.["official-artwork"]?.front_default || data.sprites?.front_default || null,
+      fallbackSprite: data.sprites?.other?.["official-artwork"]?.front_default || data.sprites?.front_default || null,
       baseStats,
       baseStatTotal: Object.values(baseStats).reduce((a, b) => a + b, 0),
     };
-    POKEAPI_FALLBACK_CACHE.set(slug, result);
+    POKEAPI_STATS_CACHE.set(slug, result);
     return result;
   } catch {
-    const result = { name: titleCase(chaosKey), type: "Unknown", sprite: null, baseStats: null, baseStatTotal: null };
-    POKEAPI_FALLBACK_CACHE.set(slug, result);
+    const result = { type: "Unknown", fallbackSprite: null, baseStats: null, baseStatTotal: null };
+    POKEAPI_STATS_CACHE.set(slug, result);
     return result;
   }
 }
 
+async function fetchFallbackSpecies(chaosKey){
+  const displayName = guessDisplayName(chaosKey);
+  const assetName = guessChampionsAssetName(chaosKey);
+  const [championsSprite, stats] = await Promise.all([
+    fetchChampionsSpriteByName(assetName, chaosKey),
+    fetchPokeApiStats(chaosKey),
+  ]);
+  return {
+    name: displayName,
+    type: stats.type,
+    sprite: championsSprite || stats.fallbackSprite, // championsbattledata first, PokeAPI art only if that 404s
+    baseStats: stats.baseStats,
+    baseStatTotal: stats.baseStatTotal,
+  };
+}
+
+// Mega/regional forms specifically get sprite-metadata from
+// championsbattledata that points at the WRONG path (their own raw,
+// unencoded ID-style naming, not the actual "Mega Name.png" convention
+// their asset server uses) — trusting entry.sprite for these downloads
+// broken/empty files. For these categories, always run our own guesser
+// (confirmed correct against a real URL) instead of trusting their data.
+function isSpecialForm(chaosKey){
+  return matchSpecialForm(chaosKey) !== null
+    || /^(.+?)-?(megax|megay|megaz|mega|alola|galar|hisui)$/i.test(chaosKey.toLowerCase());
+}
+
 async function localSpecies(chaosKey) {
   const entry = POKEDEX[toId(chaosKey)];
-  if (entry) {
+  const special = isSpecialForm(chaosKey);
+
+  // A local entry existing isn't enough on its own — some Champions
+  // pokedex entries (mainly single-form Megas, e.g. Abomasnow-Mega) have
+  // a badly-formed internal slug that fails their own PokeAPI base-stat
+  // lookup, leaving sprite/baseStats null even though the entry exists.
+  // Treat "exists but incomplete" the same as "missing": run the
+  // fallback guesser too, and fill in only the gaps.
+  if (entry && entry.sprite && entry.baseStats && !special) {
     return {
       name: entry.name,
       type: entry.types?.[0] || "Unknown",
-      sprite: entry.sprite || null, // already a repo-relative path, e.g. "assets/sprites/x.png"
-      baseStats: entry.baseStats || null,
+      sprite: entry.sprite,
+      baseStats: entry.baseStats,
       baseStatTotal: entry.baseStatTotal || null,
     };
   }
-  // Not in the local Champions pokedex (e.g. a Mega form Champions
-  // doesn't have) — fall back to PokeAPI for sprite/type/stats rather
-  // than leaving the entry blank.
-  return fetchPokeApiFallback(chaosKey);
+
+  const fallback = await fetchFallbackSpecies(chaosKey);
+  if (!entry) return fallback;
+
+  if (special) {
+    // Prefer OUR sprite guess over their (unreliable) metadata for
+    // these forms; still use their name/stats if present.
+    return {
+      name: entry.name || fallback.name,
+      type: entry.types?.[0] || fallback.type,
+      sprite: fallback.sprite || entry.sprite,
+      baseStats: entry.baseStats || fallback.baseStats,
+      baseStatTotal: entry.baseStatTotal || fallback.baseStatTotal,
+    };
+  }
+
+  return {
+    name: entry.name || fallback.name,
+    type: entry.types?.[0] || fallback.type,
+    sprite: entry.sprite || fallback.sprite,
+    baseStats: entry.baseStats || fallback.baseStats,
+    baseStatTotal: entry.baseStatTotal || fallback.baseStatTotal,
+  };
 }
 
 // ---------------------------------------------------------------------
@@ -224,24 +435,63 @@ function topEntries(rawObj = {}, limit, total, prettify) {
     .slice(0, limit);
 }
 
+// Smogon bundles nature+EVs into one "Spreads" key, e.g.
+// "Adamant:252/0/0/0/4/252". To show a standalone Natures box (like the
+// Champions page has) and a pure-numbers EV spreads box, split each key
+// on ":" and re-aggregate weights by just the nature, or just the EVs,
+// so multiple different EV spreads sharing a nature all count toward it.
+function splitSpreadEntries(spreadsObj = {}, part, limit, total) {
+  const tally = new Map();
+  Object.entries(spreadsObj).forEach(([key, weight]) => {
+    if (key === "empty" || key === "nothing") return;
+    const [nature, evs] = key.split(":");
+    const bucketKey = part === "nature" ? nature : (evs || key);
+    tally.set(bucketKey, (tally.get(bucketKey) || 0) + weight);
+  });
+  return [...tally.entries()]
+    .map(([name, weight]) => ({ name, pct: total ? Math.round((weight / total) * 1000) / 10 : 0 }))
+    .sort((a, b) => b.pct - a.pct)
+    .slice(0, limit);
+}
+
+// Smogon's "Checks and Counters" is keyed by opponent species, each
+// value an array where [0] is the check/counter rating (%). Same shape
+// as Teammates but scored differently — reuses the same species-name
+// resolution map.
+function checksEntries(rawObj = {}, limit, nameResolver) {
+  return Object.entries(rawObj)
+    .filter(([name]) => name !== "empty")
+    .map(([name, arr]) => ({
+      name: nameResolver(name),
+      pct: Array.isArray(arr) && typeof arr[0] === "number" ? Math.round(arr[0] * 10) / 10 : 0,
+    }))
+    .sort((a, b) => b.pct - a.pct)
+    .slice(0, limit);
+}
+
 async function parseChaosJson(chaos) {
   const entries = Object.entries(chaos.data || {}).filter(([name]) => name !== "empty");
 
-  // Pre-resolve every teammate species name that shows up anywhere in
-  // this file, so the synchronous topEntries() callback below can just
-  // look names up instead of needing to be async itself.
-  const teammateKeys = new Set();
+  // Pre-resolve every species name that shows up anywhere as a
+  // Teammate or a Check/Counter, so the synchronous callbacks below can
+  // just look names up instead of needing to be async themselves.
+  const speciesKeys = new Set();
   entries.forEach(([, stats]) => {
-    Object.keys(stats.Teammates || {}).forEach(k => { if (k !== "empty") teammateKeys.add(k); });
+    Object.keys(stats.Teammates || {}).forEach(k => { if (k !== "empty") speciesKeys.add(k); });
+    Object.keys(stats["Checks and Counters"] || {}).forEach(k => { if (k !== "empty") speciesKeys.add(k); });
   });
-  const teammateNames = new Map();
-  for (const key of teammateKeys) {
-    teammateNames.set(key, (await localSpecies(key)).name);
+  const speciesNames = new Map();
+  for (const key of speciesKeys) {
+    speciesNames.set(key, (await localSpecies(key)).name);
   }
+  const resolveName = (n) => speciesNames.get(n) || titleCase(n);
 
   const result = [];
+  let done = 0;
   for (const [name, stats] of entries) {
     const species = await localSpecies(name);
+    done++;
+    if (done % 100 === 0) console.log(`      ${done}/${entries.length} species resolved…`);
     // Abilities/Items are 1-per-battle, so their weight sum is this
     // Pokémon's true total weighted appearances. Fall back to Moves/4
     // (roughly 4 moves per set) only if both are missing.
@@ -255,11 +505,13 @@ async function parseChaosJson(chaos) {
       baseStats: species.baseStats,
       baseStatTotal: species.baseStatTotal,
       usage: Math.round((stats.usage ?? 0) * 1000) / 10,
-      teammates: topEntries(stats.Teammates, DETAIL_LIMITS.teammates, total, (n) => teammateNames.get(n) || titleCase(n)),
+      teammates: topEntries(stats.Teammates, DETAIL_LIMITS.teammates, total, resolveName),
       abilities: topEntries(stats.Abilities, DETAIL_LIMITS.abilities, total, prettifyAbility),
       items: topEntries(stats.Items, DETAIL_LIMITS.items, total, prettifyItem),
       moves: topEntries(stats.Moves, DETAIL_LIMITS.moves, total, prettifyMove),
-      spreads: topEntries(stats.Spreads, DETAIL_LIMITS.spreads, total, null), // "Nature:HP/Atk/..." already readable
+      natures: splitSpreadEntries(stats.Spreads, "nature", DETAIL_LIMITS.natures, total),
+      evSpreads: splitSpreadEntries(stats.Spreads, "evs", DETAIL_LIMITS.spreads, total),
+      checks: checksEntries(stats["Checks and Counters"], DETAIL_LIMITS.checks, resolveName),
     });
   }
   return result.sort((a, b) => b.usage - a.usage);
@@ -267,6 +519,7 @@ async function parseChaosJson(chaos) {
 
 async function run() {
   await mkdir(OUT_DIR, { recursive: true });
+  await mkdir(SPRITE_DIR, { recursive: true });
   await loadPokedex();
   await buildNameDictionaries();
 
@@ -278,12 +531,19 @@ async function run() {
 
     for (const rating of RATINGS) {
       console.log(`  Rating ${rating}+…`);
-      const chaos = await fetchChaosJson(slug, rating);
-      byRating[rating] = await parseChaosJson(chaos);
-      if (byRating[rating].length === 0) {
-        console.warn(`    ⚠ 0 species parsed for ${slug}-${rating} — check the JSON shape, it may not match "chaos.data" anymore`);
-      } else {
-        console.log(`    ${byRating[rating].length} species parsed`);
+      try {
+        const chaos = await fetchChaosJson(slug, rating);
+        console.log(`    parsing…`);
+        byRating[rating] = await parseChaosJson(chaos);
+        if (byRating[rating].length === 0) {
+          console.warn(`    ⚠ 0 species parsed for ${slug}-${rating} — check the JSON shape, it may not match "chaos.data" anymore`);
+        } else {
+          console.log(`    ${byRating[rating].length} species parsed`);
+        }
+      } catch (err) {
+        console.error(`    ✗ ${slug}-${rating} failed: ${err.message}`);
+        console.error(`      Continuing with remaining ratings/formats rather than stopping here.`);
+        byRating[rating] = []; // keep going — an empty rating beats losing the whole run
       }
     }
 

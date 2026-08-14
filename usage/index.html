@@ -89,6 +89,13 @@
   .main-empty{ color: var(--text-muted); font-family:'JetBrains Mono', monospace; font-size: 0.85rem; margin-top: 80px; text-align:center; }
 
   .detail-hero{ display:flex; align-items:center; gap: 22px; margin-bottom: 24px; flex-wrap: wrap; }
+  .detail-avatar-wrap{ position: relative; flex-shrink: 0; }
+  .forme-cycle-btn{
+    position: absolute; bottom: -6px; right: -6px; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent-2); border: 2px solid var(--bg); color: #fff; cursor: pointer;
+    display:flex; align-items:center; justify-content:center; font-size: 0.85rem; line-height: 1;
+  }
+  .forme-cycle-btn:hover{ background: var(--accent); color: #14181C; }
   .detail-avatar{
     width: 84px; height: 84px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line);
     display:flex; align-items:center; justify-content:center; object-fit: contain; font-family:'Space Grotesk', sans-serif;
@@ -104,7 +111,6 @@
   .metric .num{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 1.7rem; }
   .metric .lbl{ font-family:'JetBrains Mono', monospace; font-size: 0.64rem; color: var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; }
 
-  .trend-panel{ border: 1px solid var(--line); background: var(--surface); padding: 20px; margin-bottom: 18px; }
   .grid2 .card, .grid3 .card{
     border: 1px solid var(--line); background: var(--surface); padding: 16px 18px;
     display:flex; flex-direction:column; height: 300px;
@@ -112,11 +118,6 @@
   .grid2 .card h3, .grid3 .card h3{ flex-shrink:0; }
   .grid2 .card-body, .grid3 .card-body{ flex:1; min-height:0; overflow-y:auto; }
   .panel-label{ font-family:'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--accent-2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom: 14px; }
-  .elo-trend{ display:flex; align-items:flex-end; gap: 18px; height: 80px; }
-  .elo-bar-col{ display:flex; flex-direction:column; align-items:center; gap: 6px; flex:1; }
-  .elo-bar{ width: 30px; background: var(--accent-2); border-radius: 3px 3px 0 0; }
-  .elo-bar.peak{ background: var(--accent); }
-  .elo-bar-label, .elo-bar-pct{ font-family:'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--text-muted); }
 
   .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   .grid3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
@@ -165,12 +166,12 @@
   /* Export Pokémon — a normal grid card like everything else, not a
      special oversized one. */
   .export-text{
-    font-family:'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.65;
+    font-family:'JetBrains Mono', monospace; font-size: 0.72rem; line-height: 1.55;
     white-space: pre-wrap; color: var(--text); background: var(--surface-2);
-    border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px;
+    border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px;
   }
   .export-copy{
-    margin-top: 10px; width: 100%; font-family:'JetBrains Mono', monospace; font-size: 0.74rem;
+    flex-shrink: 0; margin-top: 14px; width: 100%; font-family:'JetBrains Mono', monospace; font-size: 0.74rem;
     background: var(--surface-2); border: 1px solid var(--line); color: var(--text-muted);
     padding: 7px 12px; border-radius: 3px; cursor: pointer;
   }
@@ -219,6 +220,54 @@ const TYPE_COLORS = {
   Dark:"#705848", Steel:"#B8B8D0", Fairy:"#EE99AC", Unknown:"#8B95A1"
 };
 function typeColor(t){ return TYPE_COLORS[t] || TYPE_COLORS.Unknown; }
+
+// Skips blank-named entries (see selectableList's filter above) when
+// picking a default — avoids defaulting to an unusable blank pick.
+function firstValid(entries){
+  return (entries || []).find(e => e && e.name && String(e.name).trim())?.name || null;
+}
+
+// Groups related formes together so the cycle button can hop between
+// them — e.g. Charizard / Mega Charizard X / Mega Charizard Y all share
+// the key "charizard"; Aegislash / Aegislash-Blade share "aegislash".
+// Best-effort regex on the DISPLAY name (not a chaos ID), since that's
+// all the front end has to work with.
+function formeFamilyKey(name){
+  return name
+    .replace(/^Mega\s+/i, "")
+    .replace(/\s+[XY]$/i, "")
+    .replace(/^(Alolan|Galarian|Hisuian|Paldean)\s+/i, "")
+    .split(/[-\s]/)[0]
+    .toLowerCase();
+}
+
+function renderFormeCycleButton(allNames, currentName, onCycle){
+  const family = allNames.filter(n => formeFamilyKey(n) === formeFamilyKey(currentName));
+  if (family.length < 2) return null;
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "forme-cycle-btn";
+  btn.title = `Cycle formes (${family.length})`;
+  btn.textContent = "⟳";
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    const idx = family.indexOf(currentName);
+    const next = family[(idx + 1) % family.length];
+    onCycle(next);
+  };
+  return btn;
+}
+
+// A Mega's recorded ability reflects what it has AFTER transforming
+// in-battle — but a real Showdown export needs the base forme's ability
+// (the one it has before the item triggers the Mega Evolution), and the
+// export line itself should just be the species name, no "-Mega" suffix.
+function stripMegaSuffix(name){
+  return name.replace(/-Mega(-[XYZ])?$/i, "");
+}
+function isMegaName(name){
+  return /-Mega(-[XYZ])?$/i.test(name);
+}
 
 // pokedex.json stores sprite paths relative to the repo root (e.g.
 // "assets/sprites/garchomp.png"); pages live one folder down (usage/,
@@ -424,6 +473,9 @@ let buildKey = null;
 const STAT_LABELS = ["HP", "Atk", "Def", "SpA", "SpD", "Spe"];
 function formatEvString(raw){
   if (!raw) return null;
+  // Already human-formatted (contains stat letters, e.g. "252 Atk / 4 SpD")
+  // — some sources give it this way already, use as-is.
+  if (/[A-Za-z]/.test(raw)) return raw;
   const nums = raw.split("/").map(n => parseInt(n.trim(), 10) || 0);
   const parts = nums.map((n, i) => n > 0 ? `${n} ${STAT_LABELS[i]}` : null).filter(Boolean);
   return parts.length ? parts.join(" / ") : "0 HP";
@@ -447,10 +499,15 @@ function renderExportCard(name, exportText){
   card.innerHTML = '<h3>Export Pokémon</h3>';
   const body = document.createElement("div");
   body.className = "card-body";
+  body.style.flex = "0 0 auto"; // size to the text itself, not stretched to fill the card
+  body.style.maxHeight = "200px";
   const pre = document.createElement("div");
   pre.className = "export-text";
   pre.textContent = exportText;
   body.appendChild(pre);
+  card.appendChild(body);
+  // Copy button sits directly under the text (not pushed to the card's
+  // bottom edge), and stays visible without needing to scroll.
   const copyBtn = document.createElement("button");
   copyBtn.type = "button";
   copyBtn.className = "export-copy";
@@ -460,18 +517,29 @@ function renderExportCard(name, exportText){
     copyBtn.textContent = "Copied!";
     setTimeout(() => { copyBtn.textContent = "Copy to clipboard"; }, 1200);
   };
-  body.appendChild(copyBtn);
-  card.appendChild(body);
+  card.appendChild(copyBtn);
   return card;
 }
 
 // entries: [{name, pct?}]. multi: true allows several active picks
 // (moves, up to 4); false is single-select (item/ability/nature/spread).
 // isActive(name) / onPick(name) let the caller own the actual state.
-function selectableList(entries, emptyText, { isActive, onPick, multi = false, maxPicks = 4 } = {}){
+// Strips "HP"/"Atk"/"Def"/etc. stat labels for compact list display —
+// the full labeled string is still what gets picked and shown in the
+// Export card; this is presentation-only.
+function shortenEvDisplay(raw){
+  if (!raw) return raw;
+  return raw.replace(/\s*(HP|Atk|Def|SpA|SpD|Spe)\b/gi, "").replace(/\s+/g, "").trim();
+}
+
+function selectableList(entries, emptyText, { isActive, onPick, multi = false, maxPicks = 4, compactEv = false } = {}){
   const wrap = document.createElement("div");
   wrap.className = "select-list";
-  if (!entries || !entries.length){
+  // Defensive: some upstream rows arrive with a blank name (seen for
+  // certain Champions "stat_point" rows) — drop those rather than
+  // rendering an unusable blank button.
+  entries = (entries || []).filter(e => e && e.name && String(e.name).trim());
+  if (!entries.length){
     wrap.innerHTML = `<div class="empty-note">${emptyText}</div>`;
     return wrap;
   }
@@ -483,7 +551,7 @@ function selectableList(entries, emptyText, { isActive, onPick, multi = false, m
     const val = e.pct ?? e.topPercentage ?? null;
     const nameSpan = document.createElement("span");
     nameSpan.className = "select-name";
-    nameSpan.textContent = e.name;
+    nameSpan.textContent = compactEv ? shortenEvDisplay(e.name) : e.name;
     const pctSpan = document.createElement("span");
     pctSpan.className = "select-pct" + (val === null ? " muted" : "");
     pctSpan.textContent = val !== null ? val.toFixed(1) + "%" : "#" + (i + 1);
@@ -521,6 +589,35 @@ function statBarList(baseStats){
 }
 const STAT_COLORS = { "HP": "#E85D5D", "Attack": "#F0A030", "Defense": "#F0D030", "Sp. Atk": "#5088F0", "Sp. Def": "#4CAF6D", "Speed": "#F06FA8" };
 
+// Small inline sparkline (no box/border) showing usage across the four
+// ELO cutoffs — sits next to the "Usage @ X+" metric instead of a full
+// bottom panel.
+function renderEloSparkline(series, highlightRating){
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "display:flex; flex-direction:column; align-items:flex-start; gap:2px;";
+  const w = 90, h = 30, pad = 3;
+  const max = Math.max(...series.map(s => s.usage), 0.1);
+  const stepX = (w - pad * 2) / (series.length - 1);
+  const points = series.map((s, i) => {
+    const x = pad + i * stepX;
+    const y = h - pad - (s.usage / max) * (h - pad * 2);
+    return [x, y];
+  });
+  const pathD = points.map(([x, y], i) => (i === 0 ? "M" : "L") + x.toFixed(1) + "," + y.toFixed(1)).join(" ");
+  const dots = points.map(([x, y], i) => {
+    const active = series[i].rating === highlightRating;
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${active ? 2.6 : 1.6}" fill="${active ? "var(--accent)" : "var(--accent-2)"}" />`;
+  }).join("");
+  wrap.innerHTML = `
+    <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+      <path d="${pathD}" fill="none" stroke="var(--accent-2)" stroke-width="1.5" />
+      ${dots}
+    </svg>
+    <div style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--text-muted);">across ELO (0→1760+)</div>
+  `;
+  return wrap;
+}
+
 async function renderMain(){
   const main = document.getElementById("main");
   if (!state.selectedKey){
@@ -550,11 +647,11 @@ async function renderChampionsDetail(main){
   if (buildKey !== key){
     buildKey = key;
     currentBuild = {
-      item: fmtData?.items?.[0]?.name || null,
-      ability: fmtData?.abilities?.[0]?.name || null,
-      nature: fmtData?.natures?.[0]?.name || null,
-      evs: fmtData?.evSpreads?.[0]?.name || null,
-      moves: (fmtData?.moves || []).slice(0, 4).map(m => m.name),
+      item: firstValid(fmtData?.items),
+      ability: firstValid(fmtData?.abilities),
+      nature: firstValid(fmtData?.natures),
+      evs: firstValid(fmtData?.evSpreads),
+      moves: (fmtData?.moves || []).filter(m => m?.name).slice(0, 4).map(m => m.name),
     };
   }
 
@@ -562,11 +659,20 @@ async function renderChampionsDetail(main){
 
   const hero = document.createElement("div");
   hero.className = "detail-hero";
+  const avatarWrap = document.createElement("div");
+  avatarWrap.className = "detail-avatar-wrap";
   const avatarTag = mon.sprite ? "img" : "div";
   const avatar = document.createElement(avatarTag);
   avatar.className = "detail-avatar";
   const heroSprite = resolveSprite(mon.sprite);
   if (heroSprite){ avatar.src = heroSprite; } else { avatar.textContent = mon.name.slice(0,2).toUpperCase(); avatar.style.color = color; }
+  avatarWrap.appendChild(avatar);
+  const allChampNames = Object.values(dex.pokemon).map(p => p.name);
+  const cycleBtn = renderFormeCycleButton(allChampNames, mon.name, (nextName) => {
+    const found = Object.values(dex.pokemon).find(p => p.name === nextName);
+    if (found){ state.selectedKey = found.showdownId; renderSidebarList(); renderMain(); }
+  });
+  if (cycleBtn) avatarWrap.appendChild(cycleBtn);
   const titleWrap = document.createElement("div");
   titleWrap.className = "detail-title";
   titleWrap.innerHTML = `<h2>${mon.name}</h2>`;
@@ -589,7 +695,7 @@ async function renderChampionsDetail(main){
     <div class="metric"><div class="num">${mon.baseStatTotal ?? "—"}</div><div class="lbl">Base stat total</div></div>
   `;
 
-  hero.appendChild(avatar); hero.appendChild(titleWrap); hero.appendChild(metrics);
+  hero.appendChild(avatarWrap); hero.appendChild(titleWrap); hero.appendChild(metrics);
   main.appendChild(hero);
 
   // Everything below — base stats and Export Pokémon included — is one
@@ -634,6 +740,7 @@ async function renderChampionsDetail(main){
     ["EV spreads", fmtData?.evSpreads, "No EV spread data.", {
       isActive: (n) => currentBuild.evs === n,
       onPick: (n) => { currentBuild.evs = n; rerender(); },
+      compactEv: true,
     }],
   ];
   sections.forEach(([title, entries, empty, opts]) => {
@@ -673,7 +780,7 @@ async function renderChampionsDetail(main){
 
   grid.appendChild(renderExportCard(
     mon.name,
-    buildExportText(mon.name, currentBuild.item, currentBuild.ability, currentBuild.nature, currentBuild.evs, currentBuild.moves)
+    buildExportText(stripMegaSuffix(mon.name), currentBuild.item, currentBuild.ability, currentBuild.nature, currentBuild.evs, currentBuild.moves)
   ));
 
   main.appendChild(grid);
@@ -691,26 +798,25 @@ async function renderSmogonDetail(main){
 
   const color = typeColor(mon.type);
 
-  // Smogon spreads are "Nature:HP/Atk/Def/SpA/SpD/Spe" in one string —
-  // split so the export card can show "Nature" and "EVs" as separate
-  // lines like a real Showdown set.
-  const splitSpread = (name) => {
-    if (!name) return { nature: null, evs: null };
-    const [nature, evs] = name.split(":");
-    return { nature: nature || null, evs: evs || null };
-  };
-
   const key = `${state.source}:${state.eloRating}:${mon.name}`;
   if (buildKey !== key){
     buildKey = key;
-    const topSpread = splitSpread(mon.spreads?.[0]?.name);
+    // Megas: the ability Smogon records is what it has AFTER mega
+    // evolving, which isn't valid to put in a team export (you set the
+    // base forme's ability; the item triggers the transformation). Pull
+    // the base forme's own top ability instead, if it's in this list.
+    let defaultAbility = firstValid(mon.abilities);
+    if (isMegaName(mon.name)){
+      const baseName = stripMegaSuffix(mon.name);
+      const baseMon = (data.ratings[state.eloRating] || []).find(d => d.name === baseName);
+      if (baseMon) defaultAbility = firstValid(baseMon.abilities) || defaultAbility;
+    }
     currentBuild = {
-      item: mon.items?.[0]?.name || null,
-      ability: mon.abilities?.[0]?.name || null,
-      nature: topSpread.nature,
-      evs: topSpread.evs,
-      spreadName: mon.spreads?.[0]?.name || null, // full "Nature:EVs" string, used to match the active button
-      moves: (mon.moves || []).slice(0, 4).map(m => m.name),
+      item: firstValid(mon.items),
+      ability: defaultAbility,
+      nature: firstValid(mon.natures),
+      evs: firstValid(mon.evSpreads),
+      moves: (mon.moves || []).filter(m => m?.name).slice(0, 4).map(m => m.name),
     };
   }
 
@@ -718,10 +824,18 @@ async function renderSmogonDetail(main){
 
   const hero = document.createElement("div");
   hero.className = "detail-hero";
+  const avatarWrap = document.createElement("div");
+  avatarWrap.className = "detail-avatar-wrap";
   const monSprite = resolveSprite(mon.sprite);
   const avatar = document.createElement(monSprite ? "img" : "div");
   avatar.className = "detail-avatar";
   if (monSprite){ avatar.src = monSprite; } else { avatar.textContent = mon.name.slice(0,2).toUpperCase(); avatar.style.color = color; }
+  avatarWrap.appendChild(avatar);
+  const allSmogonNames = (data.ratings[state.eloRating] || []).map(d => d.name);
+  const cycleBtn = renderFormeCycleButton(allSmogonNames, mon.name, (nextName) => {
+    state.selectedKey = nextName; renderSidebarList(); renderMain();
+  });
+  if (cycleBtn) avatarWrap.appendChild(cycleBtn);
   const titleWrap = document.createElement("div");
   titleWrap.className = "detail-title";
   titleWrap.innerHTML = `<h2>${mon.name}</h2>`;
@@ -735,9 +849,18 @@ async function renderSmogonDetail(main){
 
   const metrics = document.createElement("div");
   metrics.className = "detail-metrics";
-  metrics.innerHTML = `<div class="metric"><div class="num">${mon.usage.toFixed(1)}%</div><div class="lbl">Usage @ ${state.eloRating === 0 ? "0+" : state.eloRating + "+"}</div></div>`;
+  metrics.style.alignItems = "center";
+  const sparkSeries = ratingKeys.map(r => {
+    const found = (data.ratings[r] || []).find(d => d.name === state.selectedKey);
+    return { rating: r, usage: found ? found.usage : 0 };
+  });
+  metrics.appendChild(renderEloSparkline(sparkSeries, state.eloRating));
+  const usageMetric = document.createElement("div");
+  usageMetric.className = "metric";
+  usageMetric.innerHTML = `<div class="num">${mon.usage.toFixed(1)}%</div><div class="lbl">Usage @ ${state.eloRating === 0 ? "0+" : state.eloRating + "+"}</div>`;
+  metrics.appendChild(usageMetric);
 
-  hero.appendChild(avatar); hero.appendChild(titleWrap); hero.appendChild(metrics);
+  hero.appendChild(avatarWrap); hero.appendChild(titleWrap); hero.appendChild(metrics);
   main.appendChild(hero);
 
   const rerender = () => renderMain();
@@ -774,14 +897,14 @@ async function renderSmogonDetail(main){
         rerender();
       },
     }],
-    ["EV spreads", mon.spreads, {
-      // Spreads bundle nature+EVs together — selecting one sets both.
-      isActive: (n) => currentBuild.spreadName === n,
-      onPick: (n) => {
-        const { nature, evs } = splitSpread(n);
-        currentBuild.nature = nature; currentBuild.evs = evs; currentBuild.spreadName = n;
-        rerender();
-      },
+    ["Natures", mon.natures, {
+      isActive: (n) => currentBuild.nature === n,
+      onPick: (n) => { currentBuild.nature = n; rerender(); },
+    }],
+    ["EV spreads", mon.evSpreads, {
+      isActive: (n) => currentBuild.evs === n,
+      onPick: (n) => { currentBuild.evs = n; rerender(); },
+      compactEv: true,
     }],
   ];
   sections.forEach(([title, entries, opts]) => {
@@ -819,39 +942,33 @@ async function renderSmogonDetail(main){
   teamCard.appendChild(teamBody);
   grid.appendChild(teamCard);
 
+  const checksCard = document.createElement("div");
+  checksCard.className = "card";
+  checksCard.innerHTML = '<h3>Checks & Counters</h3>';
+  const checksCloud = document.createElement("div");
+  checksCloud.className = "tag-cloud";
+  if (mon.checks?.length){
+    mon.checks.forEach(c => {
+      const pill = document.createElement("span");
+      pill.className = "teammate-pill";
+      pill.innerHTML = c.name + " <b>" + c.pct.toFixed(1) + "%</b>";
+      pill.onclick = () => { state.selectedKey = c.name; renderSidebarList(); renderMain(); };
+      checksCloud.appendChild(pill);
+    });
+  } else {
+    checksCloud.innerHTML = '<div class="empty-note">No checks/counters data at this cutoff.</div>';
+  }
+  const checksBody = document.createElement("div"); checksBody.className = "card-body";
+  checksBody.appendChild(checksCloud);
+  checksCard.appendChild(checksBody);
+  grid.appendChild(checksCard);
+
   grid.appendChild(renderExportCard(
     mon.name,
-    buildExportText(mon.name, currentBuild.item, currentBuild.ability, currentBuild.nature, currentBuild.evs, currentBuild.moves)
+    buildExportText(stripMegaSuffix(mon.name), currentBuild.item, currentBuild.ability, currentBuild.nature, currentBuild.evs, currentBuild.moves)
   ));
 
   main.appendChild(grid);
-
-  // "Usage across ELO" stays at the bottom — unique to Smogon sources.
-  const trendPanel = document.createElement("div");
-  trendPanel.className = "trend-panel";
-  trendPanel.innerHTML = '<div class="panel-label">Usage across ELO</div>';
-  const trend = document.createElement("div");
-  trend.className = "elo-trend";
-  const series = ratingKeys.map(r => {
-    const found = (data.ratings[r] || []).find(d => d.name === state.selectedKey);
-    return { rating: r, usage: found ? found.usage : 0 };
-  });
-  const maxU = Math.max(...series.map(s => s.usage), 1);
-  series.forEach(s => {
-    const col = document.createElement("div");
-    col.className = "elo-bar-col";
-    const pctLbl = document.createElement("div");
-    pctLbl.className = "elo-bar-pct"; pctLbl.textContent = s.usage.toFixed(1) + "%";
-    const bar = document.createElement("div");
-    bar.className = "elo-bar" + (s.usage === maxU ? " peak" : "");
-    bar.style.height = Math.max(4, (s.usage / maxU) * 56) + "px";
-    const lbl = document.createElement("div");
-    lbl.className = "elo-bar-label"; lbl.textContent = s.rating === 0 ? "0+" : s.rating + "+";
-    col.appendChild(pctLbl); col.appendChild(bar); col.appendChild(lbl);
-    trend.appendChild(col);
-  });
-  trendPanel.appendChild(trend);
-  main.appendChild(trendPanel);
 }
 
 // ---------- Wire up ----------
