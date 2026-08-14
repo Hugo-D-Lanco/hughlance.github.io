@@ -35,6 +35,7 @@
 
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
+import { toId, deriveShowdownId, deriveDisplayName } from "./species-naming.mjs";
 
 process.on("unhandledRejection", (err) => {
   console.error("UNHANDLED REJECTION:", err?.stack || err);
@@ -277,6 +278,105 @@ async function buildRecord(entry) {
   return record;
 }
 
+// ---------------------------------------------------------------------
+// PRIMARY source for form completeness: GET /api/metadata/{base_name}
+// returns EVERY form of a species in one call — each row already has
+// its own correct saved_name, types, abilities, real base stats, and a
+// direct image_path. This replaces guessing entirely for anything
+// championsbattledata actually tracks (Megas, regional forms, Aegislash
+// both formes, Vivillon patterns, Gourgeist sizes, Meowstic genders,
+// Palafin states, Florges colors, Tauros breeds, etc.) — the guessing
+// functions in species-naming.mjs now only matter as a last resort for
+// species this endpoint doesn't cover at all.
+// ---------------------------------------------------------------------
+const METADATA_URL = (baseName) => `https://championsbattledata.com/api/metadata/${encodeURIComponent(baseName)}`;
+
+async function fetchMetadataRows(baseName) {
+  try {
+    const res = await fetch(METADATA_URL(baseName));
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.rows || null;
+  } catch {
+    return null;
+  }
+}
+
+function statsFromMetadataRow(row) {
+  const baseStats = {
+    hp: row.hp ?? 0, attack: row.atk ?? 0, defense: row.def ?? 0,
+    sp_attack: row.spa ?? 0, sp_defense: row.spd ?? 0, speed: row.spe ?? 0,
+  };
+  const baseStatTotal = row.total ?? Object.values(baseStats).reduce((a, b) => a + b, 0);
+  return { baseStats, baseStatTotal };
+}
+
+async function buildFlattenedRecord(row, showdownId) {
+  const { baseStats, baseStatTotal } = statsFromMetadataRow(row);
+  const types = (row.types || "").split("/").map(t => t.trim()).filter(Boolean);
+  const abilities = (row.abilities || "").split("|").filter(Boolean);
+  const sprite = DOWNLOAD_SPRITES
+    ? await downloadSprite(row.image_path, showdownId) // real path from their data — no guessing needed
+    : (row.image_path ? ASSET_BASE + row.image_path : null);
+
+  return {
+    name: deriveDisplayName(row),
+    showdownId,
+    showdownName: row.saved_name,
+    slug: toId(row.saved_name),
+    isForm: true,
+    baseName: row.base_name,
+    types,
+    abilities,
+    hiddenAbility: null,
+    baseStats,
+    baseStatTotal,
+    doubles: null, // this endpoint doesn't carry battle-usage breakdowns — see buildFormatBlock for that, kept from an existing entry when present
+    singles: null,
+    sprite,
+  };
+}
+
+async function flattenFormsFromMetadata(pokedex, baseNames) {
+  console.log(`Fetching per-species metadata for ${baseNames.size} base species (full form list, real stats/sprites)…`);
+  let done = 0, formsAdded = 0, formsUpgraded = 0;
+  for (const baseName of baseNames) {
+    const rows = await fetchMetadataRows(baseName);
+    done++;
+    if (done % 25 === 0) console.log(`  metadata ${done}/${baseNames.size}…`);
+    if (!rows || !rows.length) continue;
+
+    for (const row of rows) {
+      const showdownId = deriveShowdownId(row);
+      if (!showdownId) continue;
+      const existing = pokedex[showdownId];
+
+      // Already has real battle-usage data (from the bulk index) — keep
+      // it, but still top up anything it's missing from this row.
+      if (existing) {
+        const flattenedStats = statsFromMetadataRow(row);
+        const needsSprite = !existing.sprite;
+        pokedex[showdownId] = {
+          ...existing,
+          types: existing.types?.length ? existing.types : (row.types || "").split("/").map(t => t.trim()).filter(Boolean),
+          abilities: existing.abilities?.length ? existing.abilities : (row.abilities || "").split("|").filter(Boolean),
+          baseStats: existing.baseStats || flattenedStats.baseStats,
+          baseStatTotal: existing.baseStatTotal || flattenedStats.baseStatTotal,
+          sprite: needsSprite
+            ? (DOWNLOAD_SPRITES ? await downloadSprite(row.image_path, showdownId) : (row.image_path ? ASSET_BASE + row.image_path : null))
+            : existing.sprite,
+        };
+        if (needsSprite) formsUpgraded++;
+        continue;
+      }
+
+      pokedex[showdownId] = await buildFlattenedRecord(row, showdownId);
+      formsAdded++;
+    }
+  }
+  console.log(`  Flattened ${formsAdded} new forms, upgraded ${formsUpgraded} existing entries with missing data.`);
+}
+
 async function run() {
   await mkdir(path.dirname(OUT_FILE), { recursive: true });
   if (DOWNLOAD_SPRITES) await mkdir(SPRITE_DIR, { recursive: true });
@@ -294,6 +394,14 @@ async function run() {
     done++;
     if (done % 25 === 0) console.log(`  ${done}/${entries.length}…`);
   }
+
+  // Flatten every form (Megas, regional variants, Aegislash formes,
+  // Vivillon patterns, Gourgeist sizes, Meowstic genders, etc.) using
+  // championsbattledata's own per-species metadata — ground truth, not
+  // a guess. This is a build-time-only step (runs once here, not on
+  // every page load), so it has zero impact on site load speed.
+  const baseNames = new Set(entries.map(e => e.baseName || e.slug || e.showdownId).filter(Boolean));
+  await flattenFormsFromMetadata(pokedex, baseNames);
 
   await writeFile(
     OUT_FILE,

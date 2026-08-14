@@ -47,6 +47,7 @@
 
 import { writeFile, mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
+import { toId, titleCase, guessPokeApiSlug, guessDisplayName, guessChampionsAssetName, isSpecialForm } from "./species-naming.mjs";
 
 // Surface ANY failure, no matter where it happens — a silent exit with
 // no error message (which is what you hit) means something threw
@@ -120,8 +121,6 @@ async function fetchChaosJson(slug, rating) {
 // Smogon's chaos.json keys are Pokémon Showdown internal IDs, so a plain
 // toId() normalization is enough to match one to the other.
 // ---------------------------------------------------------------------
-const toId = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-const titleCase = (s) => s.split(/[- ]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 
 let POKEDEX = null;
 async function loadPokedex() {
@@ -136,115 +135,17 @@ async function loadPokedex() {
   }
 }
 
-// Species-specific naming exceptions you've confirmed or described —
-// checked BEFORE the generic Mega/regional-suffix rules below, since
-// these don't follow that pattern cleanly.
-const SPECIAL_FORM_RULES = [
-  // Floette's "Eternal Flower" form isn't really a Mega Evolution, but
-  // this asset library files its art as "Mega Floette" anyway — the
-  // actual species identity (for stats + export) is Floette-Eternal.
-  { test: /^floette(mega|eternal)$/,
-    asset: () => "Mega Floette", display: () => "Floette-Eternal", slug: () => "floette-eternal" },
+// Naming logic (Mega/regional/species-specific exceptions) lives in
+// species-naming.mjs, shared with fetch-pokedex.mjs — both scripts now
+// override championsbattledata's unreliable metadata for these forms
+// the same way, at the source.
 
-  // Lycanroc: asset filenames use the literal word "Form"; Showdown/
-  // PokeAPI use a hyphen suffix, and Midday has none (it's the default).
-  { test: /^lycanroc-?(dusk|midnight)$/,
-    asset: (m) => `Lycanroc ${titleCase(m[1])} Form`, display: (m) => `Lycanroc-${titleCase(m[1])}`, slug: (m) => `lycanroc-${m[1]}` },
-  { test: /^lycanrocmidday$/,
-    asset: () => "Lycanroc Midday Form", display: () => "Lycanroc", slug: () => "lycanroc" },
-
-  // Aegislash: only Blade forme needs this — Shield is the default/base
-  // entry and already goes through the normal path.
-  { test: /^aegislash-?blade$/,
-    asset: () => "Aegislash Blade Forme", display: () => "Aegislash-Blade", slug: () => "aegislash-blade" },
-
-  // Vivillon: many cosmetic wing patterns, all sharing the same
-  // "{Pattern} Pattern" asset-name shape.
-  { test: /^vivillon-?(.+)$/,
-    asset: (m) => `Vivillon ${titleCase(m[1])} Pattern`, display: (m) => `Vivillon-${titleCase(m[1])}`, slug: (m) => `vivillon-${m[1]}` },
-
-  // Paldean Tauros: three "Breed" forms.
-  { test: /^tauros-?paldea-?(combat|aqua|blaze)$/,
-    asset: (m) => `Paldean Tauros ${titleCase(m[1])} Breed`, display: (m) => `Tauros-Paldea-${titleCase(m[1])}`, slug: (m) => `tauros-paldea-${m[1]}-breed` },
-];
-
-function matchSpecialForm(chaosKey){
-  const id = chaosKey.toLowerCase();
-  for (const rule of SPECIAL_FORM_RULES){
-    const m = id.match(rule.test);
-    if (m) return { assetName: rule.asset(m), displayName: rule.display(m), pokeApiSlug: rule.slug(m) };
-  }
-  return null;
-}
-
-// Best-effort slug guess for Pokémon not in the local Champions pokedex —
-// mainly Mega forms, which Smogon may ID with OR without a hyphen before
-// the suffix ("garchompmega" or "garchomp-mega") — the "-?" here makes
-// both work and, critically, keeps a real hyphen from ending up INSIDE
-// the captured species name (that was the cause of a trailing "%20" in
-// the built URLs — the hyphen was leaking into the name via titleCase's
-// hyphen-splitting, leaving an empty trailing segment).
-// PokeAPI wants "garchomp-mega" / "-mega-x" / "-mega-y".
-function guessPokeApiSlug(chaosKey){
-  const special = matchSpecialForm(chaosKey);
-  if (special) return special.pokeApiSlug;
-  const id = chaosKey.toLowerCase();
-  let m;
-  if ((m = id.match(/^(.+?)-?megax$/))) return `${m[1]}-mega-x`;
-  if ((m = id.match(/^(.+?)-?megay$/))) return `${m[1]}-mega-y`;
-  if ((m = id.match(/^(.+?)-?megaz$/))) return `${m[1]}-mega-z`;
-  if ((m = id.match(/^(.+?)-?mega$/))) return `${m[1]}-mega`;
-  if ((m = id.match(/^(.+?)-?alola$/))) return `${m[1]}-alola`;
-  if ((m = id.match(/^(.+?)-?galar$/))) return `${m[1]}-galar`;
-  if ((m = id.match(/^(.+?)-?hisui$/))) return `${m[1]}-hisui`;
-  return id;
-}
-
-// Display name for species not in the local Champions pokedex — Showdown
-// convention, hyphen-separated ("Charizard-Mega-X", "Raichu-Alola",
-// "Floette-Eternal"), matching how you asked these to read and how
-// Showdown itself names formes (this is what team-export text should
-// show as the species name). Different from championsbattledata's own
-// asset-filename convention below — the two are kept separate.
-function guessDisplayName(chaosKey){
-  const special = matchSpecialForm(chaosKey);
-  if (special) return special.displayName;
-  const id = chaosKey.toLowerCase();
-  let m;
-  if ((m = id.match(/^(.+?)-?megax$/))) return `${titleCase(m[1])}-Mega-X`;
-  if ((m = id.match(/^(.+?)-?megay$/))) return `${titleCase(m[1])}-Mega-Y`;
-  if ((m = id.match(/^(.+?)-?megaz$/))) return `${titleCase(m[1])}-Mega-Z`;
-  if ((m = id.match(/^(.+?)-?mega$/))) return `${titleCase(m[1])}-Mega`;
-  if ((m = id.match(/^(.+?)-?alola$/))) return `${titleCase(m[1])}-Alola`;
-  if ((m = id.match(/^(.+?)-?galar$/))) return `${titleCase(m[1])}-Galar`;
-  if ((m = id.match(/^(.+?)-?hisui$/))) return `${titleCase(m[1])}-Hisui`;
-  return titleCase(id);
-}
-
-// championsbattledata's own asset folder uses a different, SPACE-based
-// naming convention ("Mega Charizard X", not "Charizard-Mega-X") —
-// confirmed via
-// https://championsbattledata.com/pokemon_champions_assets/pokemon/Mega%20Charizard%20X.png
-function guessChampionsAssetName(chaosKey){
-  const special = matchSpecialForm(chaosKey);
-  if (special) return special.assetName;
-  const id = chaosKey.toLowerCase();
-  let m;
-  if ((m = id.match(/^(.+?)-?megax$/))) return `Mega ${titleCase(m[1])} X`;
-  if ((m = id.match(/^(.+?)-?megay$/))) return `Mega ${titleCase(m[1])} Y`;
-  if ((m = id.match(/^(.+?)-?megaz$/))) return `Mega ${titleCase(m[1])} Z`;
-  if ((m = id.match(/^(.+?)-?mega$/))) return `Mega ${titleCase(m[1])}`;
-  if ((m = id.match(/^(.+?)-?alola$/))) return `Alolan ${titleCase(m[1])}`;
-  if ((m = id.match(/^(.+?)-?galar$/))) return `Galarian ${titleCase(m[1])}`;
-  if ((m = id.match(/^(.+?)-?hisui$/))) return `Hisuian ${titleCase(m[1])}`;
-  return titleCase(id);
-}
-
-// Try the championsbattledata asset path (confirmed format above) before
-// ever touching PokeAPI for a sprite, downloading it locally so Bo1/Bo3
-// pages load from the same local asset folder as everything else. Logs
-// each failure once (not per Pokémon-format-rating call) so a systematic
-// naming mismatch is visible without spamming the console.
+// Try championsbattledata's own asset path (via the shared naming
+// guesser) before ever touching PokeAPI for a sprite, downloading it
+// locally so Bo1/Bo3 pages load from the same local asset folder as
+// everything else. Logs each failure once (not per Pokémon-format-
+// rating call) so a systematic naming mismatch is visible without
+// spamming the console.
 const CHAMPIONS_ASSET_BASE = "https://championsbattledata.com/pokemon_champions_assets/pokemon/";
 const SPRITE_DIR = path.join(process.cwd(), "assets", "sprites");
 const CHAMPIONS_SPRITE_CACHE = new Map();
@@ -278,9 +179,9 @@ async function fetchChampionsSpriteByName(assetName, chaosKey){
   }
 }
 
-// Base stats/type for anything not in the local pokedex — PokeAPI is
-// the source here (sprite comes from championsbattledata above, tried
-// first; this only fills in the numbers).
+// Base stats/type for anything not (usably) in the local pokedex —
+// PokeAPI is the source here (sprite comes from championsbattledata
+// above, tried first; this only fills in the numbers).
 const POKEAPI_STATS_CACHE = new Map();
 async function fetchPokeApiStats(chaosKey){
   const slug = guessPokeApiSlug(chaosKey);
@@ -295,7 +196,7 @@ async function fetchPokeApiStats(chaosKey){
       sp_attack: find("special-attack"), sp_defense: find("special-defense"), speed: find("speed"),
     };
     const result = {
-      type: data.types?.[0]?.type?.name ? titleCase(data.types[0].type.name) : "Unknown",
+      types: (data.types || []).map(t => titleCase(t.type.name)),
       fallbackSprite: data.sprites?.other?.["official-artwork"]?.front_default || data.sprites?.front_default || null,
       baseStats,
       baseStatTotal: Object.values(baseStats).reduce((a, b) => a + b, 0),
@@ -303,7 +204,7 @@ async function fetchPokeApiStats(chaosKey){
     POKEAPI_STATS_CACHE.set(slug, result);
     return result;
   } catch {
-    const result = { type: "Unknown", fallbackSprite: null, baseStats: null, baseStatTotal: null };
+    const result = { types: ["Unknown"], fallbackSprite: null, baseStats: null, baseStatTotal: null };
     POKEAPI_STATS_CACHE.set(slug, result);
     return result;
   }
@@ -318,22 +219,11 @@ async function fetchFallbackSpecies(chaosKey){
   ]);
   return {
     name: displayName,
-    type: stats.type,
+    types: stats.types,
     sprite: championsSprite || stats.fallbackSprite, // championsbattledata first, PokeAPI art only if that 404s
     baseStats: stats.baseStats,
     baseStatTotal: stats.baseStatTotal,
   };
-}
-
-// Mega/regional forms specifically get sprite-metadata from
-// championsbattledata that points at the WRONG path (their own raw,
-// unencoded ID-style naming, not the actual "Mega Name.png" convention
-// their asset server uses) — trusting entry.sprite for these downloads
-// broken/empty files. For these categories, always run our own guesser
-// (confirmed correct against a real URL) instead of trusting their data.
-function isSpecialForm(chaosKey){
-  return matchSpecialForm(chaosKey) !== null
-    || /^(.+?)-?(megax|megay|megaz|mega|alola|galar|hisui)$/i.test(chaosKey.toLowerCase());
 }
 
 async function localSpecies(chaosKey) {
@@ -349,7 +239,7 @@ async function localSpecies(chaosKey) {
   if (entry && entry.sprite && entry.baseStats && !special) {
     return {
       name: entry.name,
-      type: entry.types?.[0] || "Unknown",
+      types: entry.types?.length ? entry.types : ["Unknown"],
       sprite: entry.sprite,
       baseStats: entry.baseStats,
       baseStatTotal: entry.baseStatTotal || null,
@@ -364,7 +254,7 @@ async function localSpecies(chaosKey) {
     // these forms; still use their name/stats if present.
     return {
       name: entry.name || fallback.name,
-      type: entry.types?.[0] || fallback.type,
+      types: entry.types?.length ? entry.types : fallback.types,
       sprite: fallback.sprite || entry.sprite,
       baseStats: entry.baseStats || fallback.baseStats,
       baseStatTotal: entry.baseStatTotal || fallback.baseStatTotal,
@@ -373,7 +263,7 @@ async function localSpecies(chaosKey) {
 
   return {
     name: entry.name || fallback.name,
-    type: entry.types?.[0] || fallback.type,
+    types: entry.types?.length ? entry.types : fallback.types,
     sprite: entry.sprite || fallback.sprite,
     baseStats: entry.baseStats || fallback.baseStats,
     baseStatTotal: entry.baseStatTotal || fallback.baseStatTotal,
@@ -500,7 +390,7 @@ async function parseChaosJson(chaos) {
 
     result.push({
       name: species.name,
-      type: species.type,
+      types: species.types,
       sprite: species.sprite,
       baseStats: species.baseStats,
       baseStatTotal: species.baseStatTotal,

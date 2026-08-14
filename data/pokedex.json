@@ -3106,8 +3106,15 @@
         "Snow Warning"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 148,
+        "attack": 87,
+        "defense": 95,
+        "sp_attack": 101,
+        "sp_defense": 120,
+        "speed": 129
+      },
+      "baseStatTotal": 680,
       "doubles": {
         "rank": 29,
         "moves": [
@@ -3537,8 +3544,15 @@
         "Surge Surfer"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 135,
+        "attack": 105,
+        "defense": 70,
+        "sp_attack": 115,
+        "sp_defense": 105,
+        "speed": 130
+      },
+      "baseStatTotal": 660,
       "doubles": {
         "rank": 198,
         "moves": [
@@ -32178,8 +32192,15 @@
         "Regenerator"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 170,
+        "attack": 120,
+        "defense": 115,
+        "sp_attack": 120,
+        "sp_defense": 90,
+        "speed": 50
+      },
+      "baseStatTotal": 665,
       "doubles": {
         "rank": 141,
         "moves": [
@@ -32619,8 +32640,15 @@
         "Regenerator"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 170,
+        "attack": 85,
+        "defense": 100,
+        "sp_attack": 130,
+        "sp_defense": 130,
+        "speed": 50
+      },
+      "baseStatTotal": 665,
       "doubles": {
         "rank": 119,
         "moves": [
@@ -33058,8 +33086,15 @@
         "Mimicry"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 184,
+        "attack": 101,
+        "defense": 119,
+        "sp_attack": 86,
+        "sp_defense": 104,
+        "speed": 52
+      },
+      "baseStatTotal": 646,
       "doubles": {
         "rank": 233,
         "moves": [
@@ -39239,8 +39274,15 @@
         "Insomnia"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 110,
+        "defense": 142,
+        "sp_attack": 78,
+        "sp_defense": 95,
+        "speed": 104
+      },
+      "baseStatTotal": 669,
       "doubles": {
         "rank": 235,
         "moves": [
@@ -44559,8 +44601,15 @@
         "Rock Head"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 170,
+        "attack": 135,
+        "defense": 100,
+        "sp_attack": 115,
+        "sp_defense": 100,
+        "speed": 110
+      },
+      "baseStatTotal": 730,
       "doubles": {
         "rank": 85,
         "moves": [
@@ -45000,8 +45049,15 @@
         "Sturdy"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 170,
+        "attack": 147,
+        "defense": 204,
+        "sp_attack": 54,
+        "sp_defense": 56,
+        "speed": 58
+      },
+      "baseStatTotal": 689,
       "doubles": {
         "rank": 158,
         "moves": [
@@ -45440,8 +45496,15 @@
         "Scrappy"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 163,
+        "attack": 132,
+        "defense": 100,
+        "sp_attack": 115,
+        "sp_defense": 115,
+        "speed": 80
+      },
+      "baseStatTotal": 705,
       "doubles": {
         "rank": 115,
         "moves": [
@@ -45873,8 +45936,15 @@
         "Gooey"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 120,
+        "defense": 120,
+        "sp_attack": 130,
+        "sp_defense": 170,
+        "speed": 80
+      },
+      "baseStatTotal": 775,
       "doubles": {
         "rank": 112,
         "moves": [
@@ -46313,8 +46383,15 @@
         "Sharpness"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 165,
+        "attack": 128,
+        "defense": 100,
+        "sp_attack": 120,
+        "sp_defense": 85,
+        "speed": 105
+      },
+      "baseStatTotal": 703,
       "doubles": {
         "rank": 90,
         "moves": [
@@ -46745,8 +46822,15 @@
         "Frisk"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 148,
+        "attack": 104,
+        "defense": 98,
+        "sp_attack": 139,
+        "sp_defense": 105,
+        "speed": 115
+      },
+      "baseStatTotal": 709,
       "doubles": {
         "rank": 63,
         "moves": [
@@ -47176,8 +47260,15 @@
         "Illusion"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 130,
+        "attack": 120,
+        "defense": 80,
+        "sp_attack": 145,
+        "sp_defense": 80,
+        "speed": 130
+      },
+      "baseStatTotal": 685,
       "doubles": {
         "rank": 55,
         "moves": [
@@ -55585,8 +55676,15 @@
         "Steadfast"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 135,
+        "defense": 85,
+        "sp_attack": 75,
+        "sp_defense": 85,
+        "speed": 132
+      },
+      "baseStatTotal": 662,
       "doubles": {
         "rank": 172,
         "moves": [
@@ -56023,8 +56121,15 @@
         "Tough Claws"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 137,
+        "defense": 85,
+        "sp_attack": 75,
+        "sp_defense": 85,
+        "speed": 130
+      },
+      "baseStatTotal": 662,
       "doubles": {
         "rank": 65,
         "moves": [
@@ -56447,8 +56552,15 @@
         "No Guard"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 160,
+        "attack": 135,
+        "defense": 95,
+        "sp_attack": 75,
+        "sp_defense": 95,
+        "speed": 102
+      },
+      "baseStatTotal": 662,
       "doubles": {
         "rank": 214,
         "moves": [
@@ -60888,8 +61000,15 @@
         "Prankster"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 149,
+        "attack": 68,
+        "defense": 96,
+        "sp_attack": 103,
+        "sp_defense": 101,
+        "speed": 124
+      },
+      "baseStatTotal": 641,
       "doubles": {
         "rank": 81,
         "moves": [
@@ -62660,8 +62779,15 @@
         "Disguise"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 130,
+        "attack": 110,
+        "defense": 100,
+        "sp_attack": 70,
+        "sp_defense": 125,
+        "speed": 116
+      },
+      "baseStatTotal": 651,
       "doubles": {
         "rank": 66,
         "moves": [
@@ -63083,8 +63209,15 @@
         "Hunger Switch"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 133,
+        "attack": 115,
+        "defense": 78,
+        "sp_attack": 90,
+        "sp_defense": 78,
+        "speed": 117
+      },
+      "baseStatTotal": 611,
       "doubles": {
         "rank": 179,
         "moves": [
@@ -67492,8 +67625,15 @@
         "Cud Chew"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 130,
+        "defense": 125,
+        "sp_attack": 50,
+        "sp_defense": 90,
+        "speed": 120
+      },
+      "baseStatTotal": 665,
       "doubles": {
         "rank": 139,
         "moves": [
@@ -67933,8 +68073,15 @@
         "Cud Chew"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 130,
+        "defense": 125,
+        "sp_attack": 50,
+        "sp_defense": 90,
+        "speed": 120
+      },
+      "baseStatTotal": 665,
       "doubles": {
         "rank": 171,
         "moves": [
@@ -68373,8 +68520,15 @@
         "Cud Chew"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 130,
+        "defense": 125,
+        "sp_attack": 50,
+        "sp_defense": 90,
+        "speed": 120
+      },
+      "baseStatTotal": 665,
       "doubles": {
         "rank": 228,
         "moves": [
@@ -72805,8 +72959,15 @@
         "Moxie"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 161,
+        "attack": 88,
+        "defense": 92,
+        "sp_attack": 129,
+        "sp_defense": 86,
+        "speed": 126
+      },
+      "baseStatTotal": 682,
       "doubles": {
         "rank": 67,
         "moves": [
@@ -100194,8 +100355,15 @@
         "Friend Guard"
       ],
       "hiddenAbility": null,
-      "baseStats": null,
-      "baseStatTotal": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
       "doubles": {
         "rank": 47,
         "moves": [
@@ -103269,6 +103437,3691 @@
         ]
       },
       "sprite": "assets/sprites/zoroark.png"
+    },
+    "abomasnowmega": {
+      "name": "Abomasnow-Mega",
+      "showdownId": "abomasnowmega",
+      "showdownName": "Mega Abomasnow",
+      "slug": "megaabomasnow",
+      "isForm": true,
+      "baseName": "Abomasnow",
+      "types": [
+        "Grass",
+        "Ice"
+      ],
+      "abilities": [
+        "Snow Warning"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 165,
+        "attack": 152,
+        "defense": 125,
+        "sp_attack": 152,
+        "sp_defense": 125,
+        "speed": 50
+      },
+      "baseStatTotal": 769,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/abomasnowmega.png"
+    },
+    "absolmega": {
+      "name": "Absol-Mega",
+      "showdownId": "absolmega",
+      "showdownName": "Mega Absol",
+      "slug": "megaabsol",
+      "isForm": true,
+      "baseName": "Absol",
+      "types": [
+        "Dark"
+      ],
+      "abilities": [
+        "Magic Bounce"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 170,
+        "defense": 80,
+        "sp_attack": 135,
+        "sp_defense": 80,
+        "speed": 135
+      },
+      "baseStatTotal": 740,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/absolmega.png"
+    },
+    "aegislashshield": {
+      "name": "Aegislash-Shield",
+      "showdownId": "aegislashshield",
+      "showdownName": "Aegislash Shield Forme",
+      "slug": "aegislashshieldforme",
+      "isForm": true,
+      "baseName": "Aegislash",
+      "types": [
+        "Steel",
+        "Ghost"
+      ],
+      "abilities": [
+        "Stance Change"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 135,
+        "attack": 70,
+        "defense": 160,
+        "sp_attack": 70,
+        "sp_defense": 160,
+        "speed": 80
+      },
+      "baseStatTotal": 675,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/aegislashshield.png"
+    },
+    "aegislashblade": {
+      "name": "Aegislash-Blade",
+      "showdownId": "aegislashblade",
+      "showdownName": "Aegislash Blade Forme",
+      "slug": "aegislashbladeforme",
+      "isForm": true,
+      "baseName": "Aegislash",
+      "types": [
+        "Steel",
+        "Ghost"
+      ],
+      "abilities": [
+        "Stance Change"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 135,
+        "attack": 160,
+        "defense": 70,
+        "sp_attack": 160,
+        "sp_defense": 70,
+        "speed": 80
+      },
+      "baseStatTotal": 675,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/aegislashblade.png"
+    },
+    "aerodactylmega": {
+      "name": "Aerodactyl-Mega",
+      "showdownId": "aerodactylmega",
+      "showdownName": "Mega Aerodactyl",
+      "slug": "megaaerodactyl",
+      "isForm": true,
+      "baseName": "Aerodactyl",
+      "types": [
+        "Rock",
+        "Flying"
+      ],
+      "abilities": [
+        "Tough Claws"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 155,
+        "defense": 105,
+        "sp_attack": 90,
+        "sp_defense": 115,
+        "speed": 170
+      },
+      "baseStatTotal": 790,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/aerodactylmega.png"
+    },
+    "aggronmega": {
+      "name": "Aggron-Mega",
+      "showdownId": "aggronmega",
+      "showdownName": "Mega Aggron",
+      "slug": "megaaggron",
+      "isForm": true,
+      "baseName": "Aggron",
+      "types": [
+        "Steel"
+      ],
+      "abilities": [
+        "Filter"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 145,
+        "attack": 160,
+        "defense": 250,
+        "sp_attack": 80,
+        "sp_defense": 100,
+        "speed": 70
+      },
+      "baseStatTotal": 805,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/aggronmega.png"
+    },
+    "alakazammega": {
+      "name": "Alakazam-Mega",
+      "showdownId": "alakazammega",
+      "showdownName": "Mega Alakazam",
+      "slug": "megaalakazam",
+      "isForm": true,
+      "baseName": "Alakazam",
+      "types": [
+        "Psychic"
+      ],
+      "abilities": [
+        "Trace"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 130,
+        "attack": 70,
+        "defense": 85,
+        "sp_attack": 195,
+        "sp_defense": 125,
+        "speed": 170
+      },
+      "baseStatTotal": 775,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/alakazammega.png"
+    },
+    "alcremiecaramelswirl": {
+      "name": "Alcremie-Caramel Swirl",
+      "showdownId": "alcremiecaramelswirl",
+      "showdownName": "Alcremie Caramel Swirl",
+      "slug": "alcremiecaramelswirl",
+      "isForm": true,
+      "baseName": "Alcremie",
+      "types": [
+        "Fairy"
+      ],
+      "abilities": [
+        "Sweet Veil",
+        "Aroma Veil"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 80,
+        "defense": 95,
+        "sp_attack": 130,
+        "sp_defense": 141,
+        "speed": 84
+      },
+      "baseStatTotal": 670,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/alcremiecaramelswirl.png"
+    },
+    "alcremielemoncream": {
+      "name": "Alcremie-Lemon Cream",
+      "showdownId": "alcremielemoncream",
+      "showdownName": "Alcremie Lemon Cream",
+      "slug": "alcremielemoncream",
+      "isForm": true,
+      "baseName": "Alcremie",
+      "types": [
+        "Fairy"
+      ],
+      "abilities": [
+        "Sweet Veil",
+        "Aroma Veil"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 80,
+        "defense": 95,
+        "sp_attack": 130,
+        "sp_defense": 141,
+        "speed": 84
+      },
+      "baseStatTotal": 670,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/alcremielemoncream.png"
+    },
+    "alcremiematchacream": {
+      "name": "Alcremie-Matcha Cream",
+      "showdownId": "alcremiematchacream",
+      "showdownName": "Alcremie Matcha Cream",
+      "slug": "alcremiematchacream",
+      "isForm": true,
+      "baseName": "Alcremie",
+      "types": [
+        "Fairy"
+      ],
+      "abilities": [
+        "Sweet Veil",
+        "Aroma Veil"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 80,
+        "defense": 95,
+        "sp_attack": 130,
+        "sp_defense": 141,
+        "speed": 84
+      },
+      "baseStatTotal": 670,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/alcremiematchacream.png"
+    },
+    "alcremiemintcream": {
+      "name": "Alcremie-Mint Cream",
+      "showdownId": "alcremiemintcream",
+      "showdownName": "Alcremie Mint Cream",
+      "slug": "alcremiemintcream",
+      "isForm": true,
+      "baseName": "Alcremie",
+      "types": [
+        "Fairy"
+      ],
+      "abilities": [
+        "Sweet Veil",
+        "Aroma Veil"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 80,
+        "defense": 95,
+        "sp_attack": 130,
+        "sp_defense": 141,
+        "speed": 84
+      },
+      "baseStatTotal": 670,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/alcremiemintcream.png"
+    },
+    "alcremierainbowswirl": {
+      "name": "Alcremie-Rainbow Swirl",
+      "showdownId": "alcremierainbowswirl",
+      "showdownName": "Alcremie Rainbow Swirl",
+      "slug": "alcremierainbowswirl",
+      "isForm": true,
+      "baseName": "Alcremie",
+      "types": [
+        "Fairy"
+      ],
+      "abilities": [
+        "Sweet Veil",
+        "Aroma Veil"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 80,
+        "defense": 95,
+        "sp_attack": 130,
+        "sp_defense": 141,
+        "speed": 84
+      },
+      "baseStatTotal": 670,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/alcremierainbowswirl.png"
+    },
+    "alcremierubycream": {
+      "name": "Alcremie-Ruby Cream",
+      "showdownId": "alcremierubycream",
+      "showdownName": "Alcremie Ruby Cream",
+      "slug": "alcremierubycream",
+      "isForm": true,
+      "baseName": "Alcremie",
+      "types": [
+        "Fairy"
+      ],
+      "abilities": [
+        "Sweet Veil",
+        "Aroma Veil"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 80,
+        "defense": 95,
+        "sp_attack": 130,
+        "sp_defense": 141,
+        "speed": 84
+      },
+      "baseStatTotal": 670,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/alcremierubycream.png"
+    },
+    "alcremierubyswirl": {
+      "name": "Alcremie-Ruby Swirl",
+      "showdownId": "alcremierubyswirl",
+      "showdownName": "Alcremie Ruby Swirl",
+      "slug": "alcremierubyswirl",
+      "isForm": true,
+      "baseName": "Alcremie",
+      "types": [
+        "Fairy"
+      ],
+      "abilities": [
+        "Sweet Veil",
+        "Aroma Veil"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 80,
+        "defense": 95,
+        "sp_attack": 130,
+        "sp_defense": 141,
+        "speed": 84
+      },
+      "baseStatTotal": 670,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/alcremierubyswirl.png"
+    },
+    "alcremiesaltedcream": {
+      "name": "Alcremie-Salted Cream",
+      "showdownId": "alcremiesaltedcream",
+      "showdownName": "Alcremie Salted Cream",
+      "slug": "alcremiesaltedcream",
+      "isForm": true,
+      "baseName": "Alcremie",
+      "types": [
+        "Fairy"
+      ],
+      "abilities": [
+        "Sweet Veil",
+        "Aroma Veil"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 80,
+        "defense": 95,
+        "sp_attack": 130,
+        "sp_defense": 141,
+        "speed": 84
+      },
+      "baseStatTotal": 670,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/alcremiesaltedcream.png"
+    },
+    "raichumegax": {
+      "name": "Raichu-Mega-X",
+      "showdownId": "raichumegax",
+      "showdownName": "Mega Raichu X",
+      "slug": "megaraichux",
+      "isForm": true,
+      "baseName": "Raichu",
+      "types": [
+        "Electric"
+      ],
+      "abilities": [
+        "Electric Surge"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 135,
+        "attack": 155,
+        "defense": 115,
+        "sp_attack": 110,
+        "sp_defense": 115,
+        "speed": 130
+      },
+      "baseStatTotal": 760,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/raichumegax.png"
+    },
+    "raichumegay": {
+      "name": "Raichu-Mega-Y",
+      "showdownId": "raichumegay",
+      "showdownName": "Mega Raichu Y",
+      "slug": "megaraichuy",
+      "isForm": true,
+      "baseName": "Raichu",
+      "types": [
+        "Electric"
+      ],
+      "abilities": [
+        "No Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 135,
+        "attack": 120,
+        "defense": 75,
+        "sp_attack": 180,
+        "sp_defense": 100,
+        "speed": 150
+      },
+      "baseStatTotal": 760,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/raichumegay.png"
+    },
+    "altariamega": {
+      "name": "Altaria-Mega",
+      "showdownId": "altariamega",
+      "showdownName": "Mega Altaria",
+      "slug": "megaaltaria",
+      "isForm": true,
+      "baseName": "Altaria",
+      "types": [
+        "Dragon",
+        "Fairy"
+      ],
+      "abilities": [
+        "Pixilate"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 130,
+        "defense": 130,
+        "sp_attack": 130,
+        "sp_defense": 125,
+        "speed": 100
+      },
+      "baseStatTotal": 765,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/altariamega.png"
+    },
+    "ampharosmega": {
+      "name": "Ampharos-Mega",
+      "showdownId": "ampharosmega",
+      "showdownName": "Mega Ampharos",
+      "slug": "megaampharos",
+      "isForm": true,
+      "baseName": "Ampharos",
+      "types": [
+        "Electric",
+        "Dragon"
+      ],
+      "abilities": [
+        "Mold Breaker"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 165,
+        "attack": 115,
+        "defense": 125,
+        "sp_attack": 185,
+        "sp_defense": 130,
+        "speed": 65
+      },
+      "baseStatTotal": 785,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/ampharosmega.png"
+    },
+    "audinomega": {
+      "name": "Audino-Mega",
+      "showdownId": "audinomega",
+      "showdownName": "Mega Audino",
+      "slug": "megaaudino",
+      "isForm": true,
+      "baseName": "Audino",
+      "types": [
+        "Normal",
+        "Fairy"
+      ],
+      "abilities": [
+        "Healer"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 178,
+        "attack": 80,
+        "defense": 146,
+        "sp_attack": 100,
+        "sp_defense": 146,
+        "speed": 70
+      },
+      "baseStatTotal": 720,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/audinomega.png"
+    },
+    "banettemega": {
+      "name": "Banette-Mega",
+      "showdownId": "banettemega",
+      "showdownName": "Mega Banette",
+      "slug": "megabanette",
+      "isForm": true,
+      "baseName": "Banette",
+      "types": [
+        "Ghost"
+      ],
+      "abilities": [
+        "Prankster"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 139,
+        "attack": 185,
+        "defense": 95,
+        "sp_attack": 113,
+        "sp_defense": 103,
+        "speed": 95
+      },
+      "baseStatTotal": 730,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/banettemega.png"
+    },
+    "barbaraclemega": {
+      "name": "Barbaracle-Mega",
+      "showdownId": "barbaraclemega",
+      "showdownName": "Mega Barbaracle",
+      "slug": "megabarbaracle",
+      "isForm": true,
+      "baseName": "Barbaracle",
+      "types": [
+        "Rock",
+        "Fighting"
+      ],
+      "abilities": [
+        "Tough Claws"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 147,
+        "attack": 160,
+        "defense": 150,
+        "sp_attack": 84,
+        "sp_defense": 126,
+        "speed": 108
+      },
+      "baseStatTotal": 775,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/barbaraclemega.png"
+    },
+    "beedrillmega": {
+      "name": "Beedrill-Mega",
+      "showdownId": "beedrillmega",
+      "showdownName": "Mega Beedrill",
+      "slug": "megabeedrill",
+      "isForm": true,
+      "baseName": "Beedrill",
+      "types": [
+        "Bug",
+        "Poison"
+      ],
+      "abilities": [
+        "Adaptability"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 170,
+        "defense": 60,
+        "sp_attack": 35,
+        "sp_defense": 100,
+        "speed": 165
+      },
+      "baseStatTotal": 670,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/beedrillmega.png"
+    },
+    "blastoisemega": {
+      "name": "Blastoise-Mega",
+      "showdownId": "blastoisemega",
+      "showdownName": "Mega Blastoise",
+      "slug": "megablastoise",
+      "isForm": true,
+      "baseName": "Blastoise",
+      "types": [
+        "Water"
+      ],
+      "abilities": [
+        "Mega Launcher"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 154,
+        "attack": 123,
+        "defense": 140,
+        "sp_attack": 155,
+        "sp_defense": 135,
+        "speed": 98
+      },
+      "baseStatTotal": 805,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/blastoisemega.png"
+    },
+    "blazikenmega": {
+      "name": "Blaziken-Mega",
+      "showdownId": "blazikenmega",
+      "showdownName": "Mega Blaziken",
+      "slug": "megablaziken",
+      "isForm": true,
+      "baseName": "Blaziken",
+      "types": [
+        "Fire",
+        "Fighting"
+      ],
+      "abilities": [
+        "Speed Boost"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 180,
+        "defense": 100,
+        "sp_attack": 150,
+        "sp_defense": 100,
+        "speed": 120
+      },
+      "baseStatTotal": 805,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/blazikenmega.png"
+    },
+    "cameruptmega": {
+      "name": "Camerupt-Mega",
+      "showdownId": "cameruptmega",
+      "showdownName": "Mega Camerupt",
+      "slug": "megacamerupt",
+      "isForm": true,
+      "baseName": "Camerupt",
+      "types": [
+        "Fire",
+        "Ground"
+      ],
+      "abilities": [
+        "Sheer Force"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 145,
+        "attack": 140,
+        "defense": 120,
+        "sp_attack": 165,
+        "sp_defense": 125,
+        "speed": 40
+      },
+      "baseStatTotal": 735,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/cameruptmega.png"
+    },
+    "castformrainy": {
+      "name": "Castform-Rainy",
+      "showdownId": "castformrainy",
+      "showdownName": "Castform Rainy Form",
+      "slug": "castformrainyform",
+      "isForm": true,
+      "baseName": "Castform",
+      "types": [
+        "Water"
+      ],
+      "abilities": [
+        "Forecast"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 145,
+        "attack": 90,
+        "defense": 90,
+        "sp_attack": 90,
+        "sp_defense": 90,
+        "speed": 90
+      },
+      "baseStatTotal": 595,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/castformrainy.png"
+    },
+    "castformsnowy": {
+      "name": "Castform-Snowy",
+      "showdownId": "castformsnowy",
+      "showdownName": "Castform Snowy Form",
+      "slug": "castformsnowyform",
+      "isForm": true,
+      "baseName": "Castform",
+      "types": [
+        "Ice"
+      ],
+      "abilities": [
+        "Forecast"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 145,
+        "attack": 90,
+        "defense": 90,
+        "sp_attack": 90,
+        "sp_defense": 90,
+        "speed": 90
+      },
+      "baseStatTotal": 595,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/castformsnowy.png"
+    },
+    "castformsunny": {
+      "name": "Castform-Sunny",
+      "showdownId": "castformsunny",
+      "showdownName": "Castform Sunny Form",
+      "slug": "castformsunnyform",
+      "isForm": true,
+      "baseName": "Castform",
+      "types": [
+        "Fire"
+      ],
+      "abilities": [
+        "Forecast"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 145,
+        "attack": 90,
+        "defense": 90,
+        "sp_attack": 90,
+        "sp_defense": 90,
+        "speed": 90
+      },
+      "baseStatTotal": 595,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/castformsunny.png"
+    },
+    "chandeluremega": {
+      "name": "Chandelure-Mega",
+      "showdownId": "chandeluremega",
+      "showdownName": "Mega Chandelure",
+      "slug": "megachandelure",
+      "isForm": true,
+      "baseName": "Chandelure",
+      "types": [
+        "Ghost",
+        "Fire"
+      ],
+      "abilities": [
+        "Infiltrator"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 135,
+        "attack": 95,
+        "defense": 130,
+        "sp_attack": 195,
+        "sp_defense": 130,
+        "speed": 110
+      },
+      "baseStatTotal": 795,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/chandeluremega.png"
+    },
+    "charizardmegax": {
+      "name": "Charizard-Mega-X",
+      "showdownId": "charizardmegax",
+      "showdownName": "Mega Charizard X",
+      "slug": "megacharizardx",
+      "isForm": true,
+      "baseName": "Charizard",
+      "types": [
+        "Fire",
+        "Dragon"
+      ],
+      "abilities": [
+        "Tough Claws"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 153,
+        "attack": 150,
+        "defense": 131,
+        "sp_attack": 150,
+        "sp_defense": 105,
+        "speed": 120
+      },
+      "baseStatTotal": 809,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/charizardmegax.png"
+    },
+    "charizardmegay": {
+      "name": "Charizard-Mega-Y",
+      "showdownId": "charizardmegay",
+      "showdownName": "Mega Charizard Y",
+      "slug": "megacharizardy",
+      "isForm": true,
+      "baseName": "Charizard",
+      "types": [
+        "Fire",
+        "Flying"
+      ],
+      "abilities": [
+        "Drought"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 153,
+        "attack": 124,
+        "defense": 98,
+        "sp_attack": 179,
+        "sp_defense": 135,
+        "speed": 120
+      },
+      "baseStatTotal": 809,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/charizardmegay.png"
+    },
+    "chesnaughtmega": {
+      "name": "Chesnaught-Mega",
+      "showdownId": "chesnaughtmega",
+      "showdownName": "Mega Chesnaught",
+      "slug": "megachesnaught",
+      "isForm": true,
+      "baseName": "Chesnaught",
+      "types": [
+        "Grass",
+        "Fighting"
+      ],
+      "abilities": [
+        "Bulletproof"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 163,
+        "attack": 157,
+        "defense": 192,
+        "sp_attack": 94,
+        "sp_defense": 135,
+        "speed": 64
+      },
+      "baseStatTotal": 805,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/chesnaughtmega.png"
+    },
+    "chimechomega": {
+      "name": "Chimecho-Mega",
+      "showdownId": "chimechomega",
+      "showdownName": "Mega Chimecho",
+      "slug": "megachimecho",
+      "isForm": true,
+      "baseName": "Chimecho",
+      "types": [
+        "Psychic",
+        "Steel"
+      ],
+      "abilities": [
+        "Levitate"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 70,
+        "defense": 130,
+        "sp_attack": 155,
+        "sp_defense": 140,
+        "speed": 85
+      },
+      "baseStatTotal": 730,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/chimechomega.png"
+    },
+    "clefablemega": {
+      "name": "Clefable-Mega",
+      "showdownId": "clefablemega",
+      "showdownName": "Mega Clefable",
+      "slug": "megaclefable",
+      "isForm": true,
+      "baseName": "Clefable",
+      "types": [
+        "Fairy",
+        "Flying"
+      ],
+      "abilities": [
+        "Magic Bounce"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 170,
+        "attack": 100,
+        "defense": 113,
+        "sp_attack": 155,
+        "sp_defense": 130,
+        "speed": 90
+      },
+      "baseStatTotal": 758,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/clefablemega.png"
+    },
+    "crabominablemega": {
+      "name": "Crabominable-Mega",
+      "showdownId": "crabominablemega",
+      "showdownName": "Mega Crabominable",
+      "slug": "megacrabominable",
+      "isForm": true,
+      "baseName": "Crabominable",
+      "types": [
+        "Fighting",
+        "Ice"
+      ],
+      "abilities": [
+        "Iron Fist"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 172,
+        "attack": 177,
+        "defense": 142,
+        "sp_attack": 82,
+        "sp_defense": 127,
+        "speed": 53
+      },
+      "baseStatTotal": 753,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/crabominablemega.png"
+    },
+    "delphoxmega": {
+      "name": "Delphox-Mega",
+      "showdownId": "delphoxmega",
+      "showdownName": "Mega Delphox",
+      "slug": "megadelphox",
+      "isForm": true,
+      "baseName": "Delphox",
+      "types": [
+        "Fire",
+        "Psychic"
+      ],
+      "abilities": [
+        "Levitate"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 89,
+        "defense": 92,
+        "sp_attack": 179,
+        "sp_defense": 145,
+        "speed": 154
+      },
+      "baseStatTotal": 809,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/delphoxmega.png"
+    },
+    "dragalgemega": {
+      "name": "Dragalge-Mega",
+      "showdownId": "dragalgemega",
+      "showdownName": "Mega Dragalge",
+      "slug": "megadragalge",
+      "isForm": true,
+      "baseName": "Dragalge",
+      "types": [
+        "Poison",
+        "Dragon"
+      ],
+      "abilities": [
+        "Regenerator"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 105,
+        "defense": 125,
+        "sp_attack": 152,
+        "sp_defense": 183,
+        "speed": 64
+      },
+      "baseStatTotal": 769,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/dragalgemega.png"
+    },
+    "dragonitemega": {
+      "name": "Dragonite-Mega",
+      "showdownId": "dragonitemega",
+      "showdownName": "Mega Dragonite",
+      "slug": "megadragonite",
+      "isForm": true,
+      "baseName": "Dragonite",
+      "types": [
+        "Dragon",
+        "Flying"
+      ],
+      "abilities": [
+        "Multiscale"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 166,
+        "attack": 144,
+        "defense": 135,
+        "sp_attack": 165,
+        "sp_defense": 145,
+        "speed": 120
+      },
+      "baseStatTotal": 875,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/dragonitemega.png"
+    },
+    "drampamega": {
+      "name": "Drampa-Mega",
+      "showdownId": "drampamega",
+      "showdownName": "Mega Drampa",
+      "slug": "megadrampa",
+      "isForm": true,
+      "baseName": "Drampa",
+      "types": [
+        "Normal",
+        "Dragon"
+      ],
+      "abilities": [
+        "Berserk"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 153,
+        "attack": 105,
+        "defense": 130,
+        "sp_attack": 180,
+        "sp_defense": 136,
+        "speed": 56
+      },
+      "baseStatTotal": 760,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/drampamega.png"
+    },
+    "eelektrossmega": {
+      "name": "Eelektross-Mega",
+      "showdownId": "eelektrossmega",
+      "showdownName": "Mega Eelektross",
+      "slug": "megaeelektross",
+      "isForm": true,
+      "baseName": "Eelektross",
+      "types": [
+        "Electric"
+      ],
+      "abilities": [
+        "Eelevate"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 160,
+        "attack": 165,
+        "defense": 100,
+        "sp_attack": 155,
+        "sp_defense": 110,
+        "speed": 100
+      },
+      "baseStatTotal": 790,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/eelektrossmega.png"
+    },
+    "emboarmega": {
+      "name": "Emboar-Mega",
+      "showdownId": "emboarmega",
+      "showdownName": "Mega Emboar",
+      "slug": "megaemboar",
+      "isForm": true,
+      "baseName": "Emboar",
+      "types": [
+        "Fire",
+        "Fighting"
+      ],
+      "abilities": [
+        "Mold Breaker"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 185,
+        "attack": 168,
+        "defense": 95,
+        "sp_attack": 130,
+        "sp_defense": 130,
+        "speed": 95
+      },
+      "baseStatTotal": 803,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/emboarmega.png"
+    },
+    "excadrillmega": {
+      "name": "Excadrill-Mega",
+      "showdownId": "excadrillmega",
+      "showdownName": "Mega Excadrill",
+      "slug": "megaexcadrill",
+      "isForm": true,
+      "baseName": "Excadrill",
+      "types": [
+        "Ground",
+        "Steel"
+      ],
+      "abilities": [
+        "Piercing Drill"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 185,
+        "attack": 185,
+        "defense": 120,
+        "sp_attack": 85,
+        "sp_defense": 85,
+        "speed": 123
+      },
+      "baseStatTotal": 783,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/excadrillmega.png"
+    },
+    "falinksmega": {
+      "name": "Falinks-Mega",
+      "showdownId": "falinksmega",
+      "showdownName": "Mega Falinks",
+      "slug": "megafalinks",
+      "isForm": true,
+      "baseName": "Falinks",
+      "types": [
+        "Fighting"
+      ],
+      "abilities": [
+        "Defiant"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 155,
+        "defense": 155,
+        "sp_attack": 90,
+        "sp_defense": 85,
+        "speed": 120
+      },
+      "baseStatTotal": 745,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/falinksmega.png"
+    },
+    "fanrotom": {
+      "name": "Fan Rotom",
+      "showdownId": "fanrotom",
+      "showdownName": "Fan Rotom",
+      "slug": "fanrotom",
+      "isForm": true,
+      "baseName": "Fan Rotom",
+      "types": [
+        "Electric",
+        "Flying"
+      ],
+      "abilities": [
+        "Levitate"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 125,
+        "attack": 85,
+        "defense": 127,
+        "sp_attack": 125,
+        "sp_defense": 127,
+        "speed": 106
+      },
+      "baseStatTotal": 695,
+      "doubles": null,
+      "singles": null,
+      "sprite": null
+    },
+    "feraligatrmega": {
+      "name": "Feraligatr-Mega",
+      "showdownId": "feraligatrmega",
+      "showdownName": "Mega Feraligatr",
+      "slug": "megaferaligatr",
+      "isForm": true,
+      "baseName": "Feraligatr",
+      "types": [
+        "Water",
+        "Dragon"
+      ],
+      "abilities": [
+        "Dragonize"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 160,
+        "attack": 180,
+        "defense": 145,
+        "sp_attack": 109,
+        "sp_defense": 113,
+        "speed": 98
+      },
+      "baseStatTotal": 805,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/feraligatrmega.png"
+    },
+    "floetteeternal": {
+      "name": "Floette-Eternal",
+      "showdownId": "floetteeternal",
+      "showdownName": "Mega Floette",
+      "slug": "megafloette",
+      "isForm": true,
+      "baseName": "Floette",
+      "types": [
+        "Fairy"
+      ],
+      "abilities": [
+        "Fairy Aura"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 149,
+        "attack": 105,
+        "defense": 107,
+        "sp_attack": 175,
+        "sp_defense": 168,
+        "speed": 122
+      },
+      "baseStatTotal": 826,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/floetteeternal.png"
+    },
+    "florgesred": {
+      "name": "Florges-Red",
+      "showdownId": "florgesred",
+      "showdownName": "Florges Red Flower",
+      "slug": "florgesredflower",
+      "isForm": true,
+      "baseName": "Florges",
+      "types": [
+        "Fairy"
+      ],
+      "abilities": [
+        "Flower Veil",
+        "Symbiosis"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 153,
+        "attack": 85,
+        "defense": 88,
+        "sp_attack": 132,
+        "sp_defense": 174,
+        "speed": 95
+      },
+      "baseStatTotal": 727,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/florgesred.png"
+    },
+    "florgesblue": {
+      "name": "Florges-Blue",
+      "showdownId": "florgesblue",
+      "showdownName": "Florges Blue Flower",
+      "slug": "florgesblueflower",
+      "isForm": true,
+      "baseName": "Florges",
+      "types": [
+        "Fairy"
+      ],
+      "abilities": [
+        "Flower Veil",
+        "Symbiosis"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 153,
+        "attack": 85,
+        "defense": 88,
+        "sp_attack": 132,
+        "sp_defense": 174,
+        "speed": 95
+      },
+      "baseStatTotal": 727,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/florgesblue.png"
+    },
+    "florgesorange": {
+      "name": "Florges-Orange",
+      "showdownId": "florgesorange",
+      "showdownName": "Florges Orange Flower",
+      "slug": "florgesorangeflower",
+      "isForm": true,
+      "baseName": "Florges",
+      "types": [
+        "Fairy"
+      ],
+      "abilities": [
+        "Flower Veil",
+        "Symbiosis"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 153,
+        "attack": 85,
+        "defense": 88,
+        "sp_attack": 132,
+        "sp_defense": 174,
+        "speed": 95
+      },
+      "baseStatTotal": 727,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/florgesorange.png"
+    },
+    "florgeswhite": {
+      "name": "Florges-White",
+      "showdownId": "florgeswhite",
+      "showdownName": "Florges White Flower",
+      "slug": "florgeswhiteflower",
+      "isForm": true,
+      "baseName": "Florges",
+      "types": [
+        "Fairy"
+      ],
+      "abilities": [
+        "Flower Veil",
+        "Symbiosis"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 153,
+        "attack": 85,
+        "defense": 88,
+        "sp_attack": 132,
+        "sp_defense": 174,
+        "speed": 95
+      },
+      "baseStatTotal": 727,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/florgeswhite.png"
+    },
+    "florgesyellow": {
+      "name": "Florges-Yellow",
+      "showdownId": "florgesyellow",
+      "showdownName": "Florges Yellow Flower",
+      "slug": "florgesyellowflower",
+      "isForm": true,
+      "baseName": "Florges",
+      "types": [
+        "Fairy"
+      ],
+      "abilities": [
+        "Flower Veil",
+        "Symbiosis"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 153,
+        "attack": 85,
+        "defense": 88,
+        "sp_attack": 132,
+        "sp_defense": 174,
+        "speed": 95
+      },
+      "baseStatTotal": 727,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/florgesyellow.png"
+    },
+    "froslassmega": {
+      "name": "Froslass-Mega",
+      "showdownId": "froslassmega",
+      "showdownName": "Mega Froslass",
+      "slug": "megafroslass",
+      "isForm": true,
+      "baseName": "Froslass",
+      "types": [
+        "Ice",
+        "Ghost"
+      ],
+      "abilities": [
+        "Snow Warning"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 145,
+        "attack": 100,
+        "defense": 90,
+        "sp_attack": 160,
+        "sp_defense": 120,
+        "speed": 140
+      },
+      "baseStatTotal": 755,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/froslassmega.png"
+    },
+    "furfrounatural": {
+      "name": "Furfrou-Natural",
+      "showdownId": "furfrounatural",
+      "showdownName": "Furfrou Natural Form",
+      "slug": "furfrounaturalform",
+      "isForm": true,
+      "baseName": "Furfrou",
+      "types": [
+        "Normal"
+      ],
+      "abilities": [
+        "Fur Coat"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 100,
+        "defense": 80,
+        "sp_attack": 85,
+        "sp_defense": 110,
+        "speed": 122
+      },
+      "baseStatTotal": 647,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/furfrounatural.png"
+    },
+    "furfroudandytrim": {
+      "name": "Furfrou-Dandy Trim",
+      "showdownId": "furfroudandytrim",
+      "showdownName": "Furfrou Dandy Trim",
+      "slug": "furfroudandytrim",
+      "isForm": true,
+      "baseName": "Furfrou",
+      "types": [
+        "Normal"
+      ],
+      "abilities": [
+        "Fur Coat"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 100,
+        "defense": 80,
+        "sp_attack": 85,
+        "sp_defense": 110,
+        "speed": 122
+      },
+      "baseStatTotal": 647,
+      "doubles": null,
+      "singles": null,
+      "sprite": null
+    },
+    "furfroudebutantetrim": {
+      "name": "Furfrou-Debutante Trim",
+      "showdownId": "furfroudebutantetrim",
+      "showdownName": "Furfrou Debutante Trim",
+      "slug": "furfroudebutantetrim",
+      "isForm": true,
+      "baseName": "Furfrou",
+      "types": [
+        "Normal"
+      ],
+      "abilities": [
+        "Fur Coat"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 100,
+        "defense": 80,
+        "sp_attack": 85,
+        "sp_defense": 110,
+        "speed": 122
+      },
+      "baseStatTotal": 647,
+      "doubles": null,
+      "singles": null,
+      "sprite": null
+    },
+    "furfroudiamondtrim": {
+      "name": "Furfrou-Diamond Trim",
+      "showdownId": "furfroudiamondtrim",
+      "showdownName": "Furfrou Diamond Trim",
+      "slug": "furfroudiamondtrim",
+      "isForm": true,
+      "baseName": "Furfrou",
+      "types": [
+        "Normal"
+      ],
+      "abilities": [
+        "Fur Coat"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 100,
+        "defense": 80,
+        "sp_attack": 85,
+        "sp_defense": 110,
+        "speed": 122
+      },
+      "baseStatTotal": 647,
+      "doubles": null,
+      "singles": null,
+      "sprite": null
+    },
+    "furfrouhearttrim": {
+      "name": "Furfrou-Heart Trim",
+      "showdownId": "furfrouhearttrim",
+      "showdownName": "Furfrou Heart Trim",
+      "slug": "furfrouhearttrim",
+      "isForm": true,
+      "baseName": "Furfrou",
+      "types": [
+        "Normal"
+      ],
+      "abilities": [
+        "Fur Coat"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 100,
+        "defense": 80,
+        "sp_attack": 85,
+        "sp_defense": 110,
+        "speed": 122
+      },
+      "baseStatTotal": 647,
+      "doubles": null,
+      "singles": null,
+      "sprite": null
+    },
+    "furfroukabukitrim": {
+      "name": "Furfrou-Kabuki Trim",
+      "showdownId": "furfroukabukitrim",
+      "showdownName": "Furfrou Kabuki Trim",
+      "slug": "furfroukabukitrim",
+      "isForm": true,
+      "baseName": "Furfrou",
+      "types": [
+        "Normal"
+      ],
+      "abilities": [
+        "Fur Coat"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 100,
+        "defense": 80,
+        "sp_attack": 85,
+        "sp_defense": 110,
+        "speed": 122
+      },
+      "baseStatTotal": 647,
+      "doubles": null,
+      "singles": null,
+      "sprite": null
+    },
+    "furfroulareinetrim": {
+      "name": "Furfrou-La Reine Trim",
+      "showdownId": "furfroulareinetrim",
+      "showdownName": "Furfrou La Reine Trim",
+      "slug": "furfroulareinetrim",
+      "isForm": true,
+      "baseName": "Furfrou",
+      "types": [
+        "Normal"
+      ],
+      "abilities": [
+        "Fur Coat"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 100,
+        "defense": 80,
+        "sp_attack": 85,
+        "sp_defense": 110,
+        "speed": 122
+      },
+      "baseStatTotal": 647,
+      "doubles": null,
+      "singles": null,
+      "sprite": null
+    },
+    "furfroumatrontrim": {
+      "name": "Furfrou-Matron Trim",
+      "showdownId": "furfroumatrontrim",
+      "showdownName": "Furfrou Matron Trim",
+      "slug": "furfroumatrontrim",
+      "isForm": true,
+      "baseName": "Furfrou",
+      "types": [
+        "Normal"
+      ],
+      "abilities": [
+        "Fur Coat"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 100,
+        "defense": 80,
+        "sp_attack": 85,
+        "sp_defense": 110,
+        "speed": 122
+      },
+      "baseStatTotal": 647,
+      "doubles": null,
+      "singles": null,
+      "sprite": null
+    },
+    "furfroupharaohtrim": {
+      "name": "Furfrou-Pharaoh Trim",
+      "showdownId": "furfroupharaohtrim",
+      "showdownName": "Furfrou Pharaoh Trim",
+      "slug": "furfroupharaohtrim",
+      "isForm": true,
+      "baseName": "Furfrou",
+      "types": [
+        "Normal"
+      ],
+      "abilities": [
+        "Fur Coat"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 100,
+        "defense": 80,
+        "sp_attack": 85,
+        "sp_defense": 110,
+        "speed": 122
+      },
+      "baseStatTotal": 647,
+      "doubles": null,
+      "singles": null,
+      "sprite": null
+    },
+    "furfroustartrim": {
+      "name": "Furfrou-Star Trim",
+      "showdownId": "furfroustartrim",
+      "showdownName": "Furfrou Star Trim",
+      "slug": "furfroustartrim",
+      "isForm": true,
+      "baseName": "Furfrou",
+      "types": [
+        "Normal"
+      ],
+      "abilities": [
+        "Fur Coat"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 100,
+        "defense": 80,
+        "sp_attack": 85,
+        "sp_defense": 110,
+        "speed": 122
+      },
+      "baseStatTotal": 647,
+      "doubles": null,
+      "singles": null,
+      "sprite": null
+    },
+    "slowbromega": {
+      "name": "Slowbro-Mega",
+      "showdownId": "slowbromega",
+      "showdownName": "Mega Slowbro",
+      "slug": "megaslowbro",
+      "isForm": true,
+      "baseName": "Slowbro",
+      "types": [
+        "Water",
+        "Psychic"
+      ],
+      "abilities": [
+        "Shell Armor"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 170,
+        "attack": 95,
+        "defense": 200,
+        "sp_attack": 150,
+        "sp_defense": 100,
+        "speed": 50
+      },
+      "baseStatTotal": 765,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/slowbromega.png"
+    },
+    "gallademega": {
+      "name": "Gallade-Mega",
+      "showdownId": "gallademega",
+      "showdownName": "Mega Gallade",
+      "slug": "megagallade",
+      "isForm": true,
+      "baseName": "Gallade",
+      "types": [
+        "Psychic",
+        "Fighting"
+      ],
+      "abilities": [
+        "Inner Focus"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 143,
+        "attack": 185,
+        "defense": 115,
+        "sp_attack": 85,
+        "sp_defense": 135,
+        "speed": 130
+      },
+      "baseStatTotal": 793,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/gallademega.png"
+    },
+    "garchompmega": {
+      "name": "Garchomp-Mega",
+      "showdownId": "garchompmega",
+      "showdownName": "Mega Garchomp",
+      "slug": "megagarchomp",
+      "isForm": true,
+      "baseName": "Garchomp",
+      "types": [
+        "Dragon",
+        "Ground"
+      ],
+      "abilities": [
+        "Sand Force"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 183,
+        "attack": 190,
+        "defense": 135,
+        "sp_attack": 140,
+        "sp_defense": 115,
+        "speed": 112
+      },
+      "baseStatTotal": 875,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/garchompmega.png"
+    },
+    "gardevoirmega": {
+      "name": "Gardevoir-Mega",
+      "showdownId": "gardevoirmega",
+      "showdownName": "Mega Gardevoir",
+      "slug": "megagardevoir",
+      "isForm": true,
+      "baseName": "Gardevoir",
+      "types": [
+        "Psychic",
+        "Fairy"
+      ],
+      "abilities": [
+        "Pixilate"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 143,
+        "attack": 105,
+        "defense": 85,
+        "sp_attack": 185,
+        "sp_defense": 155,
+        "speed": 120
+      },
+      "baseStatTotal": 793,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/gardevoirmega.png"
+    },
+    "gengarmega": {
+      "name": "Gengar-Mega",
+      "showdownId": "gengarmega",
+      "showdownName": "Mega Gengar",
+      "slug": "megagengar",
+      "isForm": true,
+      "baseName": "Gengar",
+      "types": [
+        "Ghost",
+        "Poison"
+      ],
+      "abilities": [
+        "Shadow Tag"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 135,
+        "attack": 85,
+        "defense": 100,
+        "sp_attack": 190,
+        "sp_defense": 115,
+        "speed": 150
+      },
+      "baseStatTotal": 775,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/gengarmega.png"
+    },
+    "glaliemega": {
+      "name": "Glalie-Mega",
+      "showdownId": "glaliemega",
+      "showdownName": "Mega Glalie",
+      "slug": "megaglalie",
+      "isForm": true,
+      "baseName": "Glalie",
+      "types": [
+        "Ice"
+      ],
+      "abilities": [
+        "Refrigerate"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 140,
+        "defense": 100,
+        "sp_attack": 140,
+        "sp_defense": 100,
+        "speed": 120
+      },
+      "baseStatTotal": 755,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/glaliemega.png"
+    },
+    "glimmoramega": {
+      "name": "Glimmora-Mega",
+      "showdownId": "glimmoramega",
+      "showdownName": "Mega Glimmora",
+      "slug": "megaglimmora",
+      "isForm": true,
+      "baseName": "Glimmora",
+      "types": [
+        "Rock",
+        "Poison"
+      ],
+      "abilities": [
+        "Adaptability"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 158,
+        "attack": 110,
+        "defense": 125,
+        "sp_attack": 170,
+        "sp_defense": 116,
+        "speed": 121
+      },
+      "baseStatTotal": 800,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/glimmoramega.png"
+    },
+    "golurkmega": {
+      "name": "Golurk-Mega",
+      "showdownId": "golurkmega",
+      "showdownName": "Mega Golurk",
+      "slug": "megagolurk",
+      "isForm": true,
+      "baseName": "Golurk",
+      "types": [
+        "Ground",
+        "Ghost"
+      ],
+      "abilities": [
+        "Unseen Fist"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 164,
+        "attack": 179,
+        "defense": 125,
+        "sp_attack": 90,
+        "sp_defense": 125,
+        "speed": 75
+      },
+      "baseStatTotal": 758,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/golurkmega.png"
+    },
+    "gourgeistjumbovariety": {
+      "name": "Gourgeist-Jumbo Variety",
+      "showdownId": "gourgeistjumbovariety",
+      "showdownName": "Gourgeist Jumbo Variety",
+      "slug": "gourgeistjumbovariety",
+      "isForm": true,
+      "baseName": "Gourgeist",
+      "types": [
+        "Ghost",
+        "Grass"
+      ],
+      "abilities": [
+        "Pickup",
+        "Frisk",
+        "Insomnia"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 160,
+        "attack": 120,
+        "defense": 142,
+        "sp_attack": 78,
+        "sp_defense": 95,
+        "speed": 74
+      },
+      "baseStatTotal": 669,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/gourgeistjumbovariety.png"
+    },
+    "gourgeistlargevariety": {
+      "name": "Gourgeist-Large Variety",
+      "showdownId": "gourgeistlargevariety",
+      "showdownName": "Gourgeist Large Variety",
+      "slug": "gourgeistlargevariety",
+      "isForm": true,
+      "baseName": "Gourgeist",
+      "types": [
+        "Ghost",
+        "Grass"
+      ],
+      "abilities": [
+        "Pickup",
+        "Frisk",
+        "Insomnia"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 115,
+        "defense": 142,
+        "sp_attack": 78,
+        "sp_defense": 95,
+        "speed": 89
+      },
+      "baseStatTotal": 669,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/gourgeistlargevariety.png"
+    },
+    "gourgeistsmallvariety": {
+      "name": "Gourgeist-Small Variety",
+      "showdownId": "gourgeistsmallvariety",
+      "showdownName": "Gourgeist Small Variety",
+      "slug": "gourgeistsmallvariety",
+      "isForm": true,
+      "baseName": "Gourgeist",
+      "types": [
+        "Ghost",
+        "Grass"
+      ],
+      "abilities": [
+        "Pickup",
+        "Frisk",
+        "Insomnia"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 130,
+        "attack": 105,
+        "defense": 142,
+        "sp_attack": 78,
+        "sp_defense": 95,
+        "speed": 119
+      },
+      "baseStatTotal": 669,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/gourgeistsmallvariety.png"
+    },
+    "greninjamega": {
+      "name": "Greninja-Mega",
+      "showdownId": "greninjamega",
+      "showdownName": "Mega Greninja",
+      "slug": "megagreninja",
+      "isForm": true,
+      "baseName": "Greninja",
+      "types": [
+        "Water",
+        "Dark"
+      ],
+      "abilities": [
+        "Protean"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 147,
+        "attack": 145,
+        "defense": 97,
+        "sp_attack": 153,
+        "sp_defense": 101,
+        "speed": 162
+      },
+      "baseStatTotal": 805,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/greninjamega.png"
+    },
+    "gyaradosmega": {
+      "name": "Gyarados-Mega",
+      "showdownId": "gyaradosmega",
+      "showdownName": "Mega Gyarados",
+      "slug": "megagyarados",
+      "isForm": true,
+      "baseName": "Gyarados",
+      "types": [
+        "Water",
+        "Dark"
+      ],
+      "abilities": [
+        "Mold Breaker"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 170,
+        "attack": 175,
+        "defense": 129,
+        "sp_attack": 90,
+        "sp_defense": 150,
+        "speed": 101
+      },
+      "baseStatTotal": 815,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/gyaradosmega.png"
+    },
+    "hawluchamega": {
+      "name": "Hawlucha-Mega",
+      "showdownId": "hawluchamega",
+      "showdownName": "Mega Hawlucha",
+      "slug": "megahawlucha",
+      "isForm": true,
+      "baseName": "Hawlucha",
+      "types": [
+        "Fighting",
+        "Flying"
+      ],
+      "abilities": [
+        "No Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 153,
+        "attack": 157,
+        "defense": 120,
+        "sp_attack": 94,
+        "sp_defense": 113,
+        "speed": 138
+      },
+      "baseStatTotal": 775,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/hawluchamega.png"
+    },
+    "heracrossmega": {
+      "name": "Heracross-Mega",
+      "showdownId": "heracrossmega",
+      "showdownName": "Mega Heracross",
+      "slug": "megaheracross",
+      "isForm": true,
+      "baseName": "Heracross",
+      "types": [
+        "Bug",
+        "Fighting"
+      ],
+      "abilities": [
+        "Skill Link"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 205,
+        "defense": 135,
+        "sp_attack": 60,
+        "sp_defense": 125,
+        "speed": 95
+      },
+      "baseStatTotal": 775,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/heracrossmega.png"
+    },
+    "houndoommega": {
+      "name": "Houndoom-Mega",
+      "showdownId": "houndoommega",
+      "showdownName": "Mega Houndoom",
+      "slug": "megahoundoom",
+      "isForm": true,
+      "baseName": "Houndoom",
+      "types": [
+        "Dark",
+        "Fire"
+      ],
+      "abilities": [
+        "Solar Power"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 110,
+        "defense": 110,
+        "sp_attack": 160,
+        "sp_defense": 110,
+        "speed": 135
+      },
+      "baseStatTotal": 775,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/houndoommega.png"
+    },
+    "kangaskhanmega": {
+      "name": "Kangaskhan-Mega",
+      "showdownId": "kangaskhanmega",
+      "showdownName": "Mega Kangaskhan",
+      "slug": "megakangaskhan",
+      "isForm": true,
+      "baseName": "Kangaskhan",
+      "types": [
+        "Normal"
+      ],
+      "abilities": [
+        "Parental Bond"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 180,
+        "attack": 145,
+        "defense": 120,
+        "sp_attack": 80,
+        "sp_defense": 120,
+        "speed": 120
+      },
+      "baseStatTotal": 765,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/kangaskhanmega.png"
+    },
+    "lopunnymega": {
+      "name": "Lopunny-Mega",
+      "showdownId": "lopunnymega",
+      "showdownName": "Mega Lopunny",
+      "slug": "megalopunny",
+      "isForm": true,
+      "baseName": "Lopunny",
+      "types": [
+        "Normal",
+        "Fighting"
+      ],
+      "abilities": [
+        "Scrappy"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 156,
+        "defense": 114,
+        "sp_attack": 74,
+        "sp_defense": 116,
+        "speed": 155
+      },
+      "baseStatTotal": 755,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/lopunnymega.png"
+    },
+    "lucariomega": {
+      "name": "Lucario-Mega",
+      "showdownId": "lucariomega",
+      "showdownName": "Mega Lucario",
+      "slug": "megalucario",
+      "isForm": true,
+      "baseName": "Lucario",
+      "types": [
+        "Fighting",
+        "Steel"
+      ],
+      "abilities": [
+        "Adaptability"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 145,
+        "attack": 165,
+        "defense": 108,
+        "sp_attack": 160,
+        "sp_defense": 90,
+        "speed": 132
+      },
+      "baseStatTotal": 800,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/lucariomega.png"
+    },
+    "malamarmega": {
+      "name": "Malamar-Mega",
+      "showdownId": "malamarmega",
+      "showdownName": "Mega Malamar",
+      "slug": "megamalamar",
+      "isForm": true,
+      "baseName": "Malamar",
+      "types": [
+        "Dark",
+        "Psychic"
+      ],
+      "abilities": [
+        "Contrary"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 161,
+        "attack": 122,
+        "defense": 108,
+        "sp_attack": 118,
+        "sp_defense": 140,
+        "speed": 108
+      },
+      "baseStatTotal": 757,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/malamarmega.png"
+    },
+    "manectricmega": {
+      "name": "Manectric-Mega",
+      "showdownId": "manectricmega",
+      "showdownName": "Mega Manectric",
+      "slug": "megamanectric",
+      "isForm": true,
+      "baseName": "Manectric",
+      "types": [
+        "Electric"
+      ],
+      "abilities": [
+        "Intimidate"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 145,
+        "attack": 95,
+        "defense": 100,
+        "sp_attack": 155,
+        "sp_defense": 100,
+        "speed": 155
+      },
+      "baseStatTotal": 750,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/manectricmega.png"
+    },
+    "maushold": {
+      "name": "Maushold",
+      "showdownId": "maushold",
+      "showdownName": "Maushold",
+      "slug": "maushold",
+      "isForm": true,
+      "baseName": "Maushold",
+      "types": [
+        "Normal"
+      ],
+      "abilities": [
+        "Friend Guard",
+        "Cheek Pouch",
+        "Technician"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 149,
+        "attack": 95,
+        "defense": 90,
+        "sp_attack": 85,
+        "sp_defense": 95,
+        "speed": 131
+      },
+      "baseStatTotal": 645,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/maushold.png"
+    },
+    "mausholdfamilyoffour": {
+      "name": "Maushold-Family Of Four",
+      "showdownId": "mausholdfamilyoffour",
+      "showdownName": "Maushold Family of Four",
+      "slug": "mausholdfamilyoffour",
+      "isForm": true,
+      "baseName": "Maushold",
+      "types": [
+        "Normal"
+      ],
+      "abilities": [
+        "Friend Guard",
+        "Cheek Pouch",
+        "Technician"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 149,
+        "attack": 95,
+        "defense": 90,
+        "sp_attack": 85,
+        "sp_defense": 95,
+        "speed": 131
+      },
+      "baseStatTotal": 645,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/mausholdfamilyoffour.png"
+    },
+    "mawilemega": {
+      "name": "Mawile-Mega",
+      "showdownId": "mawilemega",
+      "showdownName": "Mega Mawile",
+      "slug": "megamawile",
+      "isForm": true,
+      "baseName": "Mawile",
+      "types": [
+        "Steel",
+        "Fairy"
+      ],
+      "abilities": [
+        "Huge Power"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 125,
+        "attack": 125,
+        "defense": 145,
+        "sp_attack": 75,
+        "sp_defense": 115,
+        "speed": 70
+      },
+      "baseStatTotal": 655,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/mawilemega.png"
+    },
+    "medichammega": {
+      "name": "Medicham-Mega",
+      "showdownId": "medichammega",
+      "showdownName": "Mega Medicham",
+      "slug": "megamedicham",
+      "isForm": true,
+      "baseName": "Medicham",
+      "types": [
+        "Fighting",
+        "Psychic"
+      ],
+      "abilities": [
+        "Pure Power"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 135,
+        "attack": 120,
+        "defense": 105,
+        "sp_attack": 100,
+        "sp_defense": 105,
+        "speed": 120
+      },
+      "baseStatTotal": 685,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/medichammega.png"
+    },
+    "meganiummega": {
+      "name": "Meganium-Mega",
+      "showdownId": "meganiummega",
+      "showdownName": "Mega Meganium",
+      "slug": "megameganium",
+      "isForm": true,
+      "baseName": "Meganium",
+      "types": [
+        "Grass",
+        "Fairy"
+      ],
+      "abilities": [
+        "Mega Sol"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 112,
+        "defense": 135,
+        "sp_attack": 163,
+        "sp_defense": 135,
+        "speed": 100
+      },
+      "baseStatTotal": 800,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/meganiummega.png"
+    },
+    "meowsticmega": {
+      "name": "Meowstic-Mega",
+      "showdownId": "meowsticmega",
+      "showdownName": "Mega Meowstic",
+      "slug": "megameowstic",
+      "isForm": true,
+      "baseName": "Meowstic",
+      "types": [
+        "Psychic"
+      ],
+      "abilities": [
+        "Trace"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 149,
+        "attack": 68,
+        "defense": 96,
+        "sp_attack": 163,
+        "sp_defense": 121,
+        "speed": 144
+      },
+      "baseStatTotal": 741,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/meowsticmega.png"
+    },
+    "metagrossmega": {
+      "name": "Metagross-Mega",
+      "showdownId": "metagrossmega",
+      "showdownName": "Mega Metagross",
+      "slug": "megametagross",
+      "isForm": true,
+      "baseName": "Metagross",
+      "types": [
+        "Steel",
+        "Psychic"
+      ],
+      "abilities": [
+        "Tough Claws"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 165,
+        "defense": 170,
+        "sp_attack": 125,
+        "sp_defense": 130,
+        "speed": 130
+      },
+      "baseStatTotal": 875,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/metagrossmega.png"
+    },
+    "morpekohangrymode": {
+      "name": "Morpeko-Hangry Mode",
+      "showdownId": "morpekohangrymode",
+      "showdownName": "Morpeko Hangry Mode",
+      "slug": "morpekohangrymode",
+      "isForm": true,
+      "baseName": "Morpeko",
+      "types": [
+        "Electric",
+        "Dark"
+      ],
+      "abilities": [
+        "Hunger Switch"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 133,
+        "attack": 115,
+        "defense": 78,
+        "sp_attack": 90,
+        "sp_defense": 78,
+        "speed": 117
+      },
+      "baseStatTotal": 611,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/morpekohangrymode.png"
+    },
+    "palafinzero": {
+      "name": "Palafin-Zero",
+      "showdownId": "palafinzero",
+      "showdownName": "Palafin Zero Form",
+      "slug": "palafinzeroform",
+      "isForm": true,
+      "baseName": "Palafin",
+      "types": [
+        "Water"
+      ],
+      "abilities": [
+        "Zero to Hero"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 175,
+        "attack": 90,
+        "defense": 92,
+        "sp_attack": 73,
+        "sp_defense": 82,
+        "speed": 120
+      },
+      "baseStatTotal": 632,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/palafinzero.png"
+    },
+    "palafinhero": {
+      "name": "Palafin-Hero",
+      "showdownId": "palafinhero",
+      "showdownName": "Palafin Hero Form",
+      "slug": "palafinheroform",
+      "isForm": true,
+      "baseName": "Palafin",
+      "types": [
+        "Water"
+      ],
+      "abilities": [
+        "Zero to Hero"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 175,
+        "attack": 180,
+        "defense": 117,
+        "sp_attack": 126,
+        "sp_defense": 107,
+        "speed": 120
+      },
+      "baseStatTotal": 825,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/palafinhero.png"
+    },
+    "pidgeotmega": {
+      "name": "Pidgeot-Mega",
+      "showdownId": "pidgeotmega",
+      "showdownName": "Mega Pidgeot",
+      "slug": "megapidgeot",
+      "isForm": true,
+      "baseName": "Pidgeot",
+      "types": [
+        "Normal",
+        "Flying"
+      ],
+      "abilities": [
+        "No Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 158,
+        "attack": 100,
+        "defense": 100,
+        "sp_attack": 155,
+        "sp_defense": 100,
+        "speed": 141
+      },
+      "baseStatTotal": 754,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/pidgeotmega.png"
+    },
+    "pinsirmega": {
+      "name": "Pinsir-Mega",
+      "showdownId": "pinsirmega",
+      "showdownName": "Mega Pinsir",
+      "slug": "megapinsir",
+      "isForm": true,
+      "baseName": "Pinsir",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Aerilate"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 175,
+        "defense": 140,
+        "sp_attack": 85,
+        "sp_defense": 110,
+        "speed": 125
+      },
+      "baseStatTotal": 775,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/pinsirmega.png"
+    },
+    "pyroarmega": {
+      "name": "Pyroar-Mega",
+      "showdownId": "pyroarmega",
+      "showdownName": "Mega Pyroar",
+      "slug": "megapyroar",
+      "isForm": true,
+      "baseName": "Pyroar",
+      "types": [
+        "Fire",
+        "Normal"
+      ],
+      "abilities": [
+        "Fire Mane"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 161,
+        "attack": 108,
+        "defense": 112,
+        "sp_attack": 149,
+        "sp_defense": 106,
+        "speed": 146
+      },
+      "baseStatTotal": 782,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/pyroarmega.png"
+    },
+    "sableyemega": {
+      "name": "Sableye-Mega",
+      "showdownId": "sableyemega",
+      "showdownName": "Mega Sableye",
+      "slug": "megasableye",
+      "isForm": true,
+      "baseName": "Sableye",
+      "types": [
+        "Dark",
+        "Ghost"
+      ],
+      "abilities": [
+        "Magic Bounce"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 125,
+        "attack": 105,
+        "defense": 145,
+        "sp_attack": 105,
+        "sp_defense": 135,
+        "speed": 40
+      },
+      "baseStatTotal": 655,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/sableyemega.png"
+    },
+    "sceptilemega": {
+      "name": "Sceptile-Mega",
+      "showdownId": "sceptilemega",
+      "showdownName": "Mega Sceptile",
+      "slug": "megasceptile",
+      "isForm": true,
+      "baseName": "Sceptile",
+      "types": [
+        "Grass",
+        "Dragon"
+      ],
+      "abilities": [
+        "Lightning Rod"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 145,
+        "attack": 130,
+        "defense": 95,
+        "sp_attack": 165,
+        "sp_defense": 105,
+        "speed": 165
+      },
+      "baseStatTotal": 805,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/sceptilemega.png"
+    },
+    "scizormega": {
+      "name": "Scizor-Mega",
+      "showdownId": "scizormega",
+      "showdownName": "Mega Scizor",
+      "slug": "megascizor",
+      "isForm": true,
+      "baseName": "Scizor",
+      "types": [
+        "Bug",
+        "Steel"
+      ],
+      "abilities": [
+        "Technician"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 145,
+        "attack": 170,
+        "defense": 160,
+        "sp_attack": 85,
+        "sp_defense": 120,
+        "speed": 95
+      },
+      "baseStatTotal": 775,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/scizormega.png"
+    },
+    "scolipedemega": {
+      "name": "Scolipede-Mega",
+      "showdownId": "scolipedemega",
+      "showdownName": "Mega Scolipede",
+      "slug": "megascolipede",
+      "isForm": true,
+      "baseName": "Scolipede",
+      "types": [
+        "Bug",
+        "Poison"
+      ],
+      "abilities": [
+        "Shell Armor"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 135,
+        "attack": 160,
+        "defense": 169,
+        "sp_attack": 95,
+        "sp_defense": 119,
+        "speed": 82
+      },
+      "baseStatTotal": 760,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/scolipedemega.png"
+    },
+    "scovillainmega": {
+      "name": "Scovillain-Mega",
+      "showdownId": "scovillainmega",
+      "showdownName": "Mega Scovillain",
+      "slug": "megascovillain",
+      "isForm": true,
+      "baseName": "Scovillain",
+      "types": [
+        "Grass",
+        "Fire"
+      ],
+      "abilities": [
+        "Spicy Spray"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 158,
+        "defense": 105,
+        "sp_attack": 158,
+        "sp_defense": 105,
+        "speed": 95
+      },
+      "baseStatTotal": 761,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/scovillainmega.png"
+    },
+    "scraftymega": {
+      "name": "Scrafty-Mega",
+      "showdownId": "scraftymega",
+      "showdownName": "Mega Scrafty",
+      "slug": "megascrafty",
+      "isForm": true,
+      "baseName": "Scrafty",
+      "types": [
+        "Dark",
+        "Fighting"
+      ],
+      "abilities": [
+        "Intimidate"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 150,
+        "defense": 155,
+        "sp_attack": 75,
+        "sp_defense": 155,
+        "speed": 88
+      },
+      "baseStatTotal": 763,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/scraftymega.png"
+    },
+    "sharpedomega": {
+      "name": "Sharpedo-Mega",
+      "showdownId": "sharpedomega",
+      "showdownName": "Mega Sharpedo",
+      "slug": "megasharpedo",
+      "isForm": true,
+      "baseName": "Sharpedo",
+      "types": [
+        "Water",
+        "Dark"
+      ],
+      "abilities": [
+        "Strong Jaw"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 145,
+        "attack": 160,
+        "defense": 90,
+        "sp_attack": 130,
+        "sp_defense": 85,
+        "speed": 125
+      },
+      "baseStatTotal": 735,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/sharpedomega.png"
+    },
+    "skarmorymega": {
+      "name": "Skarmory-Mega",
+      "showdownId": "skarmorymega",
+      "showdownName": "Mega Skarmory",
+      "slug": "megaskarmory",
+      "isForm": true,
+      "baseName": "Skarmory",
+      "types": [
+        "Steel",
+        "Flying"
+      ],
+      "abilities": [
+        "Stalwart"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 140,
+        "attack": 160,
+        "defense": 130,
+        "sp_attack": 60,
+        "sp_defense": 120,
+        "speed": 130
+      },
+      "baseStatTotal": 740,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/skarmorymega.png"
+    },
+    "staraptormega": {
+      "name": "Staraptor-Mega",
+      "showdownId": "staraptormega",
+      "showdownName": "Mega Staraptor",
+      "slug": "megastaraptor",
+      "isForm": true,
+      "baseName": "Staraptor",
+      "types": [
+        "Fighting",
+        "Flying"
+      ],
+      "abilities": [
+        "Contrary"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 160,
+        "attack": 160,
+        "defense": 120,
+        "sp_attack": 80,
+        "sp_defense": 110,
+        "speed": 130
+      },
+      "baseStatTotal": 760,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/staraptormega.png"
+    },
+    "starmiemega": {
+      "name": "Starmie-Mega",
+      "showdownId": "starmiemega",
+      "showdownName": "Mega Starmie",
+      "slug": "megastarmie",
+      "isForm": true,
+      "baseName": "Starmie",
+      "types": [
+        "Water",
+        "Psychic"
+      ],
+      "abilities": [
+        "Huge Power"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 135,
+        "attack": 120,
+        "defense": 125,
+        "sp_attack": 150,
+        "sp_defense": 125,
+        "speed": 140
+      },
+      "baseStatTotal": 795,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/starmiemega.png"
+    },
+    "steelixmega": {
+      "name": "Steelix-Mega",
+      "showdownId": "steelixmega",
+      "showdownName": "Mega Steelix",
+      "slug": "megasteelix",
+      "isForm": true,
+      "baseName": "Steelix",
+      "types": [
+        "Steel",
+        "Ground"
+      ],
+      "abilities": [
+        "Sand Force"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 150,
+        "attack": 145,
+        "defense": 250,
+        "sp_attack": 75,
+        "sp_defense": 115,
+        "speed": 50
+      },
+      "baseStatTotal": 785,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/steelixmega.png"
+    },
+    "swampertmega": {
+      "name": "Swampert-Mega",
+      "showdownId": "swampertmega",
+      "showdownName": "Mega Swampert",
+      "slug": "megaswampert",
+      "isForm": true,
+      "baseName": "Swampert",
+      "types": [
+        "Water",
+        "Ground"
+      ],
+      "abilities": [
+        "Swift Swim"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 175,
+        "attack": 170,
+        "defense": 130,
+        "sp_attack": 115,
+        "sp_defense": 130,
+        "speed": 90
+      },
+      "baseStatTotal": 810,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/swampertmega.png"
+    },
+    "tyranitarmega": {
+      "name": "Tyranitar-Mega",
+      "showdownId": "tyranitarmega",
+      "showdownName": "Mega Tyranitar",
+      "slug": "megatyranitar",
+      "isForm": true,
+      "baseName": "Tyranitar",
+      "types": [
+        "Rock",
+        "Dark"
+      ],
+      "abilities": [
+        "Sand Stream"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 175,
+        "attack": 184,
+        "defense": 170,
+        "sp_attack": 115,
+        "sp_defense": 140,
+        "speed": 91
+      },
+      "baseStatTotal": 875,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/tyranitarmega.png"
+    },
+    "venusaurmega": {
+      "name": "Venusaur-Mega",
+      "showdownId": "venusaurmega",
+      "showdownName": "Mega Venusaur",
+      "slug": "megavenusaur",
+      "isForm": true,
+      "baseName": "Venusaur",
+      "types": [
+        "Grass",
+        "Poison"
+      ],
+      "abilities": [
+        "Thick Fat"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 120,
+        "defense": 143,
+        "sp_attack": 142,
+        "sp_defense": 140,
+        "speed": 100
+      },
+      "baseStatTotal": 800,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/venusaurmega.png"
+    },
+    "victreebelmega": {
+      "name": "Victreebel-Mega",
+      "showdownId": "victreebelmega",
+      "showdownName": "Mega Victreebel",
+      "slug": "megavictreebel",
+      "isForm": true,
+      "baseName": "Victreebel",
+      "types": [
+        "Grass",
+        "Poison"
+      ],
+      "abilities": [
+        "Innards Out"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 145,
+        "defense": 105,
+        "sp_attack": 155,
+        "sp_defense": 115,
+        "speed": 90
+      },
+      "baseStatTotal": 765,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/victreebelmega.png"
+    },
+    "vivillonicysnow": {
+      "name": "Vivillon-Icy Snow",
+      "showdownId": "vivillonicysnow",
+      "showdownName": "Vivillon Icy Snow Pattern",
+      "slug": "vivillonicysnowpattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillonicysnow.png"
+    },
+    "vivillonarchipelago": {
+      "name": "Vivillon-Archipelago",
+      "showdownId": "vivillonarchipelago",
+      "showdownName": "Vivillon Archipelago Pattern",
+      "slug": "vivillonarchipelagopattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillonarchipelago.png"
+    },
+    "vivilloncontinental": {
+      "name": "Vivillon-Continental",
+      "showdownId": "vivilloncontinental",
+      "showdownName": "Vivillon Continental Pattern",
+      "slug": "vivilloncontinentalpattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivilloncontinental.png"
+    },
+    "vivillonelegant": {
+      "name": "Vivillon-Elegant",
+      "showdownId": "vivillonelegant",
+      "showdownName": "Vivillon Elegant Pattern",
+      "slug": "vivillonelegantpattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillonelegant.png"
+    },
+    "vivillongarden": {
+      "name": "Vivillon-Garden",
+      "showdownId": "vivillongarden",
+      "showdownName": "Vivillon Garden Pattern",
+      "slug": "vivillongardenpattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillongarden.png"
+    },
+    "vivillonhighplains": {
+      "name": "Vivillon-High Plains",
+      "showdownId": "vivillonhighplains",
+      "showdownName": "Vivillon High Plains Pattern",
+      "slug": "vivillonhighplainspattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillonhighplains.png"
+    },
+    "vivillonjungle": {
+      "name": "Vivillon-Jungle",
+      "showdownId": "vivillonjungle",
+      "showdownName": "Vivillon Jungle Pattern",
+      "slug": "vivillonjunglepattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillonjungle.png"
+    },
+    "vivillonmarine": {
+      "name": "Vivillon-Marine",
+      "showdownId": "vivillonmarine",
+      "showdownName": "Vivillon Marine Pattern",
+      "slug": "vivillonmarinepattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillonmarine.png"
+    },
+    "vivillonmeadow": {
+      "name": "Vivillon-Meadow",
+      "showdownId": "vivillonmeadow",
+      "showdownName": "Vivillon Meadow Pattern",
+      "slug": "vivillonmeadowpattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillonmeadow.png"
+    },
+    "vivillonmodern": {
+      "name": "Vivillon-Modern",
+      "showdownId": "vivillonmodern",
+      "showdownName": "Vivillon Modern Pattern",
+      "slug": "vivillonmodernpattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillonmodern.png"
+    },
+    "vivillonmonsoon": {
+      "name": "Vivillon-Monsoon",
+      "showdownId": "vivillonmonsoon",
+      "showdownName": "Vivillon Monsoon Pattern",
+      "slug": "vivillonmonsoonpattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillonmonsoon.png"
+    },
+    "vivillonocean": {
+      "name": "Vivillon-Ocean",
+      "showdownId": "vivillonocean",
+      "showdownName": "Vivillon Ocean Pattern",
+      "slug": "vivillonoceanpattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillonocean.png"
+    },
+    "vivillonpokball": {
+      "name": "Vivillon-Poké Ball",
+      "showdownId": "vivillonpokball",
+      "showdownName": "Vivillon Poké Ball Pattern",
+      "slug": "vivillonpokballpattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillonpokball.png"
+    },
+    "vivillonpolar": {
+      "name": "Vivillon-Polar",
+      "showdownId": "vivillonpolar",
+      "showdownName": "Vivillon Polar Pattern",
+      "slug": "vivillonpolarpattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillonpolar.png"
+    },
+    "vivillonriver": {
+      "name": "Vivillon-River",
+      "showdownId": "vivillonriver",
+      "showdownName": "Vivillon River Pattern",
+      "slug": "vivillonriverpattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillonriver.png"
+    },
+    "vivillonsandstorm": {
+      "name": "Vivillon-Sandstorm",
+      "showdownId": "vivillonsandstorm",
+      "showdownName": "Vivillon Sandstorm Pattern",
+      "slug": "vivillonsandstormpattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillonsandstorm.png"
+    },
+    "vivillonsavanna": {
+      "name": "Vivillon-Savanna",
+      "showdownId": "vivillonsavanna",
+      "showdownName": "Vivillon Savanna Pattern",
+      "slug": "vivillonsavannapattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillonsavanna.png"
+    },
+    "vivillonsun": {
+      "name": "Vivillon-Sun",
+      "showdownId": "vivillonsun",
+      "showdownName": "Vivillon Sun Pattern",
+      "slug": "vivillonsunpattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillonsun.png"
+    },
+    "vivillontundra": {
+      "name": "Vivillon-Tundra",
+      "showdownId": "vivillontundra",
+      "showdownName": "Vivillon Tundra Pattern",
+      "slug": "vivillontundrapattern",
+      "isForm": true,
+      "baseName": "Vivillon",
+      "types": [
+        "Bug",
+        "Flying"
+      ],
+      "abilities": [
+        "Shield Dust",
+        "Compound Eyes",
+        "Friend Guard"
+      ],
+      "hiddenAbility": null,
+      "baseStats": {
+        "hp": 155,
+        "attack": 72,
+        "defense": 70,
+        "sp_attack": 110,
+        "sp_defense": 70,
+        "speed": 109
+      },
+      "baseStatTotal": 586,
+      "doubles": null,
+      "singles": null,
+      "sprite": "assets/sprites/vivillontundra.png"
     }
   }
 }

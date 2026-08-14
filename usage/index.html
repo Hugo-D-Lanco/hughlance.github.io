@@ -391,7 +391,7 @@ async function renderSidebarList(){
         const data = await loadSmogonFormat(entry);
         setFlag(`Live: ${data.label} · ${data.month}`, true);
         const list = data.ratings[state.eloRating] || [];
-        rows = list.map(d => ({ key: d.name, name: d.name, types: [d.type], sprite: resolveSprite(d.sprite), metric: d.usage }));
+        rows = list.map(d => ({ key: d.name, name: d.name, types: d.types?.length ? d.types : ["Unknown"], sprite: resolveSprite(d.sprite), metric: d.usage }));
       } catch {
         setFlag("Data not available — run scripts/fetch-usage.mjs", false);
       }
@@ -796,7 +796,7 @@ async function renderSmogonDetail(main){
   const mon = (data.ratings[state.eloRating] || []).find(d => d.name === state.selectedKey);
   if (!mon){ main.innerHTML = '<div class="main-empty">Not found at this rating cutoff.</div>'; return; }
 
-  const color = typeColor(mon.type);
+  const color = typeColor(mon.types?.[0]);
 
   const key = `${state.source}:${state.eloRating}:${mon.name}`;
   if (buildKey !== key){
@@ -841,10 +841,14 @@ async function renderSmogonDetail(main){
   titleWrap.innerHTML = `<h2>${mon.name}</h2>`;
   const badges = document.createElement("div");
   badges.className = "type-badges";
-  const b = document.createElement("span");
-  b.className = "type-badge"; b.textContent = mon.type;
-  b.style.background = color + "26"; b.style.border = "1px solid " + color + "66"; b.style.color = color;
-  badges.appendChild(b);
+  (mon.types?.length ? mon.types : ["Unknown"]).forEach(t => {
+    const c = typeColor(t);
+    const b = document.createElement("span");
+    b.className = "type-badge";
+    b.textContent = t;
+    b.style.background = c + "26"; b.style.border = "1px solid " + c + "66"; b.style.color = c;
+    badges.appendChild(b);
+  });
   titleWrap.appendChild(badges);
 
   const metrics = document.createElement("div");
