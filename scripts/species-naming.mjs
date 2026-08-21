@@ -29,7 +29,7 @@ export const SPECIAL_FORM_RULES = [
   // Floette's "Eternal Flower" form isn't really a Mega Evolution, but
   // this asset library files its art as "Mega Floette" anyway — the
   // real species identity (for stats + export) is Floette-Eternal.
-  { test: /^floette(mega|eternal)$/,
+  { test: /^floette-?(mega|eternal)$/,
     asset: () => "Mega Floette", display: () => "Floette-Eternal", slug: () => "floette-eternal" },
 
   // Lycanroc: asset filenames use the literal word "Form"; Showdown/
@@ -83,14 +83,15 @@ export const SPECIAL_FORM_RULES = [
 
   // Meowstic: male (default, no suffix) and female are separate species
   // as far as sprites/stats go — must never share art. Mega forms are
-  // this game's own addition (not in mainline), so the "M"/"F" asset
-  // suffix is a best-effort guess, unconfirmed.
+  // this game's own addition (not in mainline), so the asset-name guess
+  // is unconfirmed — if these sprites still 404, the real filenames are
+  // needed to fix this precisely.
   { test: /^meowsticf$/,
     asset: () => "Meowstic F", display: () => "Meowstic-F", slug: () => "meowstic-f" },
   { test: /^meowstic-?f-?mega$/,
     asset: () => "Mega Meowstic F", display: () => "Meowstic-F-Mega", slug: () => "meowstic-f" }, // PokeAPI has no Mega Meowstic — falls back to base female stats
-  { test: /^meowstic-?mega$/,
-    asset: () => "Mega Meowstic M", display: () => "Meowstic-Mega", slug: () => "meowstic" }, // PokeAPI has no Mega Meowstic — falls back to base male stats
+  { test: /^meowstic-?m?-?mega$/,
+    asset: () => "Mega Meowstic M", display: () => "Meowstic-M-Mega", slug: () => "meowstic" }, // PokeAPI has no Mega Meowstic — falls back to base male stats
 ];
 
 export function matchSpecialForm(chaosKey){
@@ -165,8 +166,16 @@ export function guessChampionsAssetName(chaosKey){
 // A handful of saved_names don't reduce to a clean Smogon ID by pattern
 // alone (Floette's "Eternal Flower" isn't really a Mega, for instance).
 const SAVED_NAME_OVERRIDES = {
-  "Mega Floette": { smogonId: "floetteeternal", displayName: "Floette-Eternal" },
+  "Mega Floette": { smogonId: "floetteeternal", displayName: "Floette-Eternal", pokeApiSlug: "floette-eternal" },
 };
+
+// Species whose forms are cosmetic only — they don't change stats,
+// abilities, or anything battle-relevant, so the display/export name
+// should ALWAYS be just the base species, regardless of which specific
+// trim/color/pattern it is. (They still get their own showdownId
+// internally, for correct per-variant usage-stat tracking — only the
+// user-facing name collapses.)
+const COSMETIC_ONLY_BASE_SPECIES = new Set(["furfrou", "florges", "vivillon", "floette"]);
 
 export function deriveShowdownId(row) {
   const override = SAVED_NAME_OVERRIDES[row.saved_name];
@@ -183,13 +192,14 @@ export function deriveShowdownId(row) {
   if (/^Galarian\s+/i.test(s)) return base + "galar";
   if (/^Hisuian\s+/i.test(s)) return base + "hisui";
   if ((m = s.match(/^Paldean\s+.+?\s+(\w+)$/i))) return base + "paldea" + toId(m[1]);
+  if (/^Paldean\s+/i.test(s)) return base + "paldea"; // no breed suffix — plain regional form
 
   const speciesTitle = titleCase(base);
   if (s.toLowerCase().startsWith(speciesTitle.toLowerCase())) {
     const suffix = s.slice(speciesTitle.length).trim();
     if (!suffix) return base; // exactly the species name = default form
     if (/^female$/i.test(suffix)) return base + "f";
-    if (/^male$/i.test(suffix)) return base; // male = the unsuffixed default
+    if (/^(male|shield)$/i.test(suffix)) return base; // unsuffixed defaults
     if (/^average$/i.test(suffix)) return base;
     return base + toId(suffix);
   }
@@ -201,6 +211,8 @@ export function deriveDisplayName(row) {
   if (override) return override.displayName;
 
   const base = titleCase(toId(row.base_name));
+  if (COSMETIC_ONLY_BASE_SPECIES.has(toId(row.base_name))) return base;
+
   let s = (row.saved_name || "").trim();
   s = s.replace(/\s+(Form|Forme|Pattern|Flower|Breed)$/i, "").trim();
 
@@ -211,16 +223,53 @@ export function deriveDisplayName(row) {
   if (/^Galarian\s+/i.test(s)) return `${base}-Galar`;
   if (/^Hisuian\s+/i.test(s)) return `${base}-Hisui`;
   if ((m = s.match(/^Paldean\s+.+?\s+(\w+)$/i))) return `${base}-Paldea-${titleCase(m[1])}`;
+  if (/^Paldean\s+/i.test(s)) return `${base}-Paldea`; // no breed suffix — plain regional form
 
   if (s.toLowerCase().startsWith(base.toLowerCase())) {
     const suffix = s.slice(base.length).trim();
     if (!suffix) return base;
     if (/^female$/i.test(suffix)) return `${base}-F`;
-    if (/^male$/i.test(suffix)) return base;
+    if (/^(male|shield)$/i.test(suffix)) return base;
     if (/^average$/i.test(suffix)) return base;
     return `${base}-${titleCase(suffix)}`;
   }
   return titleCase(s);
+}
+
+// PokeAPI slug from a REAL metadata row — mirrors deriveShowdownId's
+// suffix detection but joins with "-" (PokeAPI's convention) instead of
+// concatenating (Smogon's convention). Built from row.base_name directly
+// rather than a derived chaos ID, so it doesn't lose information for
+// generic suffixes the way the chaos-key-only guessPokeApiSlug can
+// (that one only recognizes Mega/regional suffixes — this recognizes
+// anything, since it has the real base_name to work from).
+export function derivePokeApiSlug(row) {
+  const override = SAVED_NAME_OVERRIDES[row.saved_name];
+  if (override?.pokeApiSlug) return override.pokeApiSlug;
+  if (COSMETIC_ONLY_BASE_SPECIES.has(toId(row.base_name))) return toId(row.base_name);
+
+  const base = toId(row.base_name);
+  let s = (row.saved_name || "").trim();
+  s = s.replace(/\s+(Form|Forme|Pattern|Flower|Breed)$/i, "").trim();
+
+  let m;
+  if ((m = s.match(/^Mega\s+.+?\s+([XYZ])$/i))) return `${base}-mega-${m[1].toLowerCase()}`;
+  if (/^Mega\s+/i.test(s)) return `${base}-mega`;
+  if (/^Alolan\s+/i.test(s)) return `${base}-alola`;
+  if (/^Galarian\s+/i.test(s)) return `${base}-galar`;
+  if (/^Hisuian\s+/i.test(s)) return `${base}-hisui`;
+  if ((m = s.match(/^Paldean\s+.+?\s+(\w+)$/i))) return `${base}-paldea-${toId(m[1])}-breed`;
+  if (/^Paldean\s+/i.test(s)) return `${base}-paldea`;
+
+  const speciesTitle = titleCase(base);
+  if (s.toLowerCase().startsWith(speciesTitle.toLowerCase())) {
+    const suffix = s.slice(speciesTitle.length).trim();
+    if (!suffix) return base;
+    if (/^female$/i.test(suffix)) return `${base}-female`;
+    if (/^(male|shield|average)$/i.test(suffix)) return base;
+    return `${base}-${toId(suffix)}`;
+  }
+  return base;
 }
 
 // True for anything this module has an opinion on — i.e. anywhere

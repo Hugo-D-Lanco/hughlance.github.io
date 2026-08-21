@@ -47,7 +47,7 @@
 
 import { writeFile, mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
-import { toId, titleCase, guessPokeApiSlug, guessDisplayName, guessChampionsAssetName, isSpecialForm } from "./species-naming.mjs";
+import { toId, titleCase, guessPokeApiSlug, guessDisplayName, guessChampionsAssetName } from "./species-naming.mjs";
 
 // Surface ANY failure, no matter where it happens — a silent exit with
 // no error message (which is what you hit) means something threw
@@ -228,38 +228,29 @@ async function fetchFallbackSpecies(chaosKey){
 
 async function localSpecies(chaosKey) {
   const entry = POKEDEX[toId(chaosKey)];
-  const special = isSpecialForm(chaosKey);
 
-  // A local entry existing isn't enough on its own — some Champions
-  // pokedex entries (mainly single-form Megas, e.g. Abomasnow-Mega) have
-  // a badly-formed internal slug that fails their own PokeAPI base-stat
-  // lookup, leaving sprite/baseStats null even though the entry exists.
-  // Treat "exists but incomplete" the same as "missing": run the
-  // fallback guesser too, and fill in only the gaps.
-  if (entry && entry.sprite && entry.baseStats && !special) {
+  // fetch-pokedex.mjs now flattens every Champions-tracked form (Megas,
+  // regional variants, Aegislash formes, Gourgeist sizes, etc.) via the
+  // metadata endpoint into its own reliable local entry — a complete
+  // local entry is trustworthy regardless of whether it's a "special"
+  // form, so there's no need to second-guess it with a fresh guess-based
+  // fetch anymore (that used to be necessary when local data for these
+  // came from the unreliable bulk-index summary instead).
+  if (entry && entry.sprite && entry.baseStats && entry.types?.length) {
     return {
       name: entry.name,
-      types: entry.types?.length ? entry.types : ["Unknown"],
+      types: entry.types,
       sprite: entry.sprite,
       baseStats: entry.baseStats,
       baseStatTotal: entry.baseStatTotal || null,
     };
   }
 
+  // Missing or incomplete locally (a species championsbattledata
+  // doesn't track at all, or an entry with real gaps) — fill in via the
+  // guess-based fallback.
   const fallback = await fetchFallbackSpecies(chaosKey);
   if (!entry) return fallback;
-
-  if (special) {
-    // Prefer OUR sprite guess over their (unreliable) metadata for
-    // these forms; still use their name/stats if present.
-    return {
-      name: entry.name || fallback.name,
-      types: entry.types?.length ? entry.types : fallback.types,
-      sprite: fallback.sprite || entry.sprite,
-      baseStats: entry.baseStats || fallback.baseStats,
-      baseStatTotal: entry.baseStatTotal || fallback.baseStatTotal,
-    };
-  }
 
   return {
     name: entry.name || fallback.name,

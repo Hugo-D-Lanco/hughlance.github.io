@@ -35,7 +35,7 @@
 
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
-import { toId, deriveShowdownId, deriveDisplayName } from "./species-naming.mjs";
+import { toId, deriveShowdownId, deriveDisplayName, derivePokeApiSlug, guessPokeApiSlug } from "./species-naming.mjs";
 
 process.on("unhandledRejection", (err) => {
   console.error("UNHANDLED REJECTION:", err?.stack || err);
@@ -106,11 +106,12 @@ async function fetchBaseStats(slug) {
       sp_attack: find("special-attack"), sp_defense: find("special-defense"), speed: find("speed"),
     };
     const baseStatTotal = Object.values(baseStats).reduce((a, b) => a + b, 0);
-    const result = { baseStats, baseStatTotal };
+    const types = (data.types || []).map(t => t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1));
+    const result = { baseStats, baseStatTotal, types };
     BASE_STAT_CACHE.set(slug, result);
     return result;
   } catch {
-    const result = { baseStats: null, baseStatTotal: null };
+    const result = { baseStats: null, baseStatTotal: null, types: [] };
     BASE_STAT_CACHE.set(slug, result);
     return result;
   }
@@ -252,10 +253,22 @@ async function buildRecord(entry) {
   const primary = summary.primary || {};
   const battleCurrent = summary.battleSummary?.Current || {};
 
-  const { baseStats, baseStatTotal } = await fetchBaseStats(entry.slug || entry.showdownId);
+  // championsbattledata's bulk-index "name" field is sometimes verbose
+  // for a species' default form (e.g. "Aegislash Shield Forme" instead
+  // of just "Aegislash") — run it through the same normalizer flattened
+  // forms use, so both paths produce the same clean, hyphenated
+  // convention. Falls back to the raw name if baseName is missing.
+  const normalizedName = entry.baseName
+    ? deriveDisplayName({ base_name: entry.baseName, saved_name: entry.name })
+    : entry.name;
+
+  const pokeApiSlug = entry.baseName
+    ? derivePokeApiSlug({ base_name: entry.baseName, saved_name: entry.name })
+    : guessPokeApiSlug(entry.showdownId);
+  const { baseStats, baseStatTotal } = await fetchBaseStats(pokeApiSlug);
 
   const record = {
-    name: entry.name,
+    name: normalizedName,
     showdownId: entry.showdownId,
     showdownName: entry.showdownName,
     slug: entry.slug,
@@ -303,6 +316,12 @@ async function fetchMetadataRows(baseName) {
 }
 
 function statsFromMetadataRow(row) {
+  // Last-resort fallback only — used when PokeAPI has no matching entry
+  // (e.g. this game's own fictional forms like Mega Meowstic). Base
+  // stats should otherwise always come from PokeAPI: earlier testing
+  // showed Champions' own numbers here aren't reliable plain base stats
+  // (the same issue found with the bulk index's summary — see file
+  // header), so this is a fallback, not the primary source.
   const baseStats = {
     hp: row.hp ?? 0, attack: row.atk ?? 0, defense: row.def ?? 0,
     sp_attack: row.spa ?? 0, sp_defense: row.spd ?? 0, speed: row.spe ?? 0,
@@ -312,8 +331,21 @@ function statsFromMetadataRow(row) {
 }
 
 async function buildFlattenedRecord(row, showdownId) {
-  const { baseStats, baseStatTotal } = statsFromMetadataRow(row);
-  const types = (row.types || "").split("/").map(t => t.trim()).filter(Boolean);
+  // derivePokeApiSlug uses the REAL row.base_name — it handles any
+  // suffix, not just Mega/regional (unlike guessPokeApiSlug, which only
+  // recognizes those two patterns and loses information for anything
+  // else, e.g. Aegislash-Blade — that's why stats were missing for it).
+  let pokeApiResult = await fetchBaseStats(derivePokeApiSlug(row));
+  let { baseStats, baseStatTotal } = pokeApiResult;
+  if (!baseStats) {
+    // PokeAPI doesn't have this one (fictional/game-exclusive form) —
+    // fall back to Champions' own numbers rather than showing nothing.
+    ({ baseStats, baseStatTotal } = statsFromMetadataRow(row));
+  }
+
+  let types = (row.types || "").split("/").map(t => t.trim()).filter(Boolean);
+  if (!types.length && pokeApiResult.types?.length) types = pokeApiResult.types; // Champions' own types field is blank for some of their own fictional additions
+
   const abilities = (row.abilities || "").split("|").filter(Boolean);
   const sprite = DOWNLOAD_SPRITES
     ? await downloadSprite(row.image_path, showdownId) // real path from their data — no guessing needed
@@ -354,14 +386,41 @@ async function flattenFormsFromMetadata(pokedex, baseNames) {
       // Already has real battle-usage data (from the bulk index) — keep
       // it, but still top up anything it's missing from this row.
       if (existing) {
-        const flattenedStats = statsFromMetadataRow(row);
         const needsSprite = !existing.sprite;
+        let baseStats = existing.baseStats;
+        let baseStatTotal = existing.baseStatTotal;
+        let pokeApiRetry = null;
+        if (!baseStats) {
+          // The original PokeAPI attempt (using championsbattledata's
+          // own entry.slug) came back empty — that slug is sometimes
+          // malformed. Retry PokeAPI with our own row-derived slug
+          // (handles any suffix, not just Mega/regional) before giving
+          // up and using Champions' own (less reliable) numbers.
+          pokeApiRetry = await fetchBaseStats(derivePokeApiSlug(row));
+          baseStats = pokeApiRetry.baseStats;
+          baseStatTotal = pokeApiRetry.baseStatTotal;
+          if (!baseStats) {
+            const fromRow = statsFromMetadataRow(row);
+            baseStats = fromRow.baseStats;
+            baseStatTotal = fromRow.baseStatTotal;
+          }
+        }
+
+        let types = existing.types?.length ? existing.types : (row.types || "").split("/").map(t => t.trim()).filter(Boolean);
+        if (!types.length) {
+          // Champions' own type field is blank for some of their own
+          // fictional additions (e.g. Mega Meowstic) — try PokeAPI too.
+          if (!pokeApiRetry) pokeApiRetry = await fetchBaseStats(derivePokeApiSlug(row));
+          if (pokeApiRetry.types?.length) types = pokeApiRetry.types;
+        }
+
         pokedex[showdownId] = {
           ...existing,
-          types: existing.types?.length ? existing.types : (row.types || "").split("/").map(t => t.trim()).filter(Boolean),
+          name: deriveDisplayName(row), // always ours — championsbattledata's own top-level "name" field is often unprocessed raw text ("Aegislash Shield Forme"), not the clean form this site expects
+          types,
           abilities: existing.abilities?.length ? existing.abilities : (row.abilities || "").split("|").filter(Boolean),
-          baseStats: existing.baseStats || flattenedStats.baseStats,
-          baseStatTotal: existing.baseStatTotal || flattenedStats.baseStatTotal,
+          baseStats,
+          baseStatTotal,
           sprite: needsSprite
             ? (DOWNLOAD_SPRITES ? await downloadSprite(row.image_path, showdownId) : (row.image_path ? ASSET_BASE + row.image_path : null))
             : existing.sprite,

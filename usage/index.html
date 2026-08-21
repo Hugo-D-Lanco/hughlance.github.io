@@ -177,16 +177,37 @@
   }
   .export-copy:hover{ color: var(--text); border-color: var(--accent-2); }
 
+  .menu-toggle{
+    display:none; position: fixed; top: 14px; left: 14px; z-index: 30;
+    width: 38px; height: 38px; border-radius: 6px; background: var(--surface);
+    border: 1px solid var(--line); color: var(--text); cursor: pointer;
+    align-items:center; justify-content:center; font-size: 1.1rem;
+  }
+  .sidebar-backdrop{
+    display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 15;
+  }
+
   @media (max-width: 860px){
-    .sidebar{ width: 280px; }
     .grid2, .grid3{ grid-template-columns: 1fr; }
+    .menu-toggle{ display:flex; }
+    .layout{ position: relative; }
+    .sidebar{
+      position: fixed; top:0; left:0; z-index: 20; width: min(320px, 85vw);
+      transform: translateX(-100%); transition: transform 0.2s ease;
+    }
+    .sidebar.open{ transform: translateX(0); }
+    .sidebar-backdrop.open{ display:block; }
+    .main{ padding: 60px 18px 40px; }
   }
 </style>
 </head>
 <body>
 <div class="layout">
 
-  <aside class="sidebar">
+  <button class="menu-toggle" id="menuToggle" aria-label="Toggle Pokémon list">☰</button>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-top">
       <a class="back" href="../index.html">← Roster Sheet</a>
       <h1>Usage & Synergy</h1>
@@ -625,223 +646,158 @@ async function renderMain(){
     return;
   }
 
+  let norm;
   if (state.source === "champions"){
-    await renderChampionsDetail(main);
+    const dex = await loadPokedex().catch(() => null);
+    const mon = dex?.pokemon?.[state.selectedKey];
+    if (!mon){ main.innerHTML = '<div class="main-empty">Pokémon not found.</div>'; return; }
+    norm = normalizeChampionsMon(mon, dex);
+    if (!norm){ main.innerHTML = '<div class="main-empty">No data for this format.</div>'; return; }
   } else {
-    await renderSmogonDetail(main);
+    const entry = findSmogonEntry(state.source);
+    if (!entry){ main.innerHTML = '<div class="main-empty">No data source loaded.</div>'; return; }
+    const data = await loadSmogonFormat(entry).catch(() => null);
+    if (!data){ main.innerHTML = '<div class="main-empty">Data not available.</div>'; return; }
+    const mon = (data.ratings[state.eloRating] || []).find(d => d.name === state.selectedKey);
+    if (!mon){ main.innerHTML = '<div class="main-empty">Not found at this rating cutoff.</div>'; return; }
+    norm = normalizeSmogonMon(mon, data);
   }
+
+  renderUnifiedDetail(main, norm);
 }
 
-async function renderChampionsDetail(main){
-  const dex = await loadPokedex().catch(() => null);
-  const mon = dex?.pokemon?.[state.selectedKey];
-  if (!mon){ main.innerHTML = '<div class="main-empty">Pokémon not found.</div>'; return; }
+// ---------- Normalizers: turn each source's raw shape into one common
+// shape, so renderUnifiedDetail never has to know which source it's
+// looking at. Adding a 4th source later just means writing one more
+// normalizer function. ----------
 
+function normalizeChampionsMon(mon, dex){
   const fmtData = mon[state.champFormat];
-  const color = typeColor(mon.types[0]);
-
-  // Reset the build only when the Pokémon/format actually changes —
-  // clicking a button in the lists below re-renders this same function,
-  // and should keep whatever's already been picked.
-  const key = `champions:${state.champFormat}:${mon.showdownId}`;
-  if (buildKey !== key){
-    buildKey = key;
-    currentBuild = {
-      item: firstValid(fmtData?.items),
-      ability: firstValid(fmtData?.abilities),
-      nature: firstValid(fmtData?.natures),
-      evs: firstValid(fmtData?.evSpreads),
-      moves: (fmtData?.moves || []).filter(m => m?.name).slice(0, 4).map(m => m.name),
-    };
-  }
-
-  main.innerHTML = "";
-
-  const hero = document.createElement("div");
-  hero.className = "detail-hero";
-  const avatarWrap = document.createElement("div");
-  avatarWrap.className = "detail-avatar-wrap";
-  const avatarTag = mon.sprite ? "img" : "div";
-  const avatar = document.createElement(avatarTag);
-  avatar.className = "detail-avatar";
-  const heroSprite = resolveSprite(mon.sprite);
-  if (heroSprite){ avatar.src = heroSprite; } else { avatar.textContent = mon.name.slice(0,2).toUpperCase(); avatar.style.color = color; }
-  avatarWrap.appendChild(avatar);
-  const allChampNames = Object.values(dex.pokemon).map(p => p.name);
-  const cycleBtn = renderFormeCycleButton(allChampNames, mon.name, (nextName) => {
-    const found = Object.values(dex.pokemon).find(p => p.name === nextName);
-    if (found){ state.selectedKey = found.showdownId; renderSidebarList(); renderMain(); }
-  });
-  if (cycleBtn) avatarWrap.appendChild(cycleBtn);
-  const titleWrap = document.createElement("div");
-  titleWrap.className = "detail-title";
-  titleWrap.innerHTML = `<h2>${mon.name}</h2>`;
-  const badges = document.createElement("div");
-  badges.className = "type-badges";
-  mon.types.forEach(t => {
-    const c = typeColor(t);
-    const b = document.createElement("span");
-    b.className = "type-badge";
-    b.textContent = t;
-    b.style.background = c + "26"; b.style.border = "1px solid " + c + "66"; b.style.color = c;
-    badges.appendChild(b);
-  });
-  titleWrap.appendChild(badges);
-
-  const metrics = document.createElement("div");
-  metrics.className = "detail-metrics";
-  metrics.innerHTML = `
-    <div class="metric"><div class="num">#${fmtData?.rank ?? "—"}</div><div class="lbl">${state.champFormat} rank</div></div>
-    <div class="metric"><div class="num">${mon.baseStatTotal ?? "—"}</div><div class="lbl">Base stat total</div></div>
-  `;
-
-  hero.appendChild(avatarWrap); hero.appendChild(titleWrap); hero.appendChild(metrics);
-  main.appendChild(hero);
-
-  // Everything below — base stats and Export Pokémon included — is one
-  // 3-column grid, so every card is the same size and nothing sits
-  // alone in its own row.
-  const grid = document.createElement("div");
-  grid.className = "grid3";
-
-  const statsCard = document.createElement("div");
-  statsCard.className = "card";
-  statsCard.innerHTML = '<h3>Base stats</h3>';
-  const statsBody = document.createElement("div"); statsBody.className = "card-body";
-  statsBody.appendChild(statBarList(mon.baseStats));
-  statsCard.appendChild(statsBody);
-  grid.appendChild(statsCard);
-
-  const rerender = () => renderMain();
-
-  const sections = [
-    ["Moves", fmtData?.moves, "No move data.", {
-      multi: true,
-      isActive: (n) => currentBuild.moves.includes(n),
-      onPick: (n, active) => {
-        if (active) currentBuild.moves = currentBuild.moves.filter(m => m !== n);
-        else if (currentBuild.moves.length < 4) currentBuild.moves.push(n);
-        else currentBuild.moves = [...currentBuild.moves.slice(1), n];
-        rerender();
-      },
-    }],
-    ["Items", fmtData?.items, "No item data.", {
-      isActive: (n) => currentBuild.item === n,
-      onPick: (n) => { currentBuild.item = n; rerender(); },
-    }],
-    ["Abilities", fmtData?.abilities, "No ability data.", {
-      isActive: (n) => currentBuild.ability === n,
-      onPick: (n) => { currentBuild.ability = n; rerender(); },
-    }],
-    ["Natures", fmtData?.natures, "No nature data.", {
-      isActive: (n) => currentBuild.nature === n,
-      onPick: (n) => { currentBuild.nature = n; rerender(); },
-    }],
-    ["EV spreads", fmtData?.evSpreads, "No EV spread data.", {
-      isActive: (n) => currentBuild.evs === n,
-      onPick: (n) => { currentBuild.evs = n; rerender(); },
-      compactEv: true,
-    }],
-  ];
-  sections.forEach(([title, entries, empty, opts]) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    const h = document.createElement("h3"); h.textContent = title;
-    card.appendChild(h);
-    const body = document.createElement("div"); body.className = "card-body";
-    body.appendChild(selectableList(entries, empty, opts));
-    card.appendChild(body);
-    grid.appendChild(card);
-  });
-
-  const teamCard = document.createElement("div");
-  teamCard.className = "card";
-  teamCard.innerHTML = '<h3>Top teammates</h3>';
-  const cloud = document.createElement("div");
-  cloud.className = "tag-cloud";
-  if (fmtData?.teammates?.length){
-    fmtData.teammates.forEach(e => {
-      const pill = document.createElement("span");
-      pill.className = "teammate-pill";
-      pill.innerHTML = e.name + (typeof e.pct === "number" ? " <b>" + e.pct.toFixed(1) + "%</b>" : "");
-      pill.onclick = () => {
-        const found = Object.values(dex.pokemon).find(p => p.name === e.name);
-        if (found){ state.selectedKey = found.showdownId; renderSidebarList(); renderMain(); }
-      };
-      cloud.appendChild(pill);
-    });
-  } else {
-    cloud.innerHTML = '<div class="empty-note">No teammate data.</div>';
-  }
-  const teamBody = document.createElement("div"); teamBody.className = "card-body";
-  teamBody.appendChild(cloud);
-  teamCard.appendChild(teamBody);
-  grid.appendChild(teamCard);
-
-  grid.appendChild(renderExportCard(
-    mon.name,
-    buildExportText(stripMegaSuffix(mon.name), currentBuild.item, currentBuild.ability, currentBuild.nature, currentBuild.evs, currentBuild.moves)
-  ));
-
-  main.appendChild(grid);
+  if (!fmtData) return null;
+  return {
+    buildKey: `champions:${state.champFormat}:${mon.showdownId}`,
+    name: mon.name,
+    types: mon.types?.length ? mon.types : ["Unknown"],
+    sprite: resolveSprite(mon.sprite),
+    baseStats: mon.baseStats,
+    metrics: [
+      { label: `${state.champFormat} rank`, value: fmtData.rank != null ? "#" + fmtData.rank : "—" },
+      { label: "Base stat total", value: mon.baseStatTotal ?? "—" },
+    ],
+    sparkline: null,
+    categories: [
+      { title: "Moves", key: "moves", entries: fmtData.moves, multi: true },
+      { title: "Items", key: "items", entries: fmtData.items },
+      { title: "Abilities", key: "abilities", entries: fmtData.abilities },
+      { title: "Natures", key: "natures", entries: fmtData.natures },
+      { title: "EV spreads", key: "evSpreads", entries: fmtData.evSpreads, compactEv: true },
+    ],
+    teammates: fmtData.teammates,
+    teammatesNote: null,
+    checks: null,
+    exportBaseName: mon.name,
+    defaultAbilityOverride: null,
+    onSelectRelated: (name) => {
+      const found = Object.values(dex.pokemon).find(p => p.name === name);
+      if (found){ state.selectedKey = found.showdownId; renderSidebarList(); renderMain(); }
+    },
+    cycleNames: Object.values(dex.pokemon).map(p => p.name),
+  };
 }
 
-async function renderSmogonDetail(main){
-  const entry = findSmogonEntry(state.source);
-  if (!entry){ main.innerHTML = '<div class="main-empty">No data source loaded.</div>'; return; }
-  const data = await loadSmogonFormat(entry).catch(() => null);
-  if (!data){ main.innerHTML = '<div class="main-empty">Data not available.</div>'; return; }
-
+function normalizeSmogonMon(mon, data){
   const ratingKeys = Object.keys(data.ratings).map(Number).sort((a,b) => a - b);
-  const mon = (data.ratings[state.eloRating] || []).find(d => d.name === state.selectedKey);
-  if (!mon){ main.innerHTML = '<div class="main-empty">Not found at this rating cutoff.</div>'; return; }
 
-  const color = typeColor(mon.types?.[0]);
+  // Synergy + checks are always shown at the top-cut rating (1760+),
+  // regardless of which ELO tab is active for usage.
+  const synergyRating = ratingKeys.includes(1760) ? 1760 : ratingKeys[ratingKeys.length - 1];
+  const synergyMon = (data.ratings[synergyRating] || []).find(d => d.name === mon.name);
 
-  const key = `${state.source}:${state.eloRating}:${mon.name}`;
-  if (buildKey !== key){
-    buildKey = key;
-    // Megas: the ability Smogon records is what it has AFTER mega
-    // evolving, which isn't valid to put in a team export (you set the
-    // base forme's ability; the item triggers the transformation). Pull
-    // the base forme's own top ability instead, if it's in this list.
-    let defaultAbility = firstValid(mon.abilities);
-    if (isMegaName(mon.name)){
-      const baseName = stripMegaSuffix(mon.name);
-      const baseMon = (data.ratings[state.eloRating] || []).find(d => d.name === baseName);
-      if (baseMon) defaultAbility = firstValid(baseMon.abilities) || defaultAbility;
-    }
+  const sparkline = ratingKeys.map(r => {
+    const found = (data.ratings[r] || []).find(d => d.name === mon.name);
+    return { rating: r, usage: found ? found.usage : 0 };
+  });
+
+  // A Mega's recorded ability reflects what it has AFTER transforming —
+  // not valid for a team export. Use the base forme's own top ability
+  // instead, if the base forme is in this same list.
+  let defaultAbilityOverride = null;
+  if (isMegaName(mon.name)){
+    const baseName = stripMegaSuffix(mon.name);
+    const baseMon = (data.ratings[state.eloRating] || []).find(d => d.name === baseName);
+    if (baseMon) defaultAbilityOverride = firstValid(baseMon.abilities);
+  }
+
+  return {
+    buildKey: `${state.source}:${state.eloRating}:${mon.name}`,
+    name: mon.name,
+    types: mon.types?.length ? mon.types : ["Unknown"],
+    sprite: resolveSprite(mon.sprite),
+    baseStats: mon.baseStats,
+    metrics: [
+      { label: `Usage @ ${state.eloRating === 0 ? "0+" : state.eloRating + "+"}`, value: mon.usage.toFixed(1) + "%" },
+    ],
+    sparkline,
+    categories: [
+      { title: "Moves", key: "moves", entries: mon.moves, multi: true },
+      { title: "Items", key: "items", entries: mon.items },
+      { title: "Abilities", key: "abilities", entries: mon.abilities },
+      { title: "Natures", key: "natures", entries: mon.natures },
+      { title: "EV spreads", key: "evSpreads", entries: mon.evSpreads, compactEv: true },
+    ],
+    teammates: synergyMon?.teammates,
+    teammatesNote: `${synergyRating === 0 ? "0+" : synergyRating + "+"}`,
+    checks: mon.checks,
+    exportBaseName: stripMegaSuffix(mon.name),
+    defaultAbilityOverride,
+    onSelectRelated: (name) => { state.selectedKey = name; renderSidebarList(); renderMain(); },
+    cycleNames: (data.ratings[state.eloRating] || []).map(d => d.name),
+  };
+}
+
+// ---------- The one shared layout, used by every source ----------
+function renderUnifiedDetail(main, norm){
+  const color = typeColor(norm.types[0]);
+
+  // Reset the build only when the Pokémon/source/format/rating actually
+  // changes — clicking a button in the lists below re-renders this same
+  // function, and should keep whatever's already been picked.
+  if (buildKey !== norm.buildKey){
+    buildKey = norm.buildKey;
+    const abilities = norm.categories.find(c => c.key === "abilities")?.entries;
+    const items = norm.categories.find(c => c.key === "items")?.entries;
+    const natures = norm.categories.find(c => c.key === "natures")?.entries;
+    const evSpreads = norm.categories.find(c => c.key === "evSpreads")?.entries;
+    const moves = norm.categories.find(c => c.key === "moves")?.entries;
     currentBuild = {
-      item: firstValid(mon.items),
-      ability: defaultAbility,
-      nature: firstValid(mon.natures),
-      evs: firstValid(mon.evSpreads),
-      moves: (mon.moves || []).filter(m => m?.name).slice(0, 4).map(m => m.name),
+      item: firstValid(items),
+      ability: norm.defaultAbilityOverride || firstValid(abilities),
+      nature: firstValid(natures),
+      evs: firstValid(evSpreads),
+      moves: (moves || []).filter(m => m?.name).slice(0, 4).map(m => m.name),
     };
   }
 
   main.innerHTML = "";
 
+  // ---- Hero ----
   const hero = document.createElement("div");
   hero.className = "detail-hero";
   const avatarWrap = document.createElement("div");
   avatarWrap.className = "detail-avatar-wrap";
-  const monSprite = resolveSprite(mon.sprite);
-  const avatar = document.createElement(monSprite ? "img" : "div");
+  const avatar = document.createElement(norm.sprite ? "img" : "div");
   avatar.className = "detail-avatar";
-  if (monSprite){ avatar.src = monSprite; } else { avatar.textContent = mon.name.slice(0,2).toUpperCase(); avatar.style.color = color; }
+  if (norm.sprite){ avatar.src = norm.sprite; } else { avatar.textContent = norm.name.slice(0,2).toUpperCase(); avatar.style.color = color; }
   avatarWrap.appendChild(avatar);
-  const allSmogonNames = (data.ratings[state.eloRating] || []).map(d => d.name);
-  const cycleBtn = renderFormeCycleButton(allSmogonNames, mon.name, (nextName) => {
-    state.selectedKey = nextName; renderSidebarList(); renderMain();
-  });
+  const cycleBtn = renderFormeCycleButton(norm.cycleNames, norm.name, norm.onSelectRelated);
   if (cycleBtn) avatarWrap.appendChild(cycleBtn);
+
   const titleWrap = document.createElement("div");
   titleWrap.className = "detail-title";
-  titleWrap.innerHTML = `<h2>${mon.name}</h2>`;
+  titleWrap.innerHTML = `<h2>${norm.name}</h2>`;
   const badges = document.createElement("div");
   badges.className = "type-badges";
-  (mon.types?.length ? mon.types : ["Unknown"]).forEach(t => {
+  norm.types.forEach(t => {
     const c = typeColor(t);
     const b = document.createElement("span");
     b.className = "type-badge";
@@ -854,131 +810,139 @@ async function renderSmogonDetail(main){
   const metrics = document.createElement("div");
   metrics.className = "detail-metrics";
   metrics.style.alignItems = "center";
-  const sparkSeries = ratingKeys.map(r => {
-    const found = (data.ratings[r] || []).find(d => d.name === state.selectedKey);
-    return { rating: r, usage: found ? found.usage : 0 };
+  if (norm.sparkline) metrics.appendChild(renderEloSparkline(norm.sparkline, state.eloRating));
+  norm.metrics.forEach(m => {
+    const el = document.createElement("div");
+    el.className = "metric";
+    el.innerHTML = `<div class="num">${m.value}</div><div class="lbl">${m.label}</div>`;
+    metrics.appendChild(el);
   });
-  metrics.appendChild(renderEloSparkline(sparkSeries, state.eloRating));
-  const usageMetric = document.createElement("div");
-  usageMetric.className = "metric";
-  usageMetric.innerHTML = `<div class="num">${mon.usage.toFixed(1)}%</div><div class="lbl">Usage @ ${state.eloRating === 0 ? "0+" : state.eloRating + "+"}</div>`;
-  metrics.appendChild(usageMetric);
 
   hero.appendChild(avatarWrap); hero.appendChild(titleWrap); hero.appendChild(metrics);
   main.appendChild(hero);
 
-  const rerender = () => renderMain();
-
-  // Same 3-column grid as the Champions page — base stats and Export
-  // Pokémon included, so every card is the same size.
+  // ---- Grid: same 3-column layout for every source ----
   const grid = document.createElement("div");
   grid.className = "grid3";
 
   const statsCard = document.createElement("div");
   statsCard.className = "card";
-  statsCard.innerHTML = '<h3>Base stats</h3>';
+  statsCard.innerHTML = "<h3>Base stats</h3>";
   const statsBody = document.createElement("div"); statsBody.className = "card-body";
-  statsBody.appendChild(statBarList(mon.baseStats));
+  statsBody.appendChild(statBarList(norm.baseStats));
   statsCard.appendChild(statsBody);
   grid.appendChild(statsCard);
 
-  const sections = [
-    ["Abilities", mon.abilities, {
-      isActive: (n) => currentBuild.ability === n,
-      onPick: (n) => { currentBuild.ability = n; rerender(); },
-    }],
-    ["Items", mon.items, {
-      isActive: (n) => currentBuild.item === n,
-      onPick: (n) => { currentBuild.item = n; rerender(); },
-    }],
-    ["Moves", mon.moves, {
-      multi: true,
-      isActive: (n) => currentBuild.moves.includes(n),
-      onPick: (n, active) => {
-        if (active) currentBuild.moves = currentBuild.moves.filter(m => m !== n);
-        else if (currentBuild.moves.length < 4) currentBuild.moves.push(n);
-        else currentBuild.moves = [...currentBuild.moves.slice(1), n];
-        rerender();
-      },
-    }],
-    ["Natures", mon.natures, {
-      isActive: (n) => currentBuild.nature === n,
-      onPick: (n) => { currentBuild.nature = n; rerender(); },
-    }],
-    ["EV spreads", mon.evSpreads, {
-      isActive: (n) => currentBuild.evs === n,
-      onPick: (n) => { currentBuild.evs = n; rerender(); },
-      compactEv: true,
-    }],
-  ];
-  sections.forEach(([title, entries, opts]) => {
+  const rerender = () => renderMain();
+
+  const BUILD_FIELD = { moves: "moves", items: "item", abilities: "ability", natures: "nature", evSpreads: "evs" };
+
+  norm.categories.forEach(cat => {
     const card = document.createElement("div");
     card.className = "card";
-    const h = document.createElement("h3"); h.textContent = title;
+    const h = document.createElement("h3"); h.textContent = cat.title;
     card.appendChild(h);
     const body = document.createElement("div"); body.className = "card-body";
-    body.appendChild(selectableList(entries, `No ${title.toLowerCase()} data at this cutoff.`, opts));
+
+    let opts;
+    if (cat.key === "moves"){
+      opts = {
+        multi: true,
+        isActive: (n) => currentBuild.moves.includes(n),
+        onPick: (n, active) => {
+          if (active) currentBuild.moves = currentBuild.moves.filter(m => m !== n);
+          else if (currentBuild.moves.length < 4) currentBuild.moves.push(n);
+          else currentBuild.moves = [...currentBuild.moves.slice(1), n];
+          rerender();
+        },
+      };
+    } else {
+      const field = BUILD_FIELD[cat.key];
+      opts = {
+        compactEv: !!cat.compactEv,
+        isActive: (n) => currentBuild[field] === n,
+        onPick: (n) => { currentBuild[field] = n; rerender(); },
+      };
+    }
+
+    body.appendChild(selectableList(cat.entries, `No ${cat.title.toLowerCase()} data.`, opts));
     card.appendChild(body);
     grid.appendChild(card);
   });
 
-  // Synergy pinned to 1760+, regardless of the active ELO tab
-  const synergyRating = ratingKeys.includes(1760) ? 1760 : ratingKeys[ratingKeys.length - 1];
-  const synergyMon = (data.ratings[synergyRating] || []).find(d => d.name === state.selectedKey);
   const teamCard = document.createElement("div");
   teamCard.className = "card";
-  teamCard.innerHTML = `<h3>Top teammates <span style="color:var(--text-muted); font-weight:400; font-size:0.72rem;">(${synergyRating === 0 ? "0+" : synergyRating + "+"})</span></h3>`;
-  const cloud = document.createElement("div");
-  cloud.className = "tag-cloud";
-  if (synergyMon?.teammates?.length){
-    synergyMon.teammates.forEach(t => {
+  teamCard.innerHTML = `<h3>Top teammates${norm.teammatesNote ? ` <span style="color:var(--text-muted); font-weight:400; font-size:0.72rem;">(${norm.teammatesNote})</span>` : ""}</h3>`;
+  const teamCloud = document.createElement("div");
+  teamCloud.className = "tag-cloud";
+  if (norm.teammates?.length){
+    norm.teammates.forEach(t => {
       const pill = document.createElement("span");
       pill.className = "teammate-pill";
-      pill.innerHTML = t.name + " <b>" + t.pct.toFixed(1) + "%</b>";
-      pill.onclick = () => { state.selectedKey = t.name; renderSidebarList(); renderMain(); };
-      cloud.appendChild(pill);
+      pill.innerHTML = t.name + (typeof t.pct === "number" ? " <b>" + t.pct.toFixed(1) + "%</b>" : "");
+      pill.onclick = () => norm.onSelectRelated(t.name);
+      teamCloud.appendChild(pill);
     });
   } else {
-    cloud.innerHTML = '<div class="empty-note">No teammate data at this cutoff.</div>';
+    teamCloud.innerHTML = '<div class="empty-note">No teammate data.</div>';
   }
   const teamBody = document.createElement("div"); teamBody.className = "card-body";
-  teamBody.appendChild(cloud);
+  teamBody.appendChild(teamCloud);
   teamCard.appendChild(teamBody);
   grid.appendChild(teamCard);
 
-  const checksCard = document.createElement("div");
-  checksCard.className = "card";
-  checksCard.innerHTML = '<h3>Checks & Counters</h3>';
-  const checksCloud = document.createElement("div");
-  checksCloud.className = "tag-cloud";
-  if (mon.checks?.length){
-    mon.checks.forEach(c => {
-      const pill = document.createElement("span");
-      pill.className = "teammate-pill";
-      pill.innerHTML = c.name + " <b>" + c.pct.toFixed(1) + "%</b>";
-      pill.onclick = () => { state.selectedKey = c.name; renderSidebarList(); renderMain(); };
-      checksCloud.appendChild(pill);
-    });
-  } else {
-    checksCloud.innerHTML = '<div class="empty-note">No checks/counters data at this cutoff.</div>';
+  if (norm.checks){
+    const checksCard = document.createElement("div");
+    checksCard.className = "card";
+    checksCard.innerHTML = "<h3>Checks & Counters</h3>";
+    const checksCloud = document.createElement("div");
+    checksCloud.className = "tag-cloud";
+    if (norm.checks.length){
+      norm.checks.forEach(c => {
+        const pill = document.createElement("span");
+        pill.className = "teammate-pill";
+        pill.innerHTML = c.name + " <b>" + c.pct.toFixed(1) + "%</b>";
+        pill.onclick = () => norm.onSelectRelated(c.name);
+        checksCloud.appendChild(pill);
+      });
+    } else {
+      checksCloud.innerHTML = '<div class="empty-note">No checks/counters data at this cutoff.</div>';
+    }
+    const checksBody = document.createElement("div"); checksBody.className = "card-body";
+    checksBody.appendChild(checksCloud);
+    checksCard.appendChild(checksBody);
+    grid.appendChild(checksCard);
   }
-  const checksBody = document.createElement("div"); checksBody.className = "card-body";
-  checksBody.appendChild(checksCloud);
-  checksCard.appendChild(checksBody);
-  grid.appendChild(checksCard);
 
   grid.appendChild(renderExportCard(
-    mon.name,
-    buildExportText(stripMegaSuffix(mon.name), currentBuild.item, currentBuild.ability, currentBuild.nature, currentBuild.evs, currentBuild.moves)
+    norm.exportBaseName,
+    buildExportText(norm.exportBaseName, currentBuild.item, currentBuild.ability, currentBuild.nature, currentBuild.evs, currentBuild.moves)
   ));
 
   main.appendChild(grid);
 }
 
+
 // ---------- Wire up ----------
 document.getElementById("search").addEventListener("input", (e) => {
   state.search = e.target.value;
   renderSidebarList();
+});
+
+// ---------- Mobile hamburger menu ----------
+const sidebarEl = document.getElementById("sidebar");
+const backdropEl = document.getElementById("sidebarBackdrop");
+function openSidebar(){ sidebarEl.classList.add("open"); backdropEl.classList.add("open"); }
+function closeSidebar(){ sidebarEl.classList.remove("open"); backdropEl.classList.remove("open"); }
+document.getElementById("menuToggle").addEventListener("click", () => {
+  sidebarEl.classList.contains("open") ? closeSidebar() : openSidebar();
+});
+backdropEl.addEventListener("click", closeSidebar);
+// Picking a Pokémon on mobile should close the sidebar so the profile
+// is immediately visible — patch the click behavior in one place rather
+// than threading a "close on mobile" flag through renderSidebarList.
+document.getElementById("sidebarList").addEventListener("click", (e) => {
+  if (e.target.closest(".mon-row") && window.innerWidth <= 860) closeSidebar();
 });
 
 async function refresh(){
